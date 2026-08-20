@@ -312,11 +312,50 @@ p:last-child{margin-bottom:0}
 @keyframes zoomout{to{transform:scale(1.005)}}
 @media(prefers-reduced-motion:reduce){.hero-bg img{animation:none; transform:none}}
 @media(max-width:900px){.hero-bg img{object-position:62% 40%}}
+/* --- cool grade -------------------------------------------------
+   The photograph runs a hue ramp: violet (264deg) at the top of the
+   sky, magenta (309deg) through the middle, rose (341deg) at the
+   horizon. The accent is azure, about 197deg — so the horizon band
+   sits nearly opposite it and the headline's second line read as a
+   sticker laid on someone else's picture.
+
+   Two blended layers walk the photo toward the accent instead:
+
+     .grade-desat  a flat grey blended on `saturation`, which pulls
+                   the magenta's intensity down without touching
+                   brightness. Same result as filter:saturate(), but
+                   it composites — a filter would re-run a shader over
+                   a 2000px image on every frame of the 34s zoom, and
+                   this hero has to feel instant on a phone.
+     .grade-cool   an azure wash blended on `soft-light`, which moves
+                   the midtones and leaves highlights alone. That is
+                   why the crane's yellow boom survives: the frame
+                   cools, the photo doesn't go monochrome.
+
+   Order matters. The cool wash sits ABOVE the scrim (z-index 3 vs 2)
+   so it cools the darkened corners too — under the scrim it would be
+   crushed exactly where the nav sits. The scrim still owns text
+   contrast; nothing here lightens it.
+
+   .hero-bg has z-index:0, which makes a stacking context — that is
+   what keeps mix-blend-mode from reaching the rest of the page. */
+.hero-bg > .grade-desat{
+  position:absolute; inset:0; z-index:1;
+  background:#7A7A7A; mix-blend-mode:saturation; opacity:.34;
+}
 .hero-bg::after{
-  content:""; position:absolute; inset:0;
+  content:""; position:absolute; inset:0; z-index:2;
   background:
     linear-gradient(180deg,rgba(10,10,12,.88) 0%,rgba(10,10,12,.28) 24%,rgba(10,10,12,.08) 42%,rgba(10,10,12,.82) 78%,var(--ink) 100%),
     linear-gradient(96deg,rgba(10,10,12,.92) 0%,rgba(10,10,12,.64) 34%,rgba(10,10,12,.10) 66%,transparent 100%);
+}
+.hero-bg > .grade-cool{
+  position:absolute; inset:0; z-index:3; mix-blend-mode:soft-light;
+  background:linear-gradient(178deg,
+    rgba(20,104,160,.70) 0%,
+    rgba(28,136,194,.48) 38%,
+    rgba(41,182,232,.26) 66%,
+    rgba(41,182,232,.12) 100%);
 }
 
 .hero-in{position:relative; z-index:2; width:100%; padding-block:156px 68px; text-align:center}
@@ -1244,6 +1283,8 @@ p:last-child{margin-bottom:0}
 <section class="hero" id="top">
   <div class="hero-bg">
     <img src="img/hero-cranes.jpg" alt="Two mobile cranes rigging at a Coastal Bend refinery turnaround at sunset" fetchpriority="high">
+    <div class="grade-desat" aria-hidden="true"></div>
+    <div class="grade-cool" aria-hidden="true"></div>
   </div>
   <div class="wrap hero-in">
     <p class="eyebrow">NCCER Accredited Assessment Center</p>
