@@ -1,3 +1,17 @@
-# Preview build. Nothing here should be indexed until the real domain is live.
+# Preview build on github.io. Nothing here should be indexed until the real
+# domain is live — but that job belongs to the `noindex` meta tag in
+# index.html, NOT to a Disallow here.
+#
+# "Disallow: /" blocks crawling, and a crawler that never fetches the page
+# never sees the noindex — so the URL can still end up listed, just without
+# a description. It also blocks the link-preview crawlers that honour
+# robots.txt (Facebook, LinkedIn) from reading the og: tags, so a shared
+# link renders as a bare URL.
+#
+# Allowing the crawl is what actually keeps this out of search: Google
+# fetches it, reads noindex, and drops it.
 User-agent: *
-Disallow: /
+Allow: /
+
+# ⚠️ AT LAUNCH: this file is already correct for production. What changes is
+# index.html — strip the noindex meta and repoint the absolute og: URLs.
