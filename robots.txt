@@ -1,0 +1,3 @@
+# Preview build. Nothing here should be indexed until the real domain is live.
+User-agent: *
+Disallow: /
