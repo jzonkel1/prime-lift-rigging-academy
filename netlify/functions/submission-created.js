@@ -14,11 +14,12 @@ exports.handler = async (event) => {
 
   let payload;
   try { payload = JSON.parse(event.body).payload; } catch { return { statusCode: 400, body: "bad body" }; }
-  if (!payload || payload.form_name !== "enrollment-request") return { statusCode: 200, body: "ignored" };
+  const FORMS = { "enrollment-request": "Website Enrollment Form", "contact": "Website Contact Form" };
+  if (!payload || !FORMS[payload.form_name]) return { statusCode: 200, body: "ignored" };
 
   const d = payload.data || {};
   const body = {
-    source: "Website Enrollment Form",
+    source: FORMS[payload.form_name],
     form_name: payload.form_name,
     submitted_at: payload.created_at,
     first_name: d.first_name || "",

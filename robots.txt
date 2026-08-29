@@ -15,3 +15,5 @@ Allow: /
 
 # ⚠️ AT LAUNCH: this file is already correct for production. What changes is
 # index.html — strip the noindex meta and repoint the absolute og: URLs.
+
+Sitemap: https://prime-lift-rigging-academy.netlify.app/sitemap.xml
