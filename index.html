@@ -785,6 +785,33 @@ p:last-child{margin-bottom:0}
 }
 .reel-frame video{width:100%; height:100%; object-fit:cover; display:block}
 
+/* paged carousel — the track slides, the <video> elements never remount */
+.reel-track{display:flex; height:100%; will-change:transform;
+  transition:transform .46s cubic-bezier(.22,.61,.36,1)}
+.reel-slide{flex:0 0 100%; height:100%; position:relative}
+.reel-arw{
+  position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+  width:34px; height:34px; display:grid; place-items:center; cursor:pointer;
+  border:1px solid var(--edge-2); border-radius:999px;
+  background:rgba(8,10,13,.56); color:#fff; padding:0;
+  -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  opacity:0; transition:opacity .22s, background .22s;
+}
+.reel-arw svg{width:17px; height:17px}
+.reel-arw.prev{left:9px} .reel-arw.next{right:9px}
+.reel-arw:hover{background:rgba(8,10,13,.82)}
+.reel-arw:disabled{opacity:0 !important; pointer-events:none}
+.reel-frame:hover .reel-arw, .reel-arw:focus-visible{opacity:1}
+@media(hover:none){.reel-arw{opacity:1}}
+.reel-dots{position:absolute; left:0; right:0; bottom:11px; z-index:2;
+  display:flex; gap:7px; justify-content:center}
+.reel-dots button{
+  width:6px; height:6px; padding:0; border-radius:999px; cursor:pointer;
+  border:0; background:rgba(255,255,255,.42); transition:background .22s, width .22s;
+}
+.reel-dots button.on{background:var(--accent); width:17px}
+@media(prefers-reduced-motion:reduce){.reel-track{transition:none}}
+
 /* ============================================================
    PROCESS — photo band + one subtle mark per card
    ============================================================ */
@@ -1275,7 +1302,7 @@ p:last-child{margin-bottom:0}
             </a>
             <a class="nm-item" href="#c-assessment">
               <span class="nm-n idx">03</span>
-              <span class="nm-b"><b>NCCER Assessments</b><span>Test out in 30+ crafts, proctored on-site</span></span>
+              <span class="nm-b"><b>NCCER Assessments</b><span>Test out in 36 crafts, proctored on-site</span></span>
               <span class="nm-p">$150</span>
             </a>
             <a class="nm-all" href="#schedule">See All Class Dates
@@ -1332,7 +1359,7 @@ p:last-child{margin-bottom:0}
 <div class="nextclass">
   <div class="wrap nextclass-in">
     <b id="nextClassLabel">Next class starts Friday, Aug 21</b>
-    <span id="nextClassSub">3-Day Advanced Rigger Weekend Express · seats still open</span>
+    <span id="nextClassSub">Advanced Rigger · 8 seats per class</span>
     <a href="#schedule">See all dates &rsaquo;</a>
   </div>
 </div>
@@ -1363,7 +1390,7 @@ p:last-child{margin-bottom:0}
       <div class="trust-cell">
         <span class="idx">02</span>
         <b>Built Around Your Shift</b>
-        <span>Day, night and 3-day weekend classes. Advanced Rigger starts every Monday.</span>
+        <span>Day, night and 3-day weekend classes. Advanced Rigger runs Monday through Thursday.</span>
       </div>
       <div class="trust-cell">
         <span class="idx">03</span>
@@ -1411,7 +1438,7 @@ p:last-child{margin-bottom:0}
         <div class="course-foot">
           <div class="price-row">
             <span class="price">$1,000</span>
-            <span class="price-was">$1,350</span>
+            <span class="price-was">$1,700</span>
             <span class="price-note">August promotion · $200 secures your seat, $800 due before class starts</span>
           </div>
           <button class="btn btn-primary btn-block" data-book="advanced">Pick a Start Date</button>
@@ -1454,12 +1481,12 @@ p:last-child{margin-bottom:0}
         <div class="course-top">
           <h3>NCCER Assessments</h3>
           <span class="course-cert">Written &amp; Practical Test-Out</span>
-          <p>Already have the field experience? Come test out. As an accredited Assessment Center we proctor written and hands-on assessments across <strong style="color:#DCDAD6">30+ crafts</strong>.</p>
+          <p>Already have the field experience? Come test out. As an accredited Assessment Center we proctor written and hands-on assessments across <strong style="color:#DCDAD6">all 36 crafts</strong>.</p>
           <ul class="course-list">
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Proctored on-site in our NCCER testing room</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Credentials recorded to the NCCER Registry</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>One flat price across every craft we assess</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>By appointment — bring a whole crew</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Monday–Friday, 8 AM – 5 PM — bring a whole crew</li>
           </ul>
         </div>
         <div class="course-foot">
@@ -1575,10 +1602,29 @@ p:last-child{margin-bottom:0}
 <!-- ================= REEL ================= -->
 <section class="section reel-band">
   <div class="wrap reel-grid">
-    <div class="reel-frame rv">
-      <video src="video/prime-lift-reel-muted.mp4" poster="video/reel-poster.jpg"
-             autoplay muted loop playsinline preload="metadata"
-             aria-label="Inside a Prime Lift Rigging Academy class"></video>
+    <div class="reel-frame rv" id="reelCar" role="group" aria-roledescription="carousel" aria-label="Inside Prime Lift Rigging Academy">
+      <div class="reel-track" id="reelTrack">
+        <div class="reel-slide" role="group" aria-label="1 of 2: inside a class">
+          <video src="video/prime-lift-reel-muted.mp4" poster="video/reel-poster.jpg"
+                 autoplay muted loop playsinline preload="metadata"
+                 aria-label="Inside a Prime Lift Rigging Academy class"></video>
+        </div>
+        <div class="reel-slide" role="group" aria-label="2 of 2: a walk through the training center">
+          <video src="video/prime-lift-reel2-muted.mp4" poster="video/reel2-poster.jpg"
+                 muted loop playsinline preload="none"
+                 aria-label="A walk through the Prime Lift Rigging Academy training center"></video>
+        </div>
+      </div>
+      <button type="button" class="reel-arw prev" id="reelPrev" aria-label="Previous video">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <button type="button" class="reel-arw next" id="reelNext" aria-label="Next video">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+      <div class="reel-dots" id="reelDots" role="tablist" aria-label="Choose video">
+        <button type="button" class="on" role="tab" aria-selected="true"  aria-label="Video 1"></button>
+        <button type="button"           role="tab" aria-selected="false" aria-label="Video 2"></button>
+      </div>
     </div>
     <div class="reel-copy rv">
       <p class="eyebrow"><span class="idx">03</span>Inside The Classroom</p>
@@ -1654,7 +1700,7 @@ p:last-child{margin-bottom:0}
         <div class="person-body">
           <span class="person-role">Advanced Rigging Instructor</span>
           <h3>Frank Torres</h3>
-          <p>Frank brings years of real-world industry experience to the classroom — and he genuinely wants every student to pass. Don't be afraid to ask him to explain something twice. Take advantage of what he knows.</p>
+          <p>Frank brings more than 15 years of crane and rigging experience to the classroom — and he genuinely wants every student to pass. Don't be afraid to ask him to explain something twice. Take advantage of what he knows.</p>
         </div>
       </article>
     </div>
@@ -1774,7 +1820,7 @@ p:last-child{margin-bottom:0}
         <ul class="loc-list">
           <li>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
-            <div><b>Training &amp; Assessment Center</b><span>1605 US Highway 181 Frontage Rd<br>Portland, TX 78374</span></div>
+            <div><b>Training &amp; Assessment Center</b><span>1605 US Highway 181 Frontage Rd, Suite A<br>Portland, TX 78374</span></div>
           </li>
           <li>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
@@ -1796,7 +1842,7 @@ p:last-child{margin-bottom:0}
       </div>
       <div class="map rv">
         <iframe
-          title="Map to Prime Lift Rigging Academy — 1605 US Highway 181 Frontage Rd, Portland, Texas"
+          title="Map to Prime Lift Rigging Academy — 1605 US Highway 181 Frontage Rd, Suite A, Portland, Texas"
           src="https://www.google.com/maps?q=1605+US+Highway+181+Frontage+Rd,+Portland,+TX+78374&output=embed"
           loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
       </div>
@@ -1853,7 +1899,7 @@ p:last-child{margin-bottom:0}
         <ul>
           <li><a href="tel:+13614130160">(361) 413-0160</a></li>
           <li><a href="mailto:primelift26@gmail.com">primelift26@gmail.com</a></li>
-          <li><a href="#visit">1605 US Hwy 181 Frontage Rd<br>Portland, TX 78374</a></li>
+          <li><a href="#visit">1605 US Hwy 181 Frontage Rd, Suite A<br>Portland, TX 78374</a></li>
           <li><a href="#visit">Mon–Fri · 7 AM – 5 PM</a></li>
           <li><a href="#faq">FAQ</a></li>
         </ul>
@@ -1889,10 +1935,6 @@ p:last-child{margin-bottom:0}
       </span>
       <button class="x" data-close aria-label="Close checkout">&times;</button>
     </div>
-    <div class="demo-ribbon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-      <span><strong>Demo preview.</strong> This is a mock-up of the Stripe checkout — nothing is charged and no card details are stored or sent anywhere.</span>
-    </div>
 
     <div id="coBody">
       <div class="sheet-grid">
@@ -1911,13 +1953,11 @@ p:last-child{margin-bottom:0}
           </div>
 
           <div class="payform on" data-form="card">
-            <label class="field"><span>Card number</span><input type="text" id="ccNum" inputmode="numeric" placeholder="4242 4242 4242 4242" autocomplete="off" maxlength="19"></label>
-            <div class="two-up">
-              <label class="field"><span>Expiry</span><input type="text" id="ccExp" inputmode="numeric" placeholder="MM / YY" autocomplete="off" maxlength="7"></label>
-              <label class="field"><span>CVC</span><input type="text" id="ccCvc" inputmode="numeric" placeholder="123" autocomplete="off" maxlength="4"></label>
+            <div class="alt-pay">
+              <b>Pay the deposit by card</b>
+              <p>You'll enter your card on Stripe's secure checkout page. Your seat is held the moment the payment goes through, and a receipt is emailed to you.</p>
+              <ul><li>Visa, Mastercard, Amex, Discover</li><li>Apple Pay and Google Pay on your phone</li><li>Balance can be paid online any time before class</li></ul>
             </div>
-            <label class="field"><span>Name on card</span><input type="text" id="ccName" placeholder="Full name" autocomplete="off"></label>
-            <label class="field"><span>ZIP</span><input type="text" id="ccZip" inputmode="numeric" placeholder="78374" autocomplete="off" maxlength="5"></label>
           </div>
 
           <div class="payform" data-form="klarna">
@@ -1943,6 +1983,7 @@ p:last-child{margin-bottom:0}
               <ul><li>No credit check</li><li>Payments scheduled before your start date</li><li>Course begins once the balance is paid in full</li></ul>
               <p style="margin-top:13px">Prefer Zelle? Choose this and note it below — the office will send details and register you manually.</p>
             </div>
+            <label class="field" style="margin-top:12px"><span>Anything we should know (optional)</span><input type="text" id="fNote" placeholder="Paying by Zelle, employer is covering it, etc." autocomplete="off"></label>
           </div>
 
           <button class="btn btn-primary btn-block" id="payBtn" style="margin-top:19px">Pay $200 Deposit</button>
@@ -1958,15 +1999,26 @@ p:last-child{margin-bottom:0}
         </div>
         <h3>Seat Reserved</h3>
         <p id="doneMsg">You're booked. A confirmation text and your study material are on the way, and we'll see you in Portland.</p>
-        <div class="co-success-box">
-          <b>This is a demo</b>
-          <p>On the live site this would charge through Stripe, text the student a confirmation, and drop them into the class roster automatically. Questions about this demo? Call Jeffrey at <a href="tel:+13616582912" style="color:var(--accent);font-weight:700">(361) 658-2912</a>.</p>
+        <div class="co-success-box" id="doneBox">
+          <b>Questions before class?</b>
+          <p>Call the office at <a href="tel:+13614130160" style="color:var(--accent);font-weight:700">(361) 413-0160</a> or email <a href="mailto:primelift26@gmail.com" style="color:var(--accent);font-weight:700">primelift26@gmail.com</a>.</p>
         </div>
         <button class="btn btn-ghost" data-close style="margin-top:26px">Close</button>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Enrollment requests that don't go through Stripe (in-house financing, Zelle,
+     or a card booking made before payments are switched on). Static markup on
+     purpose: Netlify only registers fields it can see in the deployed HTML. -->
+<form name="enrollment-request" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thanks.html" hidden aria-hidden="true">
+  <input type="hidden" name="form-name" value="enrollment-request">
+  <input name="bot-field">
+  <input name="first_name"><input name="last_name"><input name="phone"><input name="email">
+  <input name="program"><input name="format"><input name="start_date">
+  <input name="payment_method"><input name="amount_due_today"><input name="note"><input name="page">
+</form>
 
 <!-- ================= CHAT ================= -->
 <div class="chat-nudge" id="chatNudge">
@@ -2025,25 +2077,69 @@ p:last-child{margin-bottom:0}
    Prices/dates verified from Prime Lift's own registration form
    and posted flyers (see research-notes.md).
    ============================================================ */
+/* ============================================================
+   Class dates are GENERATED FROM A RECURRENCE RULE, never typed
+   by hand. A hardcoded list goes stale silently and the booking
+   grid renders empty. Change the rule, not a list of dates.
+
+   Confirmed by the client 2026-08-24:
+     Advanced Rigger  Mon-Thu  8:00 AM - 2:00 PM   (4 days)
+     Advanced Rigger  Mon-Thu  6:00 PM - 11:00 PM  (nights)
+     Signal Person    Fridays  8:00 AM - 3:00 PM   (2 days)
+     Weekend Express  Fri-Sun  8:00 AM - 5:00 PM
+     Assessments      Mon-Fri  8:00 AM - 5:00 PM
+   Booking closes the day before a class starts.
+   ============================================================ */
+const MONDAY = 1, FRIDAY = 5;
+const SEATS  = 8;                       // hard cap, every class (client-confirmed)
+const LEAD_DAYS = 1;                    // "day before" booking cutoff
+
+const isoOf = d => d.getFullYear() + "-" +
+  String(d.getMonth()+1).padStart(2,"0") + "-" +
+  String(d.getDate()).padStart(2,"0");
+
+function firstBookable(){
+  const d = new Date(); d.setHours(0,0,0,0);
+  d.setDate(d.getDate() + LEAD_DAYS);
+  return d;
+}
+/* next `count` occurrences of a weekday that are still bookable */
+function every(weekday, count){
+  count = count || 8;
+  const d = firstBookable(), out = [];
+  while(d.getDay() !== weekday) d.setDate(d.getDate()+1);
+  for(let i=0;i<count;i++){ out.push(isoOf(d)); d.setDate(d.getDate()+7); }
+  return out;
+}
+/* assessments run any weekday */
+function everyWeekday(count){
+  count = count || 12;
+  const d = firstBookable(), out = [];
+  while(out.length < count){
+    if(d.getDay() >= MONDAY && d.getDay() <= FRIDAY) out.push(isoOf(d));
+    d.setDate(d.getDate()+1);
+  }
+  return out;
+}
+
 const CONFIG = {
   business:"Prime Lift Rigging Academy",
   phone:"(361) 413-0160",
   phoneRaw:"+13614130160",
   email:"primelift26@gmail.com",
   city:"Portland, TX",
-  address:"1605 US Highway 181 Frontage Rd, Portland, TX 78374",
+  address:"1605 US Highway 181 Frontage Rd, Suite A, Portland, TX 78374",
   deposit:200,
-  demoContact:"(361) 658-2912",   // Jeffrey — demo confirmations only
 
   programs:[
     {
-      id:"advanced", name:"Advanced Rigger", price:1000, was:1350, deposit:200,
+      id:"advanced", name:"Advanced Rigger", price:1000, was:1700, deposit:200,
       shot:"img/card-rigger.jpg",
       blurb:"Lift planning, load math, slings, hardware and hands-on practical.",
       formats:[
-        {id:"day",     name:"Weekday · Day",         time:"8:00 AM – 1:00 PM", note:"Starts every Monday",       dates:["2026-08-24","2026-08-31","2026-09-07","2026-09-14","2026-09-21"]},
-        {id:"night",   name:"Weekday · Night",       time:"6:00 PM – 9:00 PM", note:"Built for day-shift crews", dates:["2026-08-24","2026-08-31","2026-09-07","2026-09-14","2026-09-21"]},
-        {id:"weekend", name:"3-Day Weekend Express", time:"Fri & Sat 8 AM – 5 PM · Sun testing", note:"Done in one weekend", dates:["2026-08-21","2026-09-18","2026-10-16"]}
+        {id:"day",     name:"Weekday · Day",         time:"8:00 AM – 2:00 PM", note:"Monday–Thursday · 4 days",  dates:every(MONDAY)},
+        {id:"night",   name:"Weekday · Night",       time:"6:00 PM – 11:00 PM", note:"Monday–Thursday · built for day-shift crews", dates:every(MONDAY)},
+        {id:"weekend", name:"3-Day Weekend Express", time:"Fri–Sun 8:00 AM – 5:00 PM", note:"Done in one weekend", dates:every(FRIDAY)}
       ]
     },
     {
@@ -2051,36 +2147,36 @@ const CONFIG = {
       shot:"img/card-signal.jpg",
       blurb:"Standard hand signals, jobsite communication, written and practical test.",
       formats:[
-        {id:"friday", name:"Two Fridays", time:"2 days of training", note:"Hands-on test-out Sept 26", dates:["2026-08-28","2026-09-04","2026-09-11","2026-09-18"]}
+        {id:"friday", name:"Two Fridays", time:"8:00 AM – 3:00 PM", note:"Fridays · 2 days of training", dates:every(FRIDAY)}
       ]
     },
     {
       id:"assessment", name:"NCCER Assessment", price:150, was:null, deposit:150,
       shot:"img/card-assessment.jpg",
-      blurb:"Test out of a craft you already work in. One flat price across 30+ crafts.",
+      blurb:"Test out of a craft you already work in. One flat price across all 36 crafts.",
       formats:[
-        {id:"assess", name:"Assessment Session", time:"By appointment", note:"Rebar · Concrete · Carpenter · Pipefitter · Forklift · Boilermaker · HVAC and more", dates:["2026-08-26","2026-09-02","2026-09-09","2026-09-16"]}
+        {id:"assess", name:"Assessment Session", time:"8:00 AM – 5:00 PM", note:"Monday–Friday · Rebar · Concrete · Carpenter · Pipefitter · Forklift · Boilermaker · HVAC and more", dates:everyWeekday()}
       ]
     }
   ],
 
   faq:[
     ["How long does the Advanced Rigger course take?",
-     "You have three options. Weekday day classes run 8:00 AM to 1:00 PM and weekday night classes run 6:00 PM to 9:00 PM, both starting every Monday. If you can't take time off during the week, the 3-Day Weekend Express runs Friday and Saturday 8 AM to 5 PM with testing on Sunday — you walk out certified after one weekend."],
+     "Four days, Monday through Thursday. Day classes run 8:00 AM to 2:00 PM and night classes run 6:00 PM to 11:00 PM, so you can keep working either shift. If you can't take time off during the week at all, the 3-Day Weekend Express runs Friday through Sunday, 8:00 AM to 5:00 PM, and you walk out certified after one weekend."],
     ["What does it cost and what do I pay today?",
-     "Advanced Rigger is $1,000 during our current promotion (normally $1,350), and Signal Person is $1,000. A $200 deposit secures your seat and the remaining $800 is due before your class begins. NCCER assessments are $150, paid in full at booking."],
+     "Advanced Rigger is $1,000 during our current promotion, normally $1,700. Signal Person is $1,000. A $200 deposit secures your seat and the remaining $800 is due before your class begins. NCCER assessments are $150 flat for any of our 36 crafts, paid in full at registration."],
     ["What if I can't pay the whole thing up front?",
      "You have options. Klarna and Afterpay are available — note that both work by covering the full $1,000 up front and then splitting it into payments for you, so those are pay-in-full options at checkout rather than the $200 deposit. If you don't qualify for either, we offer in-house financing with no credit check: as little as $200 down and payments leading up to your course date. We also take Zelle if you'd rather register that way — just message us. Either way, your course can't begin until the balance is paid in full."],
     ["Is this a real NCCER certification?",
      "Yes. We're an NCCER Accredited Training and Assessment Center, so you train and test out in the same building and your credential is recorded on the NCCER national registry — recognized on jobsites across the country."],
     ["Do I need experience to take the Advanced Rigger course?",
-     "No. The course is designed for both new and experienced riggers. We cover advanced rigging principles, load weight calculations, center of gravity, sling selection and inspection, hitch configurations, load control, lift planning and crane hand signals from the ground up."],
+     "No experience required — anyone can take it. The course is designed for both new and experienced riggers. We cover advanced rigging principles, load weight calculations, center of gravity, sling selection and inspection, hitch configurations, load control, lift planning and crane hand signals from the ground up."],
     ["What's included in the course?",
      "Classroom instruction, hands-on practice with real rigging hardware, your written and practical assessment, and your NCCER certification upon successful completion. Book early and we'll get study material to you so you can start before day one."],
     ["Can you certify my whole crew?",
-     "Yes. Call the office at (361) 413-0160 and ask for group scheduling — we can run assessments and courses for a crew and work around your turnaround schedule."],
+     "Yes. We take company bookings for up to 8 students at a time, here at our Portland training center. Call the office at (361) 413-0160 and ask for group scheduling and we'll work around your turnaround schedule."],
     ["Where are you located?",
-     "1605 US Highway 181 Frontage Rd in Portland, Texas — minutes from Corpus Christi, Ingleside and Gregory. Office hours are Monday through Friday, 7:00 AM to 5:00 PM, though hours vary during class weeks."]
+     "1605 US Highway 181 Frontage Rd, Suite A, in Portland, Texas — minutes from Corpus Christi, Ingleside and Gregory. Office hours are Monday through Friday, 7:00 AM to 5:00 PM, though hours vary during class weeks."]
   ]
 };
 
@@ -2096,12 +2192,10 @@ const pad2 = n => String(n).padStart(2,"0");
 function dparts(iso){ const [y,m,d]=iso.split("-").map(Number); return new Date(y,m-1,d); }
 function fmtLong(iso){ const d=dparts(iso); return `${DOWFULL[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}`; }
 function money(n){ return "$"+n.toLocaleString("en-US"); }
-// deterministic "seats left" so the number never jumps between renders
-function seatsFor(iso,fmt){
-  let h=0; const s=iso+fmt;
-  for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; }
-  return 2+(h%7);
-}
+/* Seat counts are the real class cap (8), NOT a fabricated countdown.
+   The old version hashed the date string into a number between 2 and 8,
+   which invented scarcity on a paying client's site. Once the GHL
+   Class Booking calendar is wired, this returns real remaining seats. */
 $("#yr").textContent=new Date().getFullYear();
 
 /* ============================================================
@@ -2134,8 +2228,7 @@ $$(".rv").forEach(el=>io.observe(el));
   })));
   if(best){
     $("#nextClassLabel").textContent=`Next class starts ${fmtLong(best.iso)}`;
-    const seats=seatsFor(best.iso,best.f.id);
-    $("#nextClassSub").textContent=`${best.p.name} · ${best.f.name} · ${seats} seat${seats===1?"":"s"} left`;
+    $("#nextClassSub").textContent=`${best.p.name} · ${best.f.name} · ${SEATS} seats per class`;
   }
 })();
 
@@ -2212,12 +2305,12 @@ function pickFormat(id){
   $("#dateSub").textContent = `${S.prog.name} · ${S.fmt.name}`;
   const today=new Date(); today.setHours(0,0,0,0);
   $("#dateGrid").innerHTML = S.fmt.dates.map(iso=>{
-    const d=dparts(iso), past=d<today, seats=seatsFor(iso,S.fmt.id);
+    const d=dparts(iso), past=d<today;
     return `
     <button class="date" data-date="${iso}" ${past?"disabled":""}>
       <span class="date-cal"><em>${MON[d.getMonth()]}</em><b>${d.getDate()}</b></span>
       <span class="date-info"><b>${DOWFULL[d.getDay()]}</b><span>${S.fmt.time}</span></span>
-      <span class="seats ${seats<=3?"low":""}"><b>${past?"—":seats}</b><span>${past?"closed":"seats left"}</span></span>
+      <span class="seats"><b>${past?"—":SEATS}</b><span>${past?"closed":"seats/class"}</span></span>
     </button>`;
   }).join("");
   setStep(3);
@@ -2310,33 +2403,86 @@ $$(".paytab").forEach(t=>t.addEventListener("click",()=>{
   applyMethod(t.dataset.pay);
 }));
 
-/* cosmetic-only formatting — nothing is submitted anywhere */
-$("#ccNum").addEventListener("input",e=>{
-  e.target.value=e.target.value.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();
-});
-$("#ccExp").addEventListener("input",e=>{
-  let v=e.target.value.replace(/\D/g,"").slice(0,4);
-  e.target.value = v.length>2 ? v.slice(0,2)+" / "+v.slice(2) : v;
-});
-$("#ccCvc").addEventListener("input",e=>{ e.target.value=e.target.value.replace(/\D/g,"").slice(0,4); });
-$("#ccZip").addEventListener("input",e=>{ e.target.value=e.target.value.replace(/\D/g,"").slice(0,5); });
-
-$("#payBtn").addEventListener("click",()=>{
+/* ============================================================
+   PAYMENT + ENROLLMENT SUBMISSION
+   Card / Klarna / Afterpay -> Netlify Function creates a Stripe Checkout
+   Session and we redirect to it. In-house / Zelle -> Netlify Form.
+   If Stripe isn't configured yet (no STRIPE_SECRET_KEY on the site), the
+   function answers 503 and the booking falls back to the form so no
+   student is ever dropped.
+   ============================================================ */
+function bookingPayload(method){
+  const dep=depositFor(S.prog,method);
+  return {
+    first_name:($("#fFirst").value||"").trim(),
+    last_name:($("#fLast").value||"").trim(),
+    phone:($("#fPhone").value||"").trim(),
+    email:($("#fEmail").value||"").trim(),
+    program:S.prog.name, program_id:S.prog.id,
+    format:S.fmt.name, format_id:S.fmt.id, class_times:S.fmt.time,
+    start_date:S.date, start_date_label:fmtLong(S.date),
+    payment_method:method, amount_due_today:dep, course_total:S.prog.price,
+    note:(($("#fNote")||{}).value||"").trim(),
+    page:location.href
+  };
+}
+async function submitEnrollmentForm(p){
+  const body=new URLSearchParams({"form-name":"enrollment-request"});
+  ["first_name","last_name","phone","email","program","format","start_date","payment_method","amount_due_today","note","page"]
+    .forEach(k=>body.append(k,String(p[k]==null?"":p[k])));
+  const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:body.toString()});
+  if(!r.ok) throw new Error("form "+r.status);
+}
+function showDone(msg){
+  $("#doneMsg").textContent=msg;
+  $("#coBody").style.display="none";
+  $("#coDone").style.display="";
+  $(".sheet").scrollTop=0;
+}
+$("#payBtn").addEventListener("click",async()=>{
   const btn=$("#payBtn"), label=btn.textContent;
-  btn.innerHTML='<span class="spin"></span> Processing…';
-  btn.disabled=true;
-  setTimeout(()=>{
-    btn.disabled=false; btn.textContent=label;
-    const name=($("#fFirst").value||"").trim();
-    const method=$(".paytab.on").dataset.pay;
-    $("#doneMsg").textContent = method==="inhouse"
-      ? `${name?name+", you're":"You're"} on the list for ${fmtLong(S.date)}. Our office will call to set up your payment schedule and hold your seat.`
-      : `${name?name+", you're":"You're"} booked for ${S.prog.name} starting ${fmtLong(S.date)}. A confirmation text and your study material are on the way.`;
-    $("#coBody").style.display="none";
-    $("#coDone").style.display="";
-    $(".sheet").scrollTop=0;
-  },1400);
+  const method=$(".paytab.on").dataset.pay;
+  const p=bookingPayload(method);
+  const who=p.first_name?p.first_name+", you're":"You're";
+  if(!p.phone && !p.email){ alert("Add a mobile number or email on the previous step so we can confirm your seat."); return; }
+  btn.innerHTML='<span class="spin"></span> Processing…'; btn.disabled=true;
+  const reset=()=>{ btn.disabled=false; btn.textContent=label; };
+  try{
+    if(method==="inhouse"){
+      await submitEnrollmentForm(p);
+      reset();
+      showDone(`${who} on the list for ${p.start_date_label}. The office will call you to set up your payment schedule and hold your seat.`);
+      return;
+    }
+    const r=await fetch("/.netlify/functions/create-checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
+    if(r.status===503){
+      // Payments not switched on yet: capture the booking so the office can take the deposit by phone.
+      p.payment_method=method+" (online payments pending, take by phone)";
+      await submitEnrollmentForm(p);
+      reset();
+      showDone(`${who} on the list for ${p.program} starting ${p.start_date_label}. The office will call you to take the deposit and confirm your seat.`);
+      return;
+    }
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok||!data.url) throw new Error(data.error||"checkout "+r.status);
+    location.href=data.url;
+  }catch(err){
+    console.error(err);
+    reset();
+    alert("Something went wrong on our end. Call the office at "+CONFIG.phone+" and we'll hold your seat by phone.");
+  }
 });
+
+/* Returning from Stripe: /?booked=1&program=...&date=... */
+(function(){
+  const q=new URLSearchParams(location.search);
+  if(q.get("booked")!=="1") return;
+  const prog=q.get("program")||"your course", date=q.get("date")||"";
+  history.replaceState(null,"",location.pathname);
+  $("#coCourse").textContent=prog; $("#coDates").textContent=date;
+  modal.classList.add("open"); document.body.style.overflow="hidden";
+  showDone(`Your deposit went through and your seat in ${prog}${date?" starting "+date:""} is reserved. A receipt is in your email, and the office will reach out with your study material.`);
+})();
 
 /* ============================================================
    FAQ  (note: the section carries id="faq" for anchoring —
@@ -2438,11 +2584,11 @@ const chat={
         next.sort((a,b)=>dparts(a.iso)-dparts(b.iso));
         if(next.length) lines.push(`<b>${p.name}</b> — next start ${fmtLong(next[0].iso)} (${next[0].f.name})`);
       });
-      return [`Here's what's coming up:\n\n${lines.join("\n")}\n\nAdvanced Rigger starts every Monday and Signal Person runs every Friday. Want me to pull up the full calendar?`,
+      return [`Here's what's coming up:\n\n${lines.join("\n")}\n\nAdvanced Rigger runs Monday through Thursday and Signal Person runs Fridays. Want me to pull up the full calendar?`,
               ["See class dates","Book a seat","How long does it take?"]];
     }
     if(has("price","cost","how much","fee","tuition","$","expensive","deposit")){
-      return [`Advanced Rigger is <b>$1,000</b> right now — down from $1,350 for our current promotion, which ends in September. Signal Person is also <b>$1,000</b>, and NCCER assessments are <b>$150</b> flat across 30+ crafts.\n\nA <b>$200 deposit</b> secures a course seat; the remaining $800 is due before class starts.`,
+      return [`Advanced Rigger is <b>$1,000</b> right now — down from <b>$1,700</b> for our current promotion. Signal Person is also <b>$1,000</b>, and NCCER assessments are <b>$150</b> flat across all 36 crafts.\n\nA <b>$200 deposit</b> secures a course seat; the remaining $800 is due before class starts.`,
               ["Payment plans?","Book a seat","What's included?"]];
     }
     if(has("financ","klarna","afterpay","payment plan","installment","credit","afford","split","monthly","zelle")){
@@ -2450,7 +2596,7 @@ const chat={
               ["Book a seat","Talk to a person","How much is it?"]];
     }
     if(has("where","location","address","directions","portland","corpus","drive","far")){
-      return [`We're at <b>1605 US Highway 181 Frontage Rd, Portland, TX 78374</b> — right off 181, minutes from Corpus Christi, Ingleside and Gregory.\n\nOffice hours are <b>Monday–Friday, 7 AM to 5 PM</b> (hours vary a bit during class weeks).`,
+      return [`We're at <b>1605 US Highway 181 Frontage Rd, Suite A, Portland, TX 78374</b> — right off 181, minutes from Corpus Christi, Ingleside and Gregory.\n\nOffice hours are <b>Monday–Friday, 7 AM to 5 PM</b> (hours vary a bit during class weeks).`,
               ["When's the next class?","Book a seat","Talk to a person"]];
     }
     if(has("signal")){
@@ -2458,15 +2604,21 @@ const chat={
               ["Book a seat","See class dates","How much is it?"]];
     }
     if(has("advanced","rigger","rigging")){
-      return [`The <b>Advanced Rigger</b> course covers advanced rigging principles, load weight calculations, center of gravity, sling selection and inspection, hitch configurations, load control, lift planning and crane hand signals — plus hands-on practical work.\n\nThree ways to take it: weekday days (8 AM–1 PM), weekday nights (6–9 PM), or the <b>3-day weekend express</b> if you can't miss work. $1,000 right now.`,
+      return [`The <b>Advanced Rigger</b> course covers advanced rigging principles, load weight calculations, center of gravity, sling selection and inspection, hitch configurations, load control, lift planning and crane hand signals — plus hands-on practical work.\n\nThree ways to take it: weekday days (8 AM–2 PM), weekday nights (6–11 PM), or the <b>3-day weekend express</b> if you can't miss work. $1,000 right now.`,
               ["See class dates","Book a seat","How long does it take?"]];
     }
     if(has("assess","test out","testout","forklift","pipefitter","rebar","carpenter","concrete","proctor","boilermaker","hvac","plumber")){
-      return [`We're an <b>NCCER Accredited Assessment Center</b>, so if you've already got the field experience you can come test out. It's <b>$150 per assessment</b>, one flat price across <b>30+ crafts</b> — boilermaker, commercial carpenter, heavy equipment operator, HVAC technician, plumber, pipefitter, rebar, concrete finisher, forklift and more.\n\nAssessments are by appointment. Bringing a crew? Call <b>${CONFIG.phone}</b>.`,
+      return [`We're an <b>NCCER Accredited Assessment Center</b>, so if you've already got the field experience you can come test out. It's <b>$150 per assessment</b>, one flat price across all <b>36 crafts</b> — boilermaker, commercial carpenter, heavy equipment operator, HVAC technician, plumber, pipefitter, rebar, concrete finisher, forklift and more.\n\nAssessments run Monday through Friday, 8 AM to 5 PM. Bringing a crew? Call <b>${CONFIG.phone}</b>.`,
               ["Book a seat","Talk to a person","Where are you located?"]];
     }
     if(has("how long","duration","days","weekend","night","evening","shift","work")){
-      return [`Depends on how you take it:\n\n• <b>Weekday day</b> — 8 AM to 1 PM, starts every Monday\n• <b>Weekday night</b> — 6 PM to 9 PM, made for day-shift crews\n• <b>3-Day Weekend Express</b> — Friday and Saturday 8 AM–5 PM, testing Sunday\n\nThe weekend express is the one most guys pick when they can't take time off.`,
+      return [`Depends on how you take it:
+
+• <b>Weekday day</b> — Monday to Thursday, 8 AM to 2 PM, four days
+• <b>Weekday night</b> — Monday to Thursday, 6 PM to 11 PM, made for day-shift crews
+• <b>3-Day Weekend Express</b> — Friday to Sunday, 8 AM to 5 PM
+
+The weekend express is the one most guys pick when they can't take time off.`,
               ["See class dates","Book a seat","How much is it?"]];
     }
     if(has("included","what do i get","material","book","study","curriculum","learn")){
@@ -2586,6 +2738,64 @@ $$(".nm-item").forEach(a=>a.addEventListener("click",()=>{
   el.classList.remove("lit"); void el.offsetWidth; el.classList.add("lit");
   setTimeout(()=>el.classList.remove("lit"),1900);
 }));
+
+/* ============================================================
+   Reel carousel — transform-track paging. The <video> nodes are
+   never re-created, so switching slides can't restart a download
+   or drop the decoded frames. Only the visible clip plays.
+   ============================================================ */
+(function(){
+  const car=$("#reelCar"); if(!car) return;
+  const track=$("#reelTrack");
+  const vids=[...track.querySelectorAll("video")];
+  const dots=[...$("#reelDots").children];
+  const prev=$("#reelPrev"), next=$("#reelNext");
+  let n=0, inView=true;
+
+  function paint(){
+    track.style.transform="translateX("+(-100*n)+"%)";
+    dots.forEach((d,j)=>{ d.classList.toggle("on",j===n); d.setAttribute("aria-selected",j===n); });
+    prev.disabled = n===0; next.disabled = n===vids.length-1;
+    vids.forEach((v,j)=>{
+      if(j===n){ if(v.preload==="none") v.preload="metadata"; if(inView) v.play().catch(()=>{}); }
+      else v.pause();
+    });
+  }
+  function go(i){ n=Math.max(0,Math.min(vids.length-1,i)); paint(); }
+
+  next.addEventListener("click",()=>go(n+1));
+  prev.addEventListener("click",()=>go(n-1));
+  dots.forEach((d,j)=>d.addEventListener("click",()=>go(j)));
+  car.addEventListener("keydown",e=>{
+    if(e.key==="ArrowRight"){ e.preventDefault(); go(n+1); }
+    if(e.key==="ArrowLeft"){ e.preventDefault(); go(n-1); }
+  });
+
+  /* swipe — only claim the gesture once it's clearly horizontal,
+     otherwise vertical page scrolling gets eaten on mobile */
+  let x0=null,y0=null,lock=null;
+  car.addEventListener("touchstart",e=>{ x0=e.touches[0].clientX; y0=e.touches[0].clientY; lock=null; },{passive:true});
+  car.addEventListener("touchmove",e=>{
+    if(x0===null) return;
+    const dx=e.touches[0].clientX-x0, dy=e.touches[0].clientY-y0;
+    if(lock===null && (Math.abs(dx)>8||Math.abs(dy)>8)) lock=Math.abs(dx)>Math.abs(dy)?"x":"y";
+  },{passive:true});
+  car.addEventListener("touchend",e=>{
+    if(x0===null||lock!=="x"){ x0=null; return; }
+    const dx=e.changedTouches[0].clientX-x0;
+    if(Math.abs(dx)>42) go(dx<0?n+1:n-1);
+    x0=null;
+  },{passive:true});
+
+  /* don't burn battery decoding a clip that's scrolled off screen */
+  if("IntersectionObserver" in window){
+    new IntersectionObserver(es=>{
+      inView=es[0].isIntersecting;
+      if(inView) vids[n].play().catch(()=>{}); else vids.forEach(v=>v.pause());
+    },{threshold:.25}).observe(car);
+  }
+  paint();
+})();
 </script>
 </body>
 </html>
