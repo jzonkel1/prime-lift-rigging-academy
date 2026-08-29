@@ -1478,6 +1478,24 @@ SITE_JS = r"""
     s.setAttribute("data-widget-id", "6a935fa49f17bc64b3251340");
     document.body.appendChild(s);
     ["scroll","pointerdown","touchstart","keydown"].forEach(function(e){ window.removeEventListener(e, load); });
+    lift();
+  }
+  /* On phones the sticky call bar owns the bottom 60px; keep the bubble above it.
+     The widget's bubble lives in an open shadow root with inline bottom:20px. */
+  function lift(){
+    var tries = 0;
+    var cb = document.getElementById("callbar");
+    function place(){
+      var host = document.querySelector("chat-widget"), sr = host && host.shadowRoot;
+      var box = sr && sr.getElementById("lc_text-widget"), btn = sr && sr.getElementById("lc_text-widget--btn");
+      if (!box || !btn) { if (tries++ < 60) setTimeout(place, 500); return; }
+      var up = window.innerWidth <= 900 && cb && cb.classList.contains("show");
+      var b = up ? "78px" : "20px";
+      box.style.bottom = b; btn.style.bottom = b;
+    }
+    place();
+    if (cb) new MutationObserver(place).observe(cb, {attributes:true, attributeFilter:["class"]});
+    window.addEventListener("resize", place, {passive:true});
   }
   ["scroll","pointerdown","touchstart","keydown"].forEach(function(e){ window.addEventListener(e, load, {passive:true, once:true}); });
   setTimeout(load, 6000);
