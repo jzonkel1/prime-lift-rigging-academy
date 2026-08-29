@@ -770,6 +770,13 @@ p:last-child{margin-bottom:0}
 .field input::placeholder,.field textarea::placeholder{color:#575C65}
 /* minmax(0,1fr): inputs carry an intrinsic min-width that blows out a plain 1fr */
 .two-up{display:grid; gap:0 14px; grid-template-columns:repeat(2,minmax(0,1fr))}
+/* SMS consent: two separate optional boxes, unchecked by default (A2P 10DLC). */
+.consent{margin:4px 0 14px; padding:13px 14px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.02)}
+.consent .chk{display:flex; gap:10px; align-items:flex-start; font-size:12.5px; line-height:1.5; color:var(--muted); margin-bottom:9px; cursor:pointer}
+.consent .chk input{flex:none; width:16px; height:16px; margin-top:2px; accent-color:var(--accent)}
+.consent .chk b{color:#DCDAD6; font-weight:600}
+.consent-note{font-size:11.5px; line-height:1.5; color:var(--muted-2); margin:0}
+.consent-note a{color:var(--accent); text-decoration:none}
 
 /* ============================================================
    REEL BAND
@@ -1565,7 +1572,7 @@ p:last-child{margin-bottom:0}
 
         <!-- Step 4 -->
         <div class="pane" data-pane="4">
-          <p class="pane-h"><b>Almost done</b><span>We'll text you a confirmation</span></p>
+          <p class="pane-h"><b>Almost done</b><span>Takes about a minute</span></p>
           <div class="review-box">
             <div>
               <div class="two-up">
@@ -1582,6 +1589,11 @@ p:last-child{margin-bottom:0}
                 </select>
               </label>
               <label class="field"><span>Anything we should know? (optional)</span><textarea id="fNotes" rows="2" placeholder="Night shift, need the evening class…"></textarea></label>
+              <div class="consent" id="smsConsent">
+                <label class="chk"><input type="checkbox" id="cNon"><span><b>Text me about my enrollment.</b> I agree to receive enrollment confirmations, class reminders and schedule updates by SMS from Prime Lift Rigging Academy at the mobile number above. Msg frequency varies. Msg &amp; data rates may apply. Reply HELP for help, STOP to opt out.</span></label>
+                <label class="chk"><input type="checkbox" id="cMkt"><span><b>Text me about future classes.</b> I agree to receive occasional class openings, recertification reminders and review requests by SMS from Prime Lift Rigging Academy. Msg frequency varies. Msg &amp; data rates may apply. Reply HELP for help, STOP to opt out.</span></label>
+                <p class="consent-note">Consent is not a condition of enrollment. We never share or sell your mobile number or opt-in information with third parties. <a href="privacy.html">Privacy Policy</a> &middot; <a href="terms.html">Terms &amp; Enrollment Policy</a></p>
+              </div>
             </div>
             <div>
               <dl class="summary" id="summary"></dl>
@@ -1907,7 +1919,7 @@ p:last-child{margin-bottom:0}
     </div>
     <div class="foot-base">
       <span>© <span id="yr"></span> Prime Lift Rigging Academy LLC · Portland, Texas · Locally &amp; Latin-owned</span>
-      <span>Site by <a href="https://zonkelmedia.com" target="_blank" rel="noopener" style="color:var(--muted)">Zonkel Media</a></span>
+      <span><a href="privacy.html" style="color:var(--muted)">Privacy</a> &middot; <a href="terms.html" style="color:var(--muted)">Terms</a> &middot; Site by <a href="https://zonkelmedia.com" target="_blank" rel="noopener" style="color:var(--muted)">Zonkel Media</a></span>
     </div>
   </div>
 </footer>
@@ -2018,6 +2030,7 @@ p:last-child{margin-bottom:0}
   <input name="first_name"><input name="last_name"><input name="phone"><input name="email">
   <input name="program"><input name="format"><input name="start_date">
   <input name="payment_method"><input name="amount_due_today"><input name="note"><input name="page">
+  <input name="payer"><input name="notes"><input name="sms_consent_nonmarketing"><input name="sms_consent_marketing">
 </form>
 
 <!-- ================= CHAT ================= -->
@@ -2423,12 +2436,16 @@ function bookingPayload(method){
     start_date:S.date, start_date_label:fmtLong(S.date),
     payment_method:method, amount_due_today:dep, course_total:S.prog.price,
     note:(($("#fNote")||{}).value||"").trim(),
+    payer:(($("#fPayer")||{}).value||""),
+    notes:(($("#fNotes")||{}).value||"").trim(),
+    sms_consent_nonmarketing: $("#cNon").checked ? "yes" : "no",
+    sms_consent_marketing:    $("#cMkt").checked ? "yes" : "no",
     page:location.href
   };
 }
 async function submitEnrollmentForm(p){
   const body=new URLSearchParams({"form-name":"enrollment-request"});
-  ["first_name","last_name","phone","email","program","format","start_date","payment_method","amount_due_today","note","page"]
+  ["first_name","last_name","phone","email","program","format","start_date","payment_method","amount_due_today","note","page","payer","notes","sms_consent_nonmarketing","sms_consent_marketing"]
     .forEach(k=>body.append(k,String(p[k]==null?"":p[k])));
   const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:body.toString()});
   if(!r.ok) throw new Error("form "+r.status);

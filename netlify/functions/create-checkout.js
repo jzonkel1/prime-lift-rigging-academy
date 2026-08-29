@@ -71,6 +71,8 @@ exports.handler = async (event) => {
     first_name: p.first_name, last_name: p.last_name, phone: p.phone, email: p.email,
     program: item.name, format: p.format, class_times: p.class_times,
     start_date: p.start_date, payment_method: method,
+    payer: p.payer, notes: p.notes,
+    sms_consent_nonmarketing: p.sms_consent_nonmarketing, sms_consent_marketing: p.sms_consent_marketing,
     course_total: String(item.price), paid_today: String(amount), balance_due: String(item.price - amount)
   };
   for (const [k, v] of Object.entries(meta)) {
