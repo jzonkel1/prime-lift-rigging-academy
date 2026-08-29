@@ -10,7 +10,7 @@
 - Signal Person course: $1,000, $200 deposit. Two Fridays 8 AM-3 PM. NCCER Certified Signal Person.
 - NCCER assessments: $150 flat per assessment, 36 crafts, Mon-Fri 8 AM-5 PM by appointment. Written and hands-on, credential recorded on the NCCER Registry.
 - Payment: card deposit, Klarna and Afterpay (pay in full at checkout), Zelle, in-house financing with no credit check. Deposit non-refundable; one reschedule with 48 hours' notice.
-- Class size: 8 seats. Crew bookings available. No Spanish-language instruction. No employer/onsite training.
+- Class size: 8 seats. Crew and employer bookings at the Portland center (group classes, private dates, crew assessments); no training at employer sites. No Spanish-language instruction; a Spanish-language summary page exists at /es/.
 
 ## Pages
 
@@ -67,6 +67,12 @@
 - [About](https://primeliftrigging-academy.com/about/)
 - [Reviews](https://primeliftrigging-academy.com/reviews/)
 - [Faq](https://primeliftrigging-academy.com/faq/)
+- [Crew training for employers (group classes, private dates, crew assessments, quote form)](https://primeliftrigging-academy.com/employers/)
+- [Resumen en español (Spanish-language summary of courses, assessments, financing, location)](https://primeliftrigging-academy.com/es/)
+- [Guides (plain-English articles)](https://primeliftrigging-academy.com/guides/)
+- [Guide: NCCER Rigger vs. NCCCO Rigger: Which Certification Do You Need?](https://primeliftrigging-academy.com/guides/nccer-vs-nccco-rigger/)
+- [Guide: Is the NCCER Advanced Rigger Test Hard? What to Expect](https://primeliftrigging-academy.com/guides/is-the-nccer-advanced-rigger-test-hard/)
+- [Guide: How to Verify NCCER Credentials (For Workers and Employers)](https://primeliftrigging-academy.com/guides/how-to-verify-nccer-credentials/)
 
 ## Policies
 - [Privacy Policy](https://primeliftrigging-academy.com/privacy.html)

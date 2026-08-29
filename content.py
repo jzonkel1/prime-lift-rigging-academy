@@ -352,3 +352,253 @@ FINANCING = [
     ("Zelle", "Prefer Zelle? Pick In-House on the booking screen and note it, or message us on Facebook or email the office and we'll register you manually.", "primelift26@gmail.com"),
     ("Employer Paying", "Company covering it? Choose \"My employer is paying\" on the booking form and the office will coordinate the invoice with them. Crews of up to 8 per class.", "Group bookings"),
 ]
+
+
+# ------------------------------------------------------------- employers
+# Crew training page (/employers/). Facts only: everything below is already
+# stated elsewhere on the site (8 seats, 36 crafts, $150, formats, Registry).
+EMPLOYERS = {
+    "kicker": "For Safety Managers & Contractors",
+    "h1": "Crew Training<em>For Employers</em>",
+    "lede": "Train and test your crew at our NCCER accredited center in Portland, TX. Advanced Rigger, Signal Person and craft assessments in 36 crafts, scheduled around your turnaround, with one point of contact at the office.",
+    "meta_title": "Crew Training for Employers · NCCER Rigging & Assessments",
+    "meta_desc": "Group rigging classes and NCCER assessments for crews in Portland, TX. Private dates, day, night or weekend formats, test on site, posted to the NCCER Registry.",
+    "specs": [("Group classes", "Up to 8 per class"), ("Private dates", "For your crew"), ("Assessments", "Whole crews · $150 each"), ("One point of contact", "The office")],
+    "why": [
+        "Test where they train: the written and practical test-out happens in our on-site NCCER accredited assessment center, not at a third-party site weeks later",
+        "36 NCCER craft assessments on site, $150 flat each, for hands who already know the work",
+        "Day, night or 3-day weekend formats, so a crew on days can certify at night and a crew on a turnaround can do it in one weekend",
+        "Credentials recorded on the NCCER Registry, where your safety department and site owners verify them",
+        "Published prices: Advanced Rigger $1,000, Signal Person $1,000, assessments $150. No quote games",
+        "Recertification scheduled as a group when several credentials expire together",
+    ],
+    "steps": [
+        ("Tell Us The Headcount", "Send the quote form below or call the office with how many people, which credential, and when you need them back on the job."),
+        ("We Block The Dates", "The office holds a class or the testing room for your crew, in the format that fits their shift, and confirms it with one point of contact on your side."),
+        ("They Train, Test &amp; Get Posted", "Your crew trains and tests out in the same building in Portland. Passing credentials are recorded on the NCCER Registry."),
+    ],
+    "faq": [
+        ("How many people can you train at once?", "Classes are capped at 8 students. Larger crews are split across sessions, which can run in different formats (day, night, weekend) so the whole crew isn't off the job at the same time. Assessments are scheduled by appointment and the testing room can be blocked for a crew."),
+        ("Where does the training happen?", "At our NCCER accredited Training and Assessment Center, 1605 US Highway 181 Frontage Rd, Suite A, Portland, TX 78374, minutes from Corpus Christi, Ingleside and Gregory. Your crew trains and tests out in the same building."),
+        ("How does payment work when the company is paying?", "Send the quote request below, or have each student choose \"My employer is paying\" on the booking form and put your contact in the notes. The office coordinates payment with your company directly. Advanced Rigger and Signal Person are $1,000 per seat and assessments are $150 each."),
+        ("What does the crew need to bring?", "A government-issued photo ID for every person; NCCER requires it before anyone can sit for a test. Work boots for the hands-on portion, and something to write with. Book early and we'll send study material ahead of the class."),
+    ],
+    "training_options": ["Advanced Rigger", "Signal Person", "NCCER Assessments", "Recertification"],
+    "headcounts": ["1-4", "5-8", "9-15", "16+"],
+}
+# Optional proof for the employers page. Rendered only when set; the client
+# has not given us these numbers, so they stay None.
+EMPLOYERS_STATS = {
+    "crews_trained": None,        # e.g. "40+" -> "crews trained"
+    "credentials_issued": None,   # e.g. "300+" -> "credentials posted to the Registry"
+    "employers_served": None,     # e.g. "25" -> "Coastal Bend employers served"
+}
+EMPLOYER_LOGOS = None             # e.g. ["Company A", "Company B"] -> "Crews we've trained" strip
+GROUP_RATE_NOTE = None            # e.g. "Ask about rates for crews of 5 or more" (client has not set any)
+
+# ------------------------------------------------------------------ Spanish
+# /es/ landing page. Usted / impersonal register. Do not add claims about the
+# language classes are taught in or about bilingual staff.
+ES = {
+    "title": "Certificación NCCER de Rigger y Signal Person en Portland, TX",
+    "desc": "Cursos de Advanced Rigger y Signal Person y evaluaciones NCCER en 36 oficios en Portland, Texas. Precios publicados, planes de pago sin revisión de crédito.",
+    "kicker": "Centro Acreditado NCCER",
+    "h1": "Certificación<br class=\"mbr\"> NCCER<em>Portland, Texas</em>",
+    "lede": "Cursos presenciales de Advanced Rigger y Signal Person, y evaluaciones NCCER en 36 oficios, con el examen en el mismo edificio. $200 aparta su lugar.",
+    "call": "Llamar",
+    "enroll": "Inscribirse",
+    "specs": [("Advanced Rigger", "$1,000 · depósito $200"), ("Signal Person", "$1,000 · depósito $200"), ("Evaluaciones NCCER", "$150 · 36 oficios"), ("Ubicación", "Portland, TX")],
+    "courses_eyebrow": "Los Cursos",
+    "courses_h2": "Capacitación<br>Presencial",
+    "advanced": {
+        "name": "Advanced Rigger",
+        "cred": "NCCER Certified Advanced Rigger",
+        "price": "$1,000",
+        "was": "$1,700",
+        "deposit": "Depósito de $200 para apartar su lugar; el saldo de $800 se paga antes de que empiece la clase.",
+        "summary": "Cuatro días de clase y práctica con equipo real de rigging en Portland, y al final el examen escrito y práctico en nuestro centro de evaluación acreditado. Sin experiencia previa necesaria. La credencial NCCER Advanced Rigger tiene una vigencia de cinco años.",
+        "learn": [
+            "Principios de rigging avanzado y planeación de izajes",
+            "Cálculo del peso de la carga y centro de gravedad",
+            "Selección de eslingas, configuraciones de enganche e inspecciones",
+            "Herrajes de rigging: grilletes, ganchos, barras separadoras y dispositivos bajo el gancho",
+            "Control de la carga, líneas guía y señales manuales para grúa",
+            "Examen escrito y práctico el último día",
+        ],
+        "formats": [
+            ("Clase de día", "Lunes a jueves", "8:00 AM – 2:00 PM", "Cuatro días. Empieza cada lunes."),
+            ("Clase de noche", "Lunes a jueves", "6:00 PM – 11:00 PM", "Cuatro noches. Para quien trabaja de día."),
+            ("Fin de semana (3 días)", "Viernes a domingo", "8:00 AM – 5:00 PM", "Todo el curso en un fin de semana. Empieza cada viernes."),
+        ],
+    },
+    "signal": {
+        "name": "Signal Person",
+        "cred": "NCCER Certified Signal Person",
+        "price": "$1,000",
+        "deposit": "Depósito de $200 para apartar su lugar; el saldo de $800 se paga antes de que empiece la clase.",
+        "summary": "Dos viernes de clase y práctica para ser los ojos y la voz del izaje: señales manuales estándar, comunicación por voz y radio, y cuándo detener la maniobra. Termina con examen escrito y práctico. No es necesario ser rigger primero.",
+        "formats": [("Dos viernes", "Viernes", "8:00 AM – 3:00 PM", "Dos días de capacitación. Empieza cada viernes.")],
+    },
+    "assess_eyebrow": "Evaluaciones NCCER",
+    "assess_h2": "¿Ya Domina<br>Su Oficio?",
+    "assess_lede": "Si ya tiene la experiencia, no necesita tomar la clase. Aplicamos evaluaciones NCCER (examen escrito y, según el oficio, verificación práctica) en nuestro centro acreditado, de lunes a viernes con cita. $150 por evaluación, precio fijo en los 36 oficios. Al aprobar, la credencial queda registrada en el NCCER Registry. Las páginas de cada oficio están en inglés.",
+    "groups": [
+        ("rigging", "Rigging e izajes"),
+        ("heo", "Operación de|equipo pesado"),
+        ("mech", "Tubería, mecánica|y millwright"),
+        ("ei", "Eléctrico e|instrumentación"),
+        ("boiler", "Boilermaker y|equipo a presión"),
+        ("struct", "Estructuras, carpintería|y concreto"),
+        ("finish", "Acabados, aislamiento|y recubrimientos"),
+        ("support", "Limpieza industrial|y oficios de apoyo"),
+    ],
+    "fin_eyebrow": "Formas De Pago",
+    "fin_h2": "Que El Costo<br>No Lo Detenga.",
+    "financing": [
+        ("Depósito y saldo", "$200 aparta su lugar hoy con tarjeta. Los $800 restantes se pagan antes de que empiece la clase: en línea, en la oficina o en pagos programados.", "La mayoría de los estudiantes"),
+        ("Klarna o Afterpay", "Divida el costo en pagos programados. Ambos pagan los $1,000 completos al momento de la compra y después lo dividen en cuotas, así que en la pantalla de pago elija Klarna o Afterpay en lugar del depósito de $200.", "Decisión inmediata"),
+        ("Financiamiento interno", "¿No califica para Klarna o Afterpay? Empiece con tan solo $200 de enganche y haga pagos hasta la fecha de su clase. Sin revisión de crédito. El curso comienza cuando el saldo está pagado por completo.", "Sin revisión de crédito"),
+        ("Zelle", "¿Prefiere Zelle? En la pantalla de reservación elija la opción de financiamiento interno y anótelo, o escríbanos por Facebook o por correo y lo registramos manualmente.", "primelift26@gmail.com"),
+        ("Paga su empleador", "¿Su empresa cubre el curso? Elija \"My employer is paying\" en el formulario de reservación y la oficina se coordina con ellos. Grupos de hasta 8 por clase.", "Grupos"),
+    ],
+    "fin_note": "El curso no puede comenzar hasta que el saldo esté pagado por completo. El depósito de $200 no es reembolsable; se permite un cambio de fecha con al menos 48 horas de anticipación.",
+    "team_eyebrow": "Sus Instructores",
+    "team_h2": "Profesionales<br>Del Campo",
+    "roles": {"andres-herrera": "Cofundador · Examinador Práctico NCCER", "juan-meza": "Director", "frank-torres": "Instructor de Rigging Avanzado"},
+    "visit_eyebrow": "Ubicación Y Horario",
+    "visit_h2": "Portland,<br>Texas",
+    "visit_lede": "Sobre la vía de servicio de la US-181, a minutos de Corpus Christi, Ingleside y Gregory.",
+    "hours": "Lunes a viernes · 7:00 AM – 5:00 PM",
+    "hours_note": "El horario puede variar en semanas de clase",
+    "labels": {"center": "Centro de Capacitación y Evaluación", "hours": "Horario de oficina", "phone": "Teléfono", "email": "Correo", "directions": "Cómo llegar", "book": "Reservar en línea", "all_dates": "Ver todas las fechas", "learn": "Lo que aprenderá", "formats": "Horarios", "cred": "Credencial"},
+    "band_eyebrow": "Su Futuro Empieza Aquí",
+    "band_h2": "Aparte Su Lugar<br class=\"mbr\"> Con $200.",
+    "band_p": "Los grupos son pequeños y las clases se llenan. Reserve su fecha, empiece a estudiar desde antes y llegue listo para aprobar.",
+}
+
+# ------------------------------------------------------------------- guides
+# Optional facts referenced by the guides. Rendered only when set.
+RETEST_POLICY = None              # e.g. "One retest of a failed section is included." (client has not stated one)
+CREDENTIAL_POSTING_TIME = None    # e.g. "Results are usually on the Registry within two weeks." (client has not stated one)
+
+GUIDES = [
+    {
+        "slug": "nccer-vs-nccco-rigger",
+        "title": "NCCER Rigger vs. NCCCO Rigger: Which Certification Do You Need?",
+        "meta_title": "NCCER Rigger vs. NCCCO Rigger: Which Do You Need?",
+        "meta_desc": "NCCER and NCCCO rigger credentials are not the same thing. What each one is, what OSHA actually requires, and how to find out which one your employer wants.",
+        "h1": "NCCER Rigger vs.<br class=\"mbr\"> NCCCO Rigger:<br> Which Certification<br class=\"mbr\"> Do You Need?",
+        "kicker": "Credentials Explained",
+        "lede": "Two rigger credentials show up on Coastal Bend job postings, and they are not interchangeable. Here is what each one is, what OSHA actually requires, and how to pick.",
+        "read": "5 min read",
+        "body": """
+<p>If you have looked at rigger jobs around Corpus Christi, Ingleside or Portland, you have seen both names: NCCER and NCCCO. They sound alike, they both put the word "rigger" on a card, and plenty of people use them as if they were the same thing. They are not. Which one you need depends almost entirely on who is hiring you and whose site you will be working on.</p>
+<h2>What an NCCER rigger<br class="mbr"> credential is</h2>
+<p>NCCER is the National Center for Construction Education and Research. It is a craft credentialing organization: it publishes the curriculum most industrial contractors train from, and it runs assessments in dozens of crafts, rigging included. An NCCER rigger credential is earned by passing a written assessment and a hands-on performance verification in front of an NCCER practical examiner. The result is recorded on the NCCER Registry, the national database contractors and site owners use to look up a worker's craft credentials by card number.</p>
+<p>NCCER credentials are used heavily by industrial contractors and by Associated Builders and Contractors (ABC) member companies. In refinery, petrochemical and shipyard work along the Gulf Coast, "NCCER rigger" is often the credential a contractor's safety department expects to see before a hand gets a gate pass. Prime Lift teaches the NCCER Advanced Rigger and Signal Person courses and proctors the assessments in the same building. See the <a href="/advanced-rigger/">Advanced Rigger course</a> for the schedule and price.</p>
+<h2>What an NCCCO rigger<br class="mbr"> certification is</h2>
+<p>NCCCO is the National Commission for the Certification of Crane Operators. It is best known for crane operator certification, and it also offers CCO Rigger Level I, Rigger Level II and Signalperson certifications. CCO certifications are accredited under ANSI standards, which is one reason some owners and general contractors write "CCO certified" into their site requirements. Like NCCER, the CCO rigger exams have a written and a practical component.</p>
+<p>You will run into CCO requirements most often where the employer or the site owner specifies it by name: certain construction general contractors, some crane and rigging companies, and owners whose lift plans call for CCO-certified personnel. Prime Lift does not offer CCO testing. If a job posting says CCO, you will need to find a CCO test site.</p>
+<h2>What OSHA actually requires</h2>
+<p>This is where most of the confusion starts. OSHA's cranes and derricks standard for construction, 29 CFR 1926 Subpart CC (1926.1400 and following), requires a <em>qualified rigger</em> for rigging work during assembly and disassembly and whenever workers are in the fall zone hooking, unhooking or guiding a load. It also requires a qualified signal person. OSHA defines "qualified" in terms of knowledge, training and demonstrated ability. It does not name NCCER, NCCCO or any other organization, and it does not require a card from either one.</p>
+<p>In practice, a credential is how your employer proves you are qualified. Which credential satisfies them is their call, and it is usually driven by their customers' site requirements.</p>
+<h2>How to decide</h2>
+<ul>
+<li><strong>Ask the employer.</strong> Before you spend a dime, ask the safety manager or the recruiter exactly which credential the job requires. Get the name, not just "rigger certified."</li>
+<li><strong>Check the site owner.</strong> If you will be working turnarounds at a specific plant, ask what that owner requires of contractor riggers. Many Coastal Bend industrial sites verify NCCER credentials on the Registry.</li>
+<li><strong>Look at the crew around you.</strong> If everyone on the crew carries NCCER cards, that tells you what the company's safety program is built on.</li>
+<li><strong>Check the expiration.</strong> NCCER rigger credentials are valid for five years. If yours is coming due, <a href="/rigger-recertification/">recertify</a> before it lapses.</li>
+</ul>
+<h2>Where Prime Lift fits</h2>
+<p>Prime Lift Rigging Academy is an NCCER Accredited Training and Assessment Center in Portland, TX. We teach the Advanced Rigger course in day, night and 3-day weekend formats, teach a standalone <a href="/signal-person/">Signal Person</a> course, and proctor NCCER assessments in 36 crafts for $150 each. If NCCER is what your employer asks for, you can train and test out here without going anywhere else. If they ask for CCO, we will tell you so up front rather than sell you the wrong card.</p>
+""",
+    },
+    {
+        "slug": "is-the-nccer-advanced-rigger-test-hard",
+        "title": "Is the NCCER Advanced Rigger Test Hard? What to Expect",
+        "meta_title": "Is the NCCER Advanced Rigger Test Hard? What to Expect",
+        "meta_desc": "What the NCCER Advanced Rigger written and practical tests cover, how the 4-day class is built around them, how to prepare, and what if you miss a section.",
+        "h1": "Is The NCCER Advanced<br class=\"mbr\"> Rigger Test Hard?<br> What To Expect",
+        "kicker": "Before You Enroll",
+        "lede": "The honest answer: it is a real test, and the class is built to get you through it. Here is what the written and hands-on portions cover and how to walk in ready.",
+        "read": "5 min read",
+        "body": """
+<p>Most people asking this question are about to spend $1,000 and four days of their life, so it deserves a straight answer. The NCCER Advanced Rigger assessment is not a formality. It has a written portion and a hands-on practical, and you have to pass both. It is also not designed to trick you. The Advanced Rigger class exists to teach exactly what the test measures, and the test is given in the same building by the people who taught you.</p>
+<h2>What the written test covers</h2>
+<p>The written assessment is a proctored, multiple-choice test on the knowledge side of rigging. Expect questions drawn from the same topics the class covers:</p>
+<ul>
+<li>Advanced rigging principles and lift planning</li>
+<li>Load weight calculations and center of gravity</li>
+<li>Sling selection, hitch configurations and sling inspection</li>
+<li>Rigging hardware: shackles, hooks, spreader bars and below-the-hook devices</li>
+<li>Load control, tag lines and crane hand signals</li>
+</ul>
+<p>The part that worries students most is the math: figuring load weight from dimensions and material, working out sling tension at different angles, and locating a center of gravity on an uneven load. None of it is beyond basic arithmetic, but you have to know the formulas and use them under time. That is why the class spends real time on it instead of skimming.</p>
+<h2>What the practical test covers</h2>
+<p>The performance verification is hands-on, in front of an NCCER practical examiner. You are asked to do the work: inspect slings and hardware and reject what should be rejected, select and rig a hitch for a given load, control the load, and give the correct hand signals. If you have rigged on a crew, most of this is familiar. If you are new, the class is where you get the reps. You will be handling real rigging hardware from the first day, not looking at pictures of it.</p>
+<h2>How the 4-day class is built</h2>
+<p>The <a href="/advanced-rigger/">Advanced Rigger course</a> runs Monday through Thursday in two formats: the day class from 8:00 AM to 2:00 PM, and the <a href="/night-classes/">night class</a> from 6:00 PM to 11:00 PM for crews working days. The first three days move through lift planning, load math, slings, hardware, load control and signals, with classroom time and hands-on time each day. The written and practical test-out is on the last day. The <a href="/weekend-express/">3-Day Weekend Express</a> covers the same material Friday through Sunday, 8:00 AM to 5:00 PM, with the test on Sunday. Classes are capped at 8, so if you do not understand something, you ask, and the instructor goes over it again.</p>
+<h2>How to prepare</h2>
+<ul>
+<li><strong>Book early and study the material.</strong> When you reserve a seat, the office sends study material so you can start before day one. The students who read it ahead of time have the easiest week.</li>
+<li><strong>Brush up on the math.</strong> Volume, area, multiplication and a little trigonometry for sling angles. If you have not done arithmetic on paper in a while, practice before class.</li>
+<li><strong>Bring what you need.</strong> A government-issued photo ID (NCCER will not let you test without it), something to write with, and work boots for the hands-on portion.</li>
+<li><strong>Ask questions in class.</strong> The reviews say it over and over: the instructors do not move on until you get it. Take them up on that.</li>
+<li><strong>Get sleep before test day.</strong> The last day is the long one.</li>
+</ul>
+<h2>What if you miss a section?</h2>
+<p>The written and practical portions are scored separately. If you pass one and miss the other, you do not start the whole course over. Ask us about retest options; the office will tell you what applies to your situation, and your instructor can point you to the areas to study before you sit again.</p>
+<h2>The bottom line</h2>
+<p>Is the Advanced Rigger test hard? It is a real credential with a real test, and it should be, because a rigging mistake can hurt someone. But it is a test of things you will be taught, by people who want you to pass, in the same room where you learned them. Show up, do the reading, ask your questions, and you will be in good shape. Pick a <a href="/class-dates/">start date</a> when you are ready.</p>
+""",
+    },
+    {
+        "slug": "how-to-verify-nccer-credentials",
+        "title": "How to Verify NCCER Credentials (For Workers and Employers)",
+        "meta_title": "How to Verify NCCER Credentials: Registry, Card & Lookup",
+        "meta_desc": "How the NCCER Registry works, what the card shows, how an employer looks up a credential on nccer.org, and training vs. assessment credentials explained.",
+        "h1": "How To Verify<br class=\"mbr\"> NCCER Credentials<br> (For Workers<br class=\"mbr\"> And Employers)",
+        "kicker": "Credentials Explained",
+        "lede": "Your NCCER credential is only worth something if an employer can verify it. Here is where it lives, what the card shows, and how the lookup works.",
+        "read": "4 min read",
+        "body": """
+<p>When you pass an NCCER assessment or complete NCCER training, the result does not just sit in a filing cabinet in Portland. It goes into a national database that any contractor or site owner in the country can check. Understanding how that works helps you as a worker, and it helps a safety manager who has a stack of cards on the desk and needs to know which ones are real.</p>
+<h2>The NCCER Registry</h2>
+<p>The NCCER Registry System is NCCER's national database of craft training and assessment records. Every person who tests or trains through an NCCER accredited organization gets an NCCER card number, and their results are recorded against that number. An accredited assessment center like Prime Lift submits results to NCCER after testing, and NCCER posts them to the Registry. The Registry is the source of truth: a card is a convenience, but the Registry record is what an employer relies on.</p>
+<h2>Your NCCER card</h2>
+<p>NCCER issues a wallet card tied to your card number, and transcripts and certificates can be pulled from your Registry record. Keep the card number somewhere safe, on your phone as well as in your wallet. You will need it to register for future assessments, to <a href="/rigger-recertification/">recertify</a>, and to give to an employer who wants to verify you. If you lose the card, the record is still there; the number is what matters.</p>
+<h2>How an employer<br class="mbr"> verifies a credential</h2>
+<p>NCCER offers a credential verification lookup through nccer.org. An employer enters the worker's NCCER card number (with the worker's permission, or as part of the hiring paperwork) and sees what credentials are on record and when they were earned. Safety departments at Coastal Bend industrial sites use this to check contractor riggers, signal persons and craft hands before a turnaround. If you are an employer verifying a crew, use the lookup rather than trusting a photocopy of a card. If you need a whole crew credentialed before a job, see our <a href="/employers/">crew training page</a>.</p>
+<h2>Training credentials vs.<br class="mbr"> assessment credentials</h2>
+<p>This is the distinction that trips people up. NCCER records two different kinds of things:</p>
+<ul>
+<li><strong>Training completions</strong> come from completing NCCER curriculum modules through an accredited training sponsor. They show that you were taught the material and passed the module tests.</li>
+<li><strong>Assessment credentials</strong> come from passing NCCER's standardized craft assessments: a written knowledge assessment and, where the craft calls for it, a hands-on performance verification, proctored by an accredited assessment center. These are the credentials most industrial contractors mean when they say "NCCER certified."</li>
+</ul>
+<p>Prime Lift is accredited for both training and assessment, so a student who takes the <a href="/advanced-rigger/">Advanced Rigger course</a> and passes the test-out gets the assessment credential, not just a training record. An experienced hand who skips the class and takes a <a href="/nccer-assessments/">$150 assessment</a> in one of 36 crafts gets the same kind of assessment credential. When an employer says they need to see the credential, the assessment record is what they are looking for.</p>
+<h2>How long until it shows up?</h2>
+<p>Results are submitted to NCCER after testing and posted to the Registry by NCCER, not by us, so the timing is not something we control. Ask the office how long posting takes for your credential, and keep your card number handy so you can check the record yourself once it is up.</p>
+<h2>How long it stays valid</h2>
+<p>NCCER rigger credentials are valid for five years from the date they are issued. An expired credential on the Registry reads the same as no credential to a safety department, so note the date and <a href="/rigger-recertification/">recertify</a> before it lapses. Crews whose cards expire together can book recertification as a group.</p>
+<h2>Quick checklist</h2>
+<ul>
+<li>Save your NCCER card number in more than one place.</li>
+<li>Know whether your record shows a training completion, an assessment credential, or both.</li>
+<li>Employers: verify on nccer.org, not from a photocopy.</li>
+<li>Watch the five-year date on rigger credentials.</li>
+</ul>
+""",
+    },
+]
+
+# --------------------------------------------------------------- home: why
+# "Why Train Here" cards on the home page (index.html is patched by hand from
+# this list; keep the six titles short so they hold one line at 390px).
+WHY = [
+    ("In-Person, Hands-On", "Small classes in Portland with real rigging hardware, not a video course."),
+    ("Test On Site", "Written and practical test-out in our own NCCER accredited assessment center."),
+    ("$150 Assessments, 36 Crafts", "One flat price to test out of any craft we assess, by appointment."),
+    ("Day, Night Or Weekend", "Four weekdays, four nights, or one Friday-to-Sunday weekend."),
+    ("Transparent Pricing", "Course and assessment prices are published right here. No quotes, no surprises."),
+    ("Payment Plans, No Credit Check", "In-house financing from $200 down, plus Klarna, Afterpay and Zelle."),
+]

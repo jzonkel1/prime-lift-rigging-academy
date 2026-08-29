@@ -45,4 +45,39 @@
     });
   });
   window.addEventListener("resize",()=>{ $$(".faq-item.open .faq-a").forEach(a=>{ a.style.maxHeight="none"; const h=a.scrollHeight; a.style.maxHeight=h+"px"; }); });
+
+  /* course pages: the "next start dates" strip is rendered at build time from
+     SCHEDULE_RULES in build.py; recompute from today's date so it never goes
+     stale between builds. Same rule: next N occurrences of the weekday, from
+     tomorrow (booking closes the day before). */
+  const MONS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], DOWS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  $$(".nd-row").forEach(row=>{
+    const wd=+row.dataset.wd; if(isNaN(wd)) return;
+    const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+(+row.dataset.lead||1));
+    while(d.getDay()!==wd) d.setDate(d.getDate()+1);
+    $$(".nd-date",row).forEach((a,i)=>{
+      const x=new Date(d); x.setDate(d.getDate()+7*i);
+      a.href="/?book="+row.dataset.book+"&fmt="+row.dataset.fmt+"&date="+iso(x)+"#schedule";
+      a.textContent=DOWS[x.getDay()]+", "+MONS[x.getMonth()]+" "+x.getDate();
+    });
+  });
+})();
+
+/* GHL live chat widget (Conversation AI). Loaded lazily so it never competes with
+   first paint: first scroll / touch / pointer, or 6s idle, whichever comes first. */
+(function(){
+  if (window.__plChat) return; window.__plChat = 1;
+  var done = false;
+  function load(){
+    if (done) return; done = true;
+    var s = document.createElement("script");
+    s.src = "https://widgets.leadconnectorhq.com/loader.js";
+    s.setAttribute("data-resources-url", "https://widgets.leadconnectorhq.com/chat-widget/loader.js");
+    s.setAttribute("data-widget-id", "6a935fa49f17bc64b3251340");
+    document.body.appendChild(s);
+    ["scroll","pointerdown","touchstart","keydown"].forEach(function(e){ window.removeEventListener(e, load); });
+  }
+  ["scroll","pointerdown","touchstart","keydown"].forEach(function(e){ window.addEventListener(e, load, {passive:true, once:true}); });
+  setTimeout(load, 6000);
 })();

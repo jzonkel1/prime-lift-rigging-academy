@@ -60,10 +60,10 @@
             <a class="nm-all" href="/class-dates/">See All Class Dates <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
         </div></div>
       </div>
-      <a href="/class-dates/">Class Dates</a>
+      <a href="/class-dates/">Dates</a>
       <a href="/financing/">Financing</a>
       <div class="nav-item">
-        <a href="/instructors/" aria-haspopup="true">Instructors <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></a>
+        <a href="/instructors/" aria-haspopup="true">Team <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></a>
         <div class="nav-menu"><div class="nav-menu-in nm-narrow">
             <a class="nm-item" href="/instructors/andres-herrera/">
               <span class="nm-n idx">01</span>
@@ -83,6 +83,7 @@
             <a class="nm-all" href="/instructors/">Meet The Whole Team <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
         </div></div>
       </div>
+      <a href="/employers/">Employers</a>
       <a href="/contact/">Contact</a>
     </nav>
     <div class="nav-cta">
@@ -107,7 +108,9 @@
       <a href="/about/"><b>About</b></a>
       <a href="/reviews/"><b>Student Reviews</b></a>
       <a href="/faq/"><b>FAQ</b></a>
+      <a href="/employers/"><b>Employers</b><span>Crew training &amp; assessments</span></a>
       <a href="/contact/"><b>Contact</b></a>
+      <a href="/es/" lang="es" hreflang="es"><b>Español</b><span>Información en español</span></a>
       <div class="mnav-cta">
         <a class="btn btn-primary btn-block" href="/#schedule">Reserve Your Seat — $200</a>
         <a class="btn btn-ghost btn-block" href="tel:+13614130160"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg> Call (361) 413-0160</a>
@@ -133,7 +136,7 @@
   <p class="center-note rv" style="margin-top:30px">Seats are capped at 8 per class. Pick a date to reserve yours with a $200 deposit, or <a href="tel:+13614130160" style="color:var(--accent)">call (361) 413-0160</a> to book a crew.</p>
 </div></section>
 <script>
-/* Same recurrence rules as the booking form on the home page. Change the rule, never a list of dates. */
+/* Recurrence rules come from SCHEDULE_RULES in build.py (shared with the course pages). Change the rule there, never a list of dates. */
 (function(){
   const SEATS=8, LEAD=1, MON=1, FRI=5;
   const MONS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], DOW=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
@@ -141,13 +144,7 @@
   function first(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+LEAD); return d; }
   function every(wd,n){ const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); for(let i=0;i<n;i++){ o.push(new Date(d)); d.setDate(d.getDate()+7);} return o; }
   function weekdays(n){ const d=first(),o=[]; while(o.length<n){ if(d.getDay()>=MON&&d.getDay()<=FRI) o.push(new Date(d)); d.setDate(d.getDate()+1);} return o; }
-  const P=[
-    {id:"advanced",fmt:"day",name:"Advanced Rigger",label:"Weekday Day Class",time:"Mon – Thu · 8:00 AM – 2:00 PM",dates:every(MON,6)},
-    {id:"advanced",fmt:"night",name:"Advanced Rigger",label:"Weekday Night Class",time:"Mon – Thu · 6:00 PM – 11:00 PM",dates:every(MON,6)},
-    {id:"advanced",fmt:"weekend",name:"Advanced Rigger",label:"3-Day Weekend Express",time:"Fri – Sun · 8:00 AM – 5:00 PM",dates:every(FRI,6)},
-    {id:"signal",fmt:"friday",name:"Signal Person",label:"Two Fridays",time:"Fridays · 8:00 AM – 3:00 PM",dates:every(FRI,6)},
-    {id:"assessment",fmt:"assess",name:"NCCER Assessments",label:"Any Weekday",time:"Mon – Fri · 8:00 AM – 5:00 PM",dates:weekdays(10)}
-  ];
+  const P=[{"id":"advanced","fmt":"day","name":"Advanced Rigger","label":"Weekday Day Class","time":"Mon \u2013 Thu \u00b7 8:00 AM \u2013 2:00 PM","wd":1,"n":6},{"id":"advanced","fmt":"night","name":"Advanced Rigger","label":"Weekday Night Class","time":"Mon \u2013 Thu \u00b7 6:00 PM \u2013 11:00 PM","wd":1,"n":6},{"id":"advanced","fmt":"weekend","name":"Advanced Rigger","label":"3-Day Weekend Express","time":"Fri \u2013 Sun \u00b7 8:00 AM \u2013 5:00 PM","wd":5,"n":6},{"id":"signal","fmt":"friday","name":"Signal Person","label":"Two Fridays","time":"Fridays \u00b7 8:00 AM \u2013 3:00 PM","wd":5,"n":6},{"id":"assessment","fmt":"assess","name":"NCCER Assessments","label":"Any Weekday","time":"Mon \u2013 Fri \u00b7 8:00 AM \u2013 5:00 PM","wd":"weekday","n":10}].map(r=>Object.assign({},r,{dates:r.wd==="weekday"?weekdays(r.n):every(r.wd,r.n)}));
   document.getElementById("schedList").innerHTML=P.map((p,i)=>`
     <div class="sched-block rv">
       <div class="sched-head"><span class="idx">${String(i+1).padStart(2,"0")}</span><div><b>${p.name}</b><span>${p.label} · ${p.time}</span></div></div>
@@ -185,6 +182,7 @@
           <a href="https://www.google.com/maps/place/?cid=16553214961176374110" target="_blank" rel="noopener" aria-label="Google"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.35 11.1H12v2.9h5.35c-.25 1.4-1.6 4.1-5.35 4.1a6.1 6.1 0 1 1 0-12.2c1.9 0 3.15.8 3.85 1.5l2.6-2.5A10 10 0 0 0 12 2a10 10 0 1 0 0 20c5.75 0 9.6-4.05 9.6-9.75 0-.65-.1-1.15-.25-1.15z"/></svg></a>
           <a href="mailto:primelift26@gmail.com" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg></a>
         </div>
+        <a class="foot-lang" href="/es/" lang="es" hreflang="es">Español</a>
       </div>
       <div>
         <p class="foot-h">Certifications</p>
@@ -195,6 +193,7 @@
           <li><a href="/weekend-express/">3-Day Weekend Express</a></li>
           <li><a href="/night-classes/">Night Classes</a></li>
           <li><a href="/rigger-recertification/">Recertification</a></li>
+          <li><a href="/guides/">Guides</a></li>
         </ul>
       </div>
       <div>

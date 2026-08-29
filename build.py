@@ -18,7 +18,8 @@ real domain in one build.
 """
 import io, os, re, json, html, datetime
 from content import (BIZ, COURSES, ASSESSMENT, CRAFT_GROUPS, CRAFTS, PEOPLE,
-                     REVIEWS, FAQ, FINANCING)
+                     REVIEWS, FAQ, FINANCING, EMPLOYERS, EMPLOYERS_STATS, EMPLOYER_LOGOS,
+                     GROUP_RATE_NOTE, ES, GUIDES, RETEST_POLICY, CREDENTIAL_POSTING_TIME, WHY)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 BASE = "https://primeliftrigging-academy.com"
@@ -52,6 +53,36 @@ I = {
  "shield": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>',
 }
 FULL_ADDR = "%s, %s, %s %s" % (BIZ["street"], BIZ["city"], BIZ["state"], BIZ["zip"])
+
+# ------------------------------------------------------- schedule rules
+# ONE set of recurrence rules. The class-dates page's JS gets this table as
+# JSON and the course pages' "next start dates" strip is rendered from it in
+# Python (then refreshed client-side from the same rule), so they can't
+# disagree. Booking closes the day before a class starts (LEAD_DAYS).
+LEAD_DAYS = 1
+MON, FRI = 1, 5                      # JS getDay() numbering (Sun=0)
+SCHEDULE_RULES = [
+    {"id": "advanced", "fmt": "day", "name": "Advanced Rigger", "label": "Weekday Day Class", "time": "Mon – Thu · 8:00 AM – 2:00 PM", "wd": MON, "n": 6},
+    {"id": "advanced", "fmt": "night", "name": "Advanced Rigger", "label": "Weekday Night Class", "time": "Mon – Thu · 6:00 PM – 11:00 PM", "wd": MON, "n": 6},
+    {"id": "advanced", "fmt": "weekend", "name": "Advanced Rigger", "label": "3-Day Weekend Express", "time": "Fri – Sun · 8:00 AM – 5:00 PM", "wd": FRI, "n": 6},
+    {"id": "signal", "fmt": "friday", "name": "Signal Person", "label": "Two Fridays", "time": "Fridays · 8:00 AM – 3:00 PM", "wd": FRI, "n": 6},
+    {"id": "assessment", "fmt": "assess", "name": "NCCER Assessments", "label": "Any Weekday", "time": "Mon – Fri · 8:00 AM – 5:00 PM", "wd": "weekday", "n": 10},
+]
+def next_dates(wd, n):
+    """Next n start dates for a rule: wd = JS weekday number, or "weekday" for Mon-Fri."""
+    d = datetime.date.today() + datetime.timedelta(days=LEAD_DAYS)
+    out = []
+    if wd == "weekday":
+        while len(out) < n:
+            if d.weekday() <= 4: out.append(d)
+            d += datetime.timedelta(days=1)
+        return out
+    while (d.weekday() + 1) % 7 != wd: d += datetime.timedelta(days=1)
+    for _ in range(n):
+        out.append(d); d += datetime.timedelta(days=7)
+    return out
+def rules_json():
+    return json.dumps(SCHEDULE_RULES, separators=(",", ":"))
 
 # ------------------------------------------------------------------ nav
 def nav(home=False):
@@ -89,14 +120,15 @@ def nav(home=False):
             <a class="nm-all" href="/class-dates/">See All Class Dates %(arrow)s</a>
         </div></div>
       </div>
-      <a href="/class-dates/">Class Dates</a>
+      <a href="/class-dates/">Dates</a>
       <a href="/financing/">Financing</a>
       <div class="nav-item">
-        <a href="/instructors/" aria-haspopup="true">Instructors %(caret)s</a>
+        <a href="/instructors/" aria-haspopup="true">Team %(caret)s</a>
         <div class="nav-menu"><div class="nav-menu-in nm-narrow">%(people)s
             <a class="nm-all" href="/instructors/">Meet The Whole Team %(arrow)s</a>
         </div></div>
       </div>
+      <a href="/employers/">Employers</a>
       <a href="/contact/">Contact</a>
     </nav>
     <div class="nav-cta">
@@ -121,7 +153,9 @@ def nav(home=False):
       <a href="/about/"><b>About</b></a>
       <a href="/reviews/"><b>Student Reviews</b></a>
       <a href="/faq/"><b>FAQ</b></a>
+      <a href="/employers/"><b>Employers</b><span>Crew training &amp; assessments</span></a>
       <a href="/contact/"><b>Contact</b></a>
+      <a href="/es/" lang="es" hreflang="es"><b>Español</b><span>Información en español</span></a>
       <div class="mnav-cta">
         <a class="btn btn-primary btn-block" href="%(h)s#schedule">Reserve Your Seat — $200</a>
         <a class="btn btn-ghost btn-block" href="tel:%(tel)s">%(phone_i)s Call %(phone)s</a>
@@ -149,6 +183,7 @@ def footer(home=False):
           <a href="%(gm)s" target="_blank" rel="noopener" aria-label="Google">%(g_i)s</a>
           <a href="mailto:%(email)s" aria-label="Email">%(mail_i)s</a>
         </div>
+        <a class="foot-lang" href="/es/" lang="es" hreflang="es">Español</a>
       </div>
       <div>
         <p class="foot-h">Certifications</p>
@@ -159,6 +194,7 @@ def footer(home=False):
           <li><a href="/weekend-express/">3-Day Weekend Express</a></li>
           <li><a href="/night-classes/">Night Classes</a></li>
           <li><a href="/rigger-recertification/">Recertification</a></li>
+          <li><a href="/guides/">Guides</a></li>
         </ul>
       </div>
       <div>
@@ -255,7 +291,13 @@ def ld(graph):
 # ---------------------------------------------------------------- shell
 FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">'
 
-def page(url, title, desc, body, crumbs=(), schema=(), og_image="/img/og.jpg", hero_img=None):
+def hreflang_links(url):
+    """en/es alternates, only for the two pages that have a translation."""
+    if url not in ("/", "/es/"): return ""
+    return ('<link rel="alternate" hreflang="en" href="%s/">\n<link rel="alternate" hreflang="es" href="%s/es/">\n'
+            '<link rel="alternate" hreflang="x-default" href="%s/">\n') % (ORIGIN, ORIGIN, ORIGIN)
+
+def page(url, title, desc, body, crumbs=(), schema=(), og_image="/img/og.jpg", hero_img=None, lang="en"):
     full = ORIGIN + url
     graph = [org_schema()]
     if crumbs: graph.append(crumbs_schema([("Home", "/")] + list(crumbs)))
@@ -264,14 +306,14 @@ def page(url, title, desc, body, crumbs=(), schema=(), og_image="/img/og.jpg", h
                   "description": desc, "isPartOf": {"@id": BASE + "/#website"}, "about": {"@id": BASE + "/#org"}})
     pre = '<link rel="preload" as="image" href="%s" fetchpriority="high">' % hero_img if hero_img else ""
     return """<!DOCTYPE html>
-<html lang="en">
+<html lang="%(lang)s">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>%(title)s%(suffix)s</title>
 <meta name="description" content="%(desc)s">
 <link rel="canonical" href="%(full)s">
-%(robots)s
+%(alt)s%(robots)s
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Prime Lift Rigging Academy">
 <meta property="og:title" content="%(title)s">
@@ -302,18 +344,18 @@ def page(url, title, desc, body, crumbs=(), schema=(), og_image="/img/og.jpg", h
 <script src="/js/site.js" defer></script>
 </body>
 </html>
-""" % dict(title=esc(title), desc=esc(desc), full=full,
+""" % dict(title=esc(title), desc=esc(desc), full=full, lang=lang, alt=hreflang_links(url),
            suffix="" if len(title) > 40 else " | Prime Lift Rigging Academy",
            robots='<meta name="robots" content="noindex, nofollow">' if NOINDEX else '<meta name="robots" content="index, follow, max-image-preview:large">',
            ogimg=ORIGIN + og_image, fonts=FONTS, pre=pre, ld=ld(graph), nav=nav(), body=body,
            footer=footer(), callbar=callbar())
 
 # ------------------------------------------------------------ components
-def crumbs_html(crumbs):
-    items = ['<a href="/">Home</a>'] + ['<a href="%s">%s</a>' % (u, esc(n)) for n, u in crumbs[:-1]] + ["<span>%s</span>" % esc(crumbs[-1][0])]
+def crumbs_html(crumbs, home="Home"):
+    items = ['<a href="/">%s</a>' % esc(home)] + ['<a href="%s">%s</a>' % (u, esc(n)) for n, u in crumbs[:-1]] + ["<span>%s</span>" % esc(crumbs[-1][0])]
     return '<nav class="crumbs" aria-label="Breadcrumb">%s</nav>' % " <i>/</i> ".join(items)
 
-def phero(img, alt, kicker, h1, lede, crumbs, ctas=None, cls=""):
+def phero(img, alt, kicker, h1, lede, crumbs, ctas=None, cls="", home="Home"):
     ctas = ctas if ctas is not None else [
         ('<a class="btn btn-primary" href="/#schedule">Reserve Your Seat — $200 %s</a>' % I["arrow"]),
         ('<a class="btn btn-ghost" href="tel:%s">%s Call %s</a>' % (BIZ["phone_raw"], I["phone"], BIZ["phone"]))]
@@ -326,7 +368,7 @@ def phero(img, alt, kicker, h1, lede, crumbs, ctas=None, cls=""):
     <p class="lede">%s</p>
     <div class="hero-cta">%s</div>
   </div>
-</section>""" % (cls, img, esc(alt), crumbs_html(crumbs), esc(kicker), h1, esc(lede), "".join(ctas))
+</section>""" % (cls, img, esc(alt), crumbs_html(crumbs, home), esc(kicker), h1, esc(lede), "".join(ctas))
 
 def specbar(cells):
     return '<div class="specbar"><div class="wrap specbar-in">%s</div></div>' % "".join(
@@ -347,18 +389,18 @@ def faq_html(faq, start=1):
     <div class="faq-a" id="fa%d"><p>%s</p></div>
   </div>""" % (i, i, esc(q), i, esc(a)) for i, (q, a) in enumerate(faq, start))
 
-def band(h2="Building Skills.<br class=\"mbr\"> Bettering Futures.", p="Spots are limited and classes fill. Lock your seat in now, start studying early, and come ready to pass.", primary=None):
+def band(h2="Building Skills.<br class=\"mbr\"> Bettering Futures.", p="Spots are limited and classes fill. Lock your seat in now, start studying early, and come ready to pass.", primary=None, eyebrow="Your Future Starts Here", call="Call"):
     primary = primary or '<a class="btn btn-primary" href="/#schedule">Reserve Your Seat — $200</a>'
     return """<section class="band">
   <div class="band-bg" aria-hidden="true"><img src="/img/bg-crane-golden.jpg" alt="" loading="lazy"></div>
   <div class="wrap band-in rv">
     <div class="chev-div"><img class="chev" src="/img/chevron.png" alt=""></div>
-    <p class="eyebrow is-center">Your Future Starts Here</p>
+    <p class="eyebrow is-center">%s</p>
     <h2>%s</h2>
     <p>%s</p>
-    <div class="band-cta">%s<a class="btn btn-ghost" href="tel:%s">Call %s</a></div>
+    <div class="band-cta">%s<a class="btn btn-ghost" href="tel:%s">%s %s</a></div>
   </div>
-</section>""" % (h2, esc(p), primary, BIZ["phone_raw"], BIZ["phone"])
+</section>""" % (esc(eyebrow), h2, esc(p), primary, BIZ["phone_raw"], esc(call), BIZ["phone"])
 
 def review_card(r):
     src = ('%s<span><b>%s</b><span>5-star review on Google</span></span>' % (I["google"], esc(r["who"]))) if r["src"] == "google" \
@@ -435,6 +477,7 @@ def build_course(c):
     body += specbar([("Course price", price_line), ("Holds your seat", money(c["deposit"])),
                      ("Length", "4 days" if c["id"] == "advanced" else "2 Fridays"),
                      ("Credential", esc(c["cred"].replace("NCCER Certified ", "NCCER ")))])
+    body += next_dates_strip(c["id"])
     body += """<section class="section"><div class="wrap split">
   <div class="prose rv">
     %s
@@ -582,13 +625,13 @@ def build_dates():
                  "Class Dates<em>&amp; Schedules</em>",
                  "Advanced Rigger starts every Monday (days or nights) and every Friday (weekend express). Signal Person starts every Friday. Assessments run any weekday. Booking closes the day before a class starts.", crumbs)
     body += specbar([("Advanced Rigger", "Mon – Thu · 8 AM – 2 PM"), ("Night class", "Mon – Thu · 6 – 11 PM"), ("Weekend express", "Fri – Sun · 8 AM – 5 PM"), ("Signal Person", "Fridays · 8 AM – 3 PM")])
-    body += """<section class="section"><div class="wrap">
+    body += ("""<section class="section"><div class="wrap">
   %s
   <div class="sched-list" id="schedList"></div>
   <p class="center-note rv" style="margin-top:30px">Seats are capped at 8 per class. Pick a date to reserve yours with a $200 deposit, or <a href="tel:%s" style="color:var(--accent)">call %s</a> to book a crew.</p>
 </div></section>
 <script>
-/* Same recurrence rules as the booking form on the home page. Change the rule, never a list of dates. */
+/* Recurrence rules come from SCHEDULE_RULES in build.py (shared with the course pages). Change the rule there, never a list of dates. */
 (function(){
   const SEATS=8, LEAD=1, MON=1, FRI=5;
   const MONS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], DOW=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
@@ -596,13 +639,7 @@ def build_dates():
   function first(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+LEAD); return d; }
   function every(wd,n){ const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); for(let i=0;i<n;i++){ o.push(new Date(d)); d.setDate(d.getDate()+7);} return o; }
   function weekdays(n){ const d=first(),o=[]; while(o.length<n){ if(d.getDay()>=MON&&d.getDay()<=FRI) o.push(new Date(d)); d.setDate(d.getDate()+1);} return o; }
-  const P=[
-    {id:"advanced",fmt:"day",name:"Advanced Rigger",label:"Weekday Day Class",time:"Mon – Thu · 8:00 AM – 2:00 PM",dates:every(MON,6)},
-    {id:"advanced",fmt:"night",name:"Advanced Rigger",label:"Weekday Night Class",time:"Mon – Thu · 6:00 PM – 11:00 PM",dates:every(MON,6)},
-    {id:"advanced",fmt:"weekend",name:"Advanced Rigger",label:"3-Day Weekend Express",time:"Fri – Sun · 8:00 AM – 5:00 PM",dates:every(FRI,6)},
-    {id:"signal",fmt:"friday",name:"Signal Person",label:"Two Fridays",time:"Fridays · 8:00 AM – 3:00 PM",dates:every(FRI,6)},
-    {id:"assessment",fmt:"assess",name:"NCCER Assessments",label:"Any Weekday",time:"Mon – Fri · 8:00 AM – 5:00 PM",dates:weekdays(10)}
-  ];
+  const P=__RULES__.map(r=>Object.assign({},r,{dates:r.wd==="weekday"?weekdays(r.n):every(r.wd,r.n)}));
   document.getElementById("schedList").innerHTML=P.map((p,i)=>`
     <div class="sched-block rv">
       <div class="sched-head"><span class="idx">${String(i+1).padStart(2,"0")}</span><div><b>${p.name}</b><span>${p.label} · ${p.time}</span></div></div>
@@ -615,7 +652,7 @@ def build_dates():
     </div>`).join("");
   document.querySelectorAll("#schedList .rv").forEach(el=>el.classList.add("in"));
 })();
-</script>""" % (sec_head("01", "Pick A Date", "Next Classes<br>In Portland, TX", "Dates roll forward every week. Tap one to hold it.", center=True), BIZ["phone_raw"], BIZ["phone"])
+</script>""" % (sec_head("01", "Pick A Date", "Next Classes<br>In Portland, TX", "Dates roll forward every week. Tap one to hold it.", center=True), BIZ["phone_raw"], BIZ["phone"])).replace("__RULES__", rules_json())
     body += band(primary='<a class="btn btn-primary" href="/#schedule">Reserve Your Seat — $200</a>')
     emit(url, page(url, "Class Dates & Schedules · Rigging Classes in Portland, TX", "Upcoming Advanced Rigger and Signal Person class dates in Portland, TX: weekday day and night classes, 3-day weekend express, assessment dates. $200 holds a seat.", body, crumbs, hero_img="/img/bg-classroom.jpg"), "0.8")
 
@@ -640,7 +677,22 @@ def build_financing():
   <div class="fin-cards fin-cards-3">%s</div>
   <div class="fin-note rv" style="max-width:760px;margin:30px auto 0"><strong>Heads up:</strong> your course can't begin until the balance is paid in full, so get started early and give yourself room to pay it down before your start date.</div>
 </div></section>""" % (sec_head("01", "Five Ways To Pay", "Pick The One<br>That Fits.", center=True), cards)
-    body += """<section class="section alt"><div class="wrap">%s%s</div></section>""" % (sec_head("02", "Common Questions", "Financing FAQ", center=True), faq_html(faq))
+    body += """<section class="section alt" id="employer"><div class="wrap split">
+  <div class="prose rv">
+    %s
+    <p class="lede">If your company is covering the course, you don't need to front the money. Choose "My employer is paying" on the booking form and put your supervisor's or safety manager's contact in the notes; the office coordinates payment with them directly. Assessments work the same way.</p>
+    %s
+    <p style="margin-top:26px"><a class="btn btn-ghost" href="/employers/">Crew Training For Employers %s</a></p>
+  </div>
+  %s
+</div></section>""" % (sec_head("02", "Employer-Sponsored Training", "Your Employer<br>Can Pay."),
+                       checks(["Pick \"My employer is paying\" on the booking form and add their contact",
+                               "The office coordinates payment with your company",
+                               "Employers can book whole crews: up to 8 seats per class, day, night or weekend",
+                               "Crews test out on site and credentials post to the NCCER Registry"]),
+                       I["arrow"],
+                       cta_box("Sending A Crew?", ["Group classes, private dates and crew assessments, with one point of contact at the office.", "Use the crew quote form and the office will call you back."], href="/employers/#quote", label="Request a Crew Quote"))
+    body += """<section class="section"><div class="wrap">%s%s</div></section>""" % (sec_head("03", "Common Questions", "Financing FAQ", center=True), faq_html(faq))
     body += band(h2="Your Goals<br class=\"mbr\"> Are Worth It.", p="Reserve your seat with $200 and we'll walk you through the rest on the phone if you'd rather talk it through.")
     emit(url, page(url, "Financing & Payment Plans · No Credit Check", "Pay for NCCER rigger certification your way: $200 deposit, Klarna, Afterpay, Zelle, or in-house financing with no credit check. Portland, TX.", body, crumbs, [faq_schema(faq)], hero_img="/img/bg-crane-golden.jpg"), "0.8")
 
@@ -796,6 +848,251 @@ def build_faq():
     body += band()
     emit(url, page(url, "FAQ · NCCER Rigging Classes & Assessments in Portland, TX", "Course length, cost, the $200 deposit, Klarna and Afterpay, no-credit-check financing, NCCER credentials, testing out, crew bookings and where to find us.", body, crumbs, [faq_schema(FAQ)], hero_img="/img/bg-classroom.jpg"), "0.7")
 
+
+def next_dates_strip(cid):
+    """Next 3 start dates per format, from SCHEDULE_RULES. Refreshed client-side (site.js) from the same rule."""
+    rows = []
+    for r in SCHEDULE_RULES:
+        if r["id"] != cid: continue
+        links = "".join('<a class="nd-date" href="/?book=%s&amp;fmt=%s&amp;date=%s#schedule">%s</a>' % (
+            r["id"], r["fmt"], d.isoformat(), d.strftime("%a, %b ") + str(d.day)) for d in next_dates(r["wd"], 3))
+        rows.append('<div class="nd-row" data-wd="%s" data-lead="%d" data-book="%s" data-fmt="%s"><b>%s</b><div class="nd-dates">%s</div></div>' % (
+            r["wd"], LEAD_DAYS, r["id"], r["fmt"], esc(r["label"]), links))
+    return '<div class="nextdates"><div class="wrap nextdates-in"><p class="nd-h">Next start dates</p>%s<a class="more nd-all" href="/class-dates/">See all dates %s</a></div></div>' % ("".join(rows), I["arrow"])
+
+def build_employers():
+    url = "/employers/"
+    e = EMPLOYERS
+    crumbs = [("Employers", url)]
+    body = phero("img/hero-cranes.jpg", "Two mobile cranes rigging at a Coastal Bend refinery turnaround at sunset", e["kicker"], e["h1"], e["lede"], crumbs,
+                 ctas=['<a class="btn btn-primary" href="#quote">Request a Crew Quote %s</a>' % I["arrow"],
+                       '<a class="btn btn-ghost" href="tel:%s">%s Call %s</a>' % (BIZ["phone_raw"], I["phone"], BIZ["phone"])])
+    body += specbar(e["specs"])
+    # optional proof: rendered only when the client gives us numbers
+    stats = [(v, lbl) for k, lbl, v in [("crews_trained", "crews trained", EMPLOYERS_STATS["crews_trained"]),
+                                         ("credentials_issued", "credentials posted to the Registry", EMPLOYERS_STATS["credentials_issued"]),
+                                         ("employers_served", "Coastal Bend employers served", EMPLOYERS_STATS["employers_served"])] if v]
+    stat_html = ('<div class="stat-row rv">%s</div>' % "".join('<div class="stat"><b>%s</b><span>%s</span></div>' % (esc(str(v)), esc(l)) for v, l in stats)) if stats else ""
+    logos = ('<p class="center-note rv">Crews we have trained: %s</p>' % esc(", ".join(EMPLOYER_LOGOS))) if EMPLOYER_LOGOS else ""
+    cta_lines = ["Advanced Rigger $1,000 · Signal Person $1,000 · Assessments $150 per person.", "Classes capped at 8. Larger crews run across sessions."]
+    if GROUP_RATE_NOTE: cta_lines.append(GROUP_RATE_NOTE)
+    body += """<section class="section"><div class="wrap split">
+  <div class="prose rv">
+    %s
+    <p class="lede">A crew that trains here tests here. There is no second trip to a third-party site and no waiting on someone else's calendar: the written and practical test-out happens in our on-site NCCER accredited assessment center, and passing credentials go on the NCCER Registry where your safety department verifies them.</p>
+    <h3 class="h-sub">Why crews train here</h3>
+    %s
+    %s%s
+  </div>
+  %s
+</div></section>""" % (sec_head("01", "For Employers", "Train And Test<br>In One Building."), checks(e["why"]), stat_html, logos,
+                       cta_box("Train Your Crew Here", cta_lines, href="#quote", label="Request a Crew Quote"))
+    steps_html = '<div class="how-grid">%s</div>' % "".join('<div class="how-card rv"><span class="idx">%02d</span><h3>%s</h3><p>%s</p></div>' % (i+1, t, esc(d)) for i, (t, d) in enumerate(e["steps"]))
+    body += """<section class="section how"><div class="how-bg" aria-hidden="true"><img src="/img/bg-classroom.jpg" alt="" loading="lazy"></div><div class="wrap">
+  %s%s
+</div></section>""" % (sec_head("02", "How It Works", "Three Steps To<br>A Credentialed Crew"), steps_html)
+    opts = "".join("<option>%s</option>" % esc(h) for h in e["headcounts"])
+    chks = "".join('<label class="chk"><input type="checkbox" name="training" value="%s"><span>%s</span></label>' % (esc(t), esc(t)) for t in e["training_options"])
+    body += """<section class="section alt" id="quote"><div class="wrap split">
+  <div class="rv">
+    %s
+    <p class="lede">Tell us the headcount, the credential and when you need the crew back on the job. The office will call you back during business hours with dates and a total. Prefer the phone? Call <a href="tel:%s" style="color:var(--accent)">%s</a> and ask for group scheduling.</p>
+  </div>
+  <form class="cform rv" name="employer-quote" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thanks.html">
+    <input type="hidden" name="form-name" value="employer-quote">
+    <p class="sr"><label>Don't fill this out: <input name="bot-field"></label></p>
+    <label class="field"><span>Company</span><input type="text" name="company" autocomplete="organization" required></label>
+    <div class="two-up">
+      <label class="field"><span>Your name</span><input type="text" name="contact_name" autocomplete="name" required></label>
+      <label class="field"><span>Phone</span><input type="tel" name="phone" autocomplete="tel" required></label>
+    </div>
+    <label class="field"><span>Email</span><input type="email" name="email" autocomplete="email"></label>
+    <label class="field"><span>How many people?</span><select name="headcount">%s</select></label>
+    <fieldset class="field chkgroup"><legend><span>Training needed</span></legend><div class="chkgroup-in">%s</div></fieldset>
+    <label class="field"><span>Target date or window</span><input type="text" name="target_date" placeholder="e.g. week of Oct 5, before the fall turnaround"></label>
+    <label class="field"><span>Notes</span><textarea name="notes" rows="4" placeholder="Shift, site requirements, credentials expiring…"></textarea></label>
+    <input type="hidden" name="page" value="/employers/">
+    <button class="btn btn-primary btn-block" type="submit">Request a Crew Quote %s</button>
+    <p class="pay-legal">The office answers during business hours, Monday through Friday. Nothing is booked or charged until you confirm dates with the office.</p>
+  </form>
+</div></section>""" % (sec_head("03", "Crew Quote", "Get Dates<br>For Your Crew"), BIZ["phone_raw"], BIZ["phone"], opts, chks, I["arrow"])
+    body += """<section class="section"><div class="wrap">
+  %s%s
+  <p class="center-note rv"><a href="/faq/" class="more">All questions %s</a></p>
+</div></section>""" % (sec_head("04", "Common Questions", "Employer FAQ", center=True), faq_html(e["faq"]), I["arrow"])
+    body += band(h2="Get The Whole Crew<br class=\"mbr\"> Credentialed.", p="One call to the office, one point of contact, and your crew trains and tests in the same building in Portland.",
+                 primary='<a class="btn btn-primary" href="#quote">Request a Crew Quote</a>')
+    schema = [{"@type": "Service", "name": "Crew Training and NCCER Assessments for Employers", "serviceType": "Group craft training and NCCER assessment",
+               "description": e["meta_desc"], "url": BASE + url, "provider": {"@id": BASE + "/#org"},
+               "areaServed": {"@type": "State", "name": "Texas"},
+               "audience": {"@type": "BusinessAudience", "name": "Employers, contractors, refineries and port operators in the Coastal Bend"},
+               "availableChannel": {"@type": "ServiceChannel", "serviceUrl": BASE + url + "#quote", "servicePhone": BIZ["phone_raw"]}},
+              faq_schema(e["faq"])]
+    emit(url, page(url, e["meta_title"], e["meta_desc"], body, crumbs, schema, hero_img="/img/hero-cranes.jpg"), "0.8")
+
+def build_es():
+    url = "/es/"
+    s = ES
+    crumbs = [("Español", url)]
+    L = s["labels"]
+    body = phero(COURSES[0]["hero"], "Instructor demostrando un enganche de eslinga durante la clase de Advanced Rigger", s["kicker"], s["h1"], s["lede"], crumbs,
+                 ctas=['<a class="btn btn-primary" href="/?book=advanced#schedule">%s %s</a>' % (esc(s["enroll"]), I["arrow"]),
+                       '<a class="btn btn-ghost" href="tel:%s">%s %s %s</a>' % (BIZ["phone_raw"], I["phone"], esc(s["call"]), BIZ["phone"])], home="Inicio")
+    body += specbar(s["specs"])
+    def fmt_cards(fmts):
+        return '<div class="fmt-grid">%s</div>' % "".join('<div class="fmt-card rv"><span class="idx">%02d</span><b>%s</b><span class="fmt-when">%s · %s</span><p>%s</p></div>' % (
+            i+1, esc(n), esc(wh), esc(t), esc(note)) for i, (n, wh, t, note) in enumerate(fmts))
+    a, sg = s["advanced"], s["signal"]
+    body += """<section class="section"><div class="wrap split">
+  <div class="prose rv">
+    %s
+    <h3 class="h-sub">%s <span class="idx" style="font-size:.7em;margin-left:8px">%s <s class="was">%s</s></span></h3>
+    <p class="lede">%s</p>
+    <p><strong style="color:#DCDAD6">%s:</strong> %s</p>
+    <p>%s</p>
+    <h4 class="h-sub" style="font-size:19px;margin-top:22px">%s</h4>
+    %s
+    <h4 class="h-sub" style="font-size:19px">%s</h4>
+    %s
+    <h3 class="h-sub" style="margin-top:44px">%s <span class="idx" style="font-size:.7em;margin-left:8px">%s</span></h3>
+    <p class="lede">%s</p>
+    <p><strong style="color:#DCDAD6">%s:</strong> %s</p>
+    <p>%s</p>
+    <h4 class="h-sub" style="font-size:19px">%s</h4>
+    %s
+  </div>
+  <aside class="cta-box rv">
+    <span class="cta-price">$1,000 <s class="was">$1,700</s></span><b>Advanced Rigger</b>
+    <p>$200 aparta su lugar. El saldo se paga antes de la clase.</p>
+    <p>Klarna, Afterpay, Zelle o financiamiento interno sin revisión de crédito.</p>
+    <a class="btn btn-primary btn-block" href="/?book=advanced#schedule">%s</a>
+    <a class="btn btn-ghost btn-block" href="tel:%s">%s %s %s</a>
+    <a class="more" href="/class-dates/">%s %s</a>
+  </aside>
+</div></section>""" % (sec_head("01", s["courses_eyebrow"], s["courses_h2"]),
+                       esc(a["name"]), a["price"], a["was"], esc(a["summary"]), esc(L["cred"]), esc(a["cred"]), esc(a["deposit"]),
+                       esc(L["learn"]), checks(a["learn"]), esc(L["formats"]), fmt_cards(a["formats"]),
+                       esc(sg["name"]), sg["price"], esc(sg["summary"]), esc(L["cred"]), esc(sg["cred"]), esc(sg["deposit"]), esc(L["formats"]), fmt_cards(sg["formats"]),
+                       esc(s["enroll"]), BIZ["phone_raw"], I["phone"], esc(s["call"]), BIZ["phone"], esc(L["all_dates"]), I["arrow"])
+    groups = []
+    for gid, gname in s["groups"]:
+        cs = [c for c in CRAFTS if c[2] == gid]
+        if not cs: continue
+        groups.append('<div class="cgroup rv"><h3>%s</h3><ul class="craft-list">%s</ul></div>' % (esc(gname).replace("|", '<br class="mbr">'), "".join(
+            '<li><a href="/nccer-assessments/%s/" hreflang="en">%s%s</a></li>' % (sl, I["arrow"], esc(craft_short(n))) for sl, n, g, bl, cv in cs)))
+    body += """<section class="section alt" id="evaluaciones"><div class="wrap">
+  %s
+  <div class="cgroups">%s</div>
+  <p class="center-note rv"><a class="btn btn-primary" href="/?book=assessment#schedule">Solicitar fecha de evaluación</a></p>
+</div></section>""" % (sec_head("02", s["assess_eyebrow"], s["assess_h2"], s["assess_lede"], center=True), "".join(groups))
+    cards = "".join('<div class="fin-card rv"><span class="idx">%02d</span><b>%s</b><span>%s</span><em class="fin-tag">%s</em></div>' % (i+1, esc(t), esc(d), esc(tag)) for i, (t, d, tag) in enumerate(s["financing"]))
+    body += """<section class="section" id="pagos"><div class="wrap">
+  %s
+  <div class="fin-cards fin-cards-3">%s</div>
+  <div class="fin-note rv" style="max-width:760px;margin:30px auto 0">%s</div>
+</div></section>""" % (sec_head("03", s["fin_eyebrow"], s["fin_h2"], center=True), cards, esc(s["fin_note"]))
+    team = "".join("""
+      <a class="person rv" href="/instructors/%s/" hreflang="en">
+        <div class="person-img"><img src="/%s" alt="%s" loading="lazy"></div>
+        <div class="person-body"><span class="person-role">%s</span><h3>%s</h3><span class="person-more">Ver perfil (en inglés) %s</span></div>
+      </a>""" % (p["slug"], p["img"], esc(p["alt"]), esc(s["roles"][p["slug"]]), esc(p["name"]), I["arrow"]) for p in PEOPLE)
+    body += """<section class="section alt" id="instructores"><div class="wrap">%s<div class="team-grid">%s</div></div></section>""" % (
+        sec_head("04", s["team_eyebrow"], s["team_h2"], center=True), team)
+    body += """<section class="section" id="ubicacion"><div class="wrap">
+  %s
+  <div class="contact-grid">
+  <div class="rv">
+    <ul class="loc-list">
+      <li>%s<div><b>%s</b><span>%s<br>%s, %s %s</span></div></li>
+      <li>%s<div><b>%s</b><span>%s<br><em>%s</em></span></div></li>
+      <li>%s<div><b>%s</b><a href="tel:%s">%s</a></div></li>
+      <li>%s<div><b>%s</b><a href="mailto:%s">%s</a></div></li>
+    </ul>
+    <div class="contact-links">
+      <a class="btn btn-ghost" href="%s" target="_blank" rel="noopener">%s %s</a>
+      <a class="btn btn-primary" href="/?book=advanced#schedule">%s</a>
+    </div>
+  </div>
+  <div class="map rv"><iframe title="Mapa a Prime Lift Rigging Academy, %s" src="%s" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>
+  </div>
+</div></section>""" % (sec_head("05", s["visit_eyebrow"], s["visit_h2"], s["visit_lede"], center=True),
+                       I["pin"], esc(L["center"]), esc(BIZ["street"]), BIZ["city"], BIZ["state"], BIZ["zip"],
+                       I["clock"], esc(L["hours"]), esc(s["hours"]), esc(s["hours_note"]),
+                       I["phone"], esc(L["phone"]), BIZ["phone_raw"], BIZ["phone"],
+                       I["mail"], esc(L["email"]), BIZ["email"], BIZ["email"],
+                       BIZ["gmaps"], I["pin"], esc(L["directions"]), esc(L["book"]), esc(FULL_ADDR), BIZ["map_embed"])
+    body += band(h2=s["band_h2"], p=s["band_p"], primary='<a class="btn btn-primary" href="/?book=advanced#schedule">%s</a>' % esc(s["enroll"]),
+                 eyebrow=s["band_eyebrow"], call=s["call"])
+    emit(url, page(url, s["title"], s["desc"], body, crumbs, hero_img="/" + COURSES[0]["hero"], lang="es"), "0.8")
+
+GUIDE_DATE = "2026-08-29"
+GUIDE_RELATED = {
+    "nccer-vs-nccco-rigger": [("Advanced Rigger course", "/advanced-rigger/"), ("Signal Person course", "/signal-person/")],
+    "is-the-nccer-advanced-rigger-test-hard": [("Advanced Rigger course", "/advanced-rigger/"), ("Class dates", "/class-dates/")],
+    "how-to-verify-nccer-credentials": [("NCCER assessments in 36 crafts", "/nccer-assessments/"), ("Rigger recertification", "/rigger-recertification/")],
+}
+
+def guide_url(g): return "/guides/%s/" % g["slug"]
+
+def build_guides():
+    url = "/guides/"
+    crumbs = [("Guides", url)]
+    cards = "".join("""
+      <a class="guide-card rv" href="%s">
+        <span class="idx">%02d</span>
+        <b>%s</b>
+        <p>%s</p>
+        <span class="person-more">Read the guide %s</span>
+      </a>""" % (guide_url(g), i+1, esc(g["title"]), esc(g["meta_desc"]), I["arrow"]) for i, g in enumerate(GUIDES))
+    body = phero("img/bg-classroom.jpg", "Students in the Prime Lift Rigging Academy classroom", "Straight Answers",
+                 "Rigging<em>Guides</em>",
+                 "Plain-English answers for Coastal Bend workers deciding on training: which rigger credential you need, what the test is like, and how credentials get verified.", crumbs,
+                 ctas=['<a class="btn btn-primary" href="/#schedule">Reserve Your Seat — $200 %s</a>' % I["arrow"],
+                       '<a class="btn btn-ghost" href="/faq/">Read The FAQ</a>'])
+    body += """<section class="section"><div class="wrap">%s<div class="guide-grid">%s</div></div></section>""" % (
+        sec_head("01", "Guides", "Before You<br>Spend A Dime", "Written by the school, checked against what we actually do here in Portland. No pass-rate hype, no fluff.", center=True), cards)
+    body += band()
+    schema = [{"@type": "ItemList", "name": "Rigging guides", "itemListElement": [
+        {"@type": "ListItem", "position": i+1, "url": BASE + guide_url(g), "name": g["title"]} for i, g in enumerate(GUIDES)]}]
+    emit(url, page(url, "Rigging Guides · NCCER Credentials, Tests & Verification", "Plain-English guides for Coastal Bend workers: NCCER vs. NCCCO rigger credentials, what the Advanced Rigger test covers, and how NCCER credentials are verified.", body, crumbs, schema, hero_img="/img/bg-classroom.jpg"), "0.6")
+    for g in GUIDES: build_guide(g)
+
+def build_guide(g):
+    url = guide_url(g)
+    crumbs = [("Guides", "/guides/"), (g["title"], url)]
+    words = len(re.sub(r"<[^>]+>", " ", g["body"]).split())
+    # in-article CTA: dropped in before the third h2 so it sits mid-read
+    parts = g["body"].split("<h2>")
+    cta = """<aside class="guide-cta rv"><b>Train And Test In Portland</b><p>Advanced Rigger $1,000, Signal Person $1,000, NCCER assessments $150. Day, night or one weekend, test-out on site, $200 holds a seat.</p>
+<div class="hero-cta"><a class="btn btn-primary" href="/#schedule">Pick a Start Date</a><a class="btn btn-ghost" href="tel:%s">%s Call %s</a></div></aside>
+""" % (BIZ["phone_raw"], I["phone"], BIZ["phone"])
+    cut = min(3, len(parts) - 1)
+    body_html = "<h2>".join(parts[:cut]) + cta + "<h2>" + "<h2>".join(parts[cut:])
+    if g["slug"] == "is-the-nccer-advanced-rigger-test-hard" and RETEST_POLICY:
+        body_html = body_html.replace("Ask us about retest options;", "%s Ask us about retest options;" % esc(RETEST_POLICY), 1)
+    if g["slug"] == "how-to-verify-nccer-credentials" and CREDENTIAL_POSTING_TIME:
+        body_html = body_html.replace("Ask the office how long posting takes", "%s Ask the office how long posting takes" % esc(CREDENTIAL_POSTING_TIME), 1)
+    related = [(x["title"], guide_url(x)) for x in GUIDES if x["slug"] != g["slug"]] + GUIDE_RELATED[g["slug"]]
+    rel = "".join('<li><a href="%s">%s%s</a></li>' % (u, I["arrow"], esc(n)) for n, u in related)
+    date_txt = datetime.date.fromisoformat(GUIDE_DATE).strftime("%B ") + str(datetime.date.fromisoformat(GUIDE_DATE).day) + ", " + GUIDE_DATE[:4]
+    body = """<section class="ghead"><div class="wrap ghead-in rv">
+  %s
+  <p class="eyebrow">%s</p>
+  <h1>%s</h1>
+  <p class="lede">%s</p>
+  <p class="gmeta">By Prime Lift Rigging Academy · <time datetime="%s">%s</time> · %s</p>
+</div></section>
+<article class="section"><div class="wrap guide-wrap">
+  <div class="guide-body rv">%s</div>
+  <div class="rv" style="margin-top:44px;padding-top:30px;border-top:1px solid var(--edge)"><h2 class="h-sub" style="margin-top:0">Related</h2><ul class="craft-list">%s</ul></div>
+</div></article>""" % (crumbs_html(crumbs), esc(g["kicker"]), g.get("h1") or esc(g["title"]), esc(g["lede"]), GUIDE_DATE, date_txt, esc(g["read"]), body_html, rel)
+    body += band()
+    schema = [{"@type": "Article", "@id": BASE + url + "#article", "headline": g["title"], "description": g["meta_desc"],
+               "url": BASE + url, "mainEntityOfPage": {"@id": BASE + url}, "datePublished": GUIDE_DATE, "dateModified": GUIDE_DATE,
+               "author": {"@type": "Organization", "@id": BASE + "/#org", "name": BIZ["name"]}, "publisher": {"@id": BASE + "/#org"},
+               "image": BASE + "/img/og.jpg", "inLanguage": "en-US", "wordCount": words, "articleSection": "Guides"}]
+    emit(url, page(url, g["meta_title"], g["meta_desc"], body, crumbs, schema), "0.6")
+
 def build_404():
     body = """<section class="section" style="min-height:70svh;display:flex;align-items:center"><div class="wrap" style="text-align:center">
   <p class="eyebrow is-center">404</p>
@@ -821,7 +1118,8 @@ def rewrite_index():
     s = re.sub(r'<meta name="robots"[^>]*>', '<meta name="robots" content="noindex, nofollow">' if NOINDEX else '<meta name="robots" content="index, follow, max-image-preview:large">', s)
     s = re.sub(r'https://(?:jzonkel1\.github\.io/prime-lift-rigging-academy|prime-lift-rigging-academy\.netlify\.app|primeliftrigging-academy\.com)/', ORIGIN + "/", s)
     s = re.sub(r'<link rel="canonical"[^>]*>\n?', "", s)
-    s = s.replace('<link rel="icon" href="img/hook.png">', '<link rel="canonical" href="%s/">\n<link rel="icon" href="img/hook.png">' % ORIGIN, 1)
+    s = re.sub(r'<link rel="alternate" hreflang=[^>]*>\n?', "", s)
+    s = s.replace('<link rel="icon" href="img/hook.png">', '<link rel="canonical" href="%s/">\n%s<link rel="icon" href="img/hook.png">' % (ORIGIN, hreflang_links("/")), 1)
     graph = [dict(org_schema(), **{"@id": BASE + "/#org"}),
              {"@type": "WebSite", "@id": BASE + "/#website", "url": BASE + "/", "name": BIZ["name"], "publisher": {"@id": BASE + "/#org"}},
              faq_schema(FAQ[:8]),
@@ -1036,6 +1334,68 @@ body.sub .callbar{display:none}
 .spec span,.was,.crumbs,.foot-base{color:var(--muted)}
 .foot-grid-4{grid-template-columns:1fr}
 @media(min-width:720px){.foot-grid-4{grid-template-columns:1.6fr 1fr 1fr 1.2fr}}
+
+/* ---- next start dates strip (course pages, under the specbar) ---- */
+.nextdates{background:var(--ink); border-bottom:1px solid var(--edge)}
+.nextdates-in{display:flex; flex-wrap:wrap; align-items:center; gap:14px 30px; padding:18px 0}
+.nd-h{margin:0; font-family:var(--f-display); font-weight:700; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); white-space:nowrap}
+.nd-row{display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px}
+.nd-row b{font-family:var(--f-fig); font-stretch:115%; font-weight:600; font-size:13.5px; color:#fff; white-space:nowrap}
+.nd-dates{display:flex; flex-wrap:wrap; gap:6px}
+.nd-date{display:inline-block; padding:7px 11px; border:1px solid var(--edge-2); border-radius:2px; font-family:var(--f-fig); font-stretch:115%; font-weight:600; font-variant-numeric:tabular-nums; font-size:13px; color:var(--text); white-space:nowrap; transition:.16s}
+.nd-date:hover{border-color:var(--accent); color:#fff}
+.nd-all{margin-left:auto}
+@media(max-width:899px){.nextdates-in{display:grid; gap:14px} .nd-all{margin-left:0; justify-self:start}}
+
+/* ---- home "Why Train Here" cards (index.html) ---- */
+.why-grid{display:grid; gap:14px; grid-template-columns:1fr}
+@media(min-width:640px){.why-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1000px){.why-grid{grid-template-columns:repeat(3,1fr)}}
+.why-grid .who-card b{font-size:19px}
+@media(max-width:399px){.why-grid .who-card b{font-size:17.5px; letter-spacing:.005em}}
+
+/* ---- employers: checkbox group + optional stat row ---- */
+.chkgroup{border:0; padding:0; margin:0 0 15px; min-width:0}
+.chkgroup legend{padding:0; display:block; width:100%}
+.chkgroup legend span{display:block; font-family:var(--f-display); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; font-weight:700; color:var(--muted-2); margin-bottom:8px}
+.chkgroup-in{display:grid; gap:2px 14px; grid-template-columns:repeat(2,minmax(0,1fr))}
+.chkgroup .chk{display:flex; gap:10px; align-items:center; font-size:15px; color:var(--text); padding:8px 0; cursor:pointer}
+.chkgroup .chk input{flex:none; width:18px; height:18px; accent-color:var(--accent); margin:0}
+.stat-row{display:grid; gap:14px; grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:30px}
+.stat{padding:20px; border:1px solid var(--edge); border-radius:var(--r); background:var(--steel); text-align:center}
+.stat b{display:block; font-family:var(--f-fig); font-stretch:125%; font-weight:700; font-size:32px; color:var(--accent); line-height:1}
+.stat span{display:block; font-size:13px; color:var(--muted); margin-top:8px}
+.foot-lang{display:inline-block; margin-top:20px; font-family:var(--f-display); font-weight:700; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--edge-2); padding-bottom:4px}
+.foot-lang:hover{color:var(--accent); border-bottom-color:var(--accent)}
+
+/* ---- guides ---- */
+.ghead{padding:132px 0 clamp(36px,5vw,56px); background:var(--steel); border-bottom:1px solid var(--edge); text-align:center}
+.ghead-in{max-width:860px; margin-inline:auto}
+.ghead .crumbs{justify-content:center}
+.ghead .eyebrow{justify-content:center}
+.ghead h1{font-size:clamp(31px,6vw,58px); line-height:1.02; margin:0 auto}
+.ghead .lede{margin:20px auto 0; max-width:60ch}
+.gmeta{margin:18px 0 0; font-family:var(--f-display); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted-2); font-weight:700}
+@media(min-width:900px){.ghead{padding-top:170px}}
+.guide-wrap{max-width:780px; margin-inline:auto}
+.guide-body p,.guide-body li{color:var(--muted); font-size:17px; line-height:1.72}
+.guide-body p{margin:0 0 20px}
+.guide-body h2{font-size:clamp(24px,3vw,32px); line-height:1.05; margin:38px 0 14px}
+.guide-body ul{margin:0 0 22px; padding-left:22px; display:grid; gap:8px}
+.guide-body a{color:var(--accent)}
+.guide-body strong{color:#DCDAD6}
+.guide-cta{margin:34px 0; padding:26px; border:1px solid var(--edge-2); border-left:3px solid var(--accent); border-radius:var(--r); background:var(--steel)}
+.guide-cta b{display:block; font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:22px; margin-bottom:8px; letter-spacing:.012em}
+.guide-cta p{margin:0 0 16px; font-size:15px; line-height:1.6}
+.guide-cta .hero-cta{justify-content:flex-start; margin:0}
+.guide-grid{display:grid; gap:14px; grid-template-columns:1fr}
+@media(min-width:760px){.guide-grid{grid-template-columns:repeat(3,1fr)}}
+a.guide-card{display:flex; flex-direction:column; gap:10px; padding:26px; border:1px solid var(--edge); border-radius:var(--r); background:var(--steel); color:inherit; transition:border-color .18s}
+a.guide-card:hover{border-color:var(--accent)}
+.guide-card .idx{font-size:16px}
+.guide-card b{font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:21px; line-height:1.05; letter-spacing:.012em}
+.guide-card p{font-size:14.5px; color:var(--muted); margin:0; line-height:1.6}
+.guide-card .person-more{margin-top:auto; padding-top:8px}
 """
 
 SITE_JS = r"""
@@ -1086,6 +1446,41 @@ SITE_JS = r"""
     });
   });
   window.addEventListener("resize",()=>{ $$(".faq-item.open .faq-a").forEach(a=>{ a.style.maxHeight="none"; const h=a.scrollHeight; a.style.maxHeight=h+"px"; }); });
+
+  /* course pages: the "next start dates" strip is rendered at build time from
+     SCHEDULE_RULES in build.py; recompute from today's date so it never goes
+     stale between builds. Same rule: next N occurrences of the weekday, from
+     tomorrow (booking closes the day before). */
+  const MONS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], DOWS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  $$(".nd-row").forEach(row=>{
+    const wd=+row.dataset.wd; if(isNaN(wd)) return;
+    const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+(+row.dataset.lead||1));
+    while(d.getDay()!==wd) d.setDate(d.getDate()+1);
+    $$(".nd-date",row).forEach((a,i)=>{
+      const x=new Date(d); x.setDate(d.getDate()+7*i);
+      a.href="/?book="+row.dataset.book+"&fmt="+row.dataset.fmt+"&date="+iso(x)+"#schedule";
+      a.textContent=DOWS[x.getDay()]+", "+MONS[x.getMonth()]+" "+x.getDate();
+    });
+  });
+})();
+
+/* GHL live chat widget (Conversation AI). Loaded lazily so it never competes with
+   first paint: first scroll / touch / pointer, or 6s idle, whichever comes first. */
+(function(){
+  if (window.__plChat) return; window.__plChat = 1;
+  var done = false;
+  function load(){
+    if (done) return; done = true;
+    var s = document.createElement("script");
+    s.src = "https://widgets.leadconnectorhq.com/loader.js";
+    s.setAttribute("data-resources-url", "https://widgets.leadconnectorhq.com/chat-widget/loader.js");
+    s.setAttribute("data-widget-id", "6a935fa49f17bc64b3251340");
+    document.body.appendChild(s);
+    ["scroll","pointerdown","touchstart","keydown"].forEach(function(e){ window.removeEventListener(e, load); });
+  }
+  ["scroll","pointerdown","touchstart","keydown"].forEach(function(e){ window.addEventListener(e, load, {passive:true, once:true}); });
+  setTimeout(load, 6000);
 })();
 """
 
@@ -1109,9 +1504,11 @@ def write_llms():
              "- Signal Person course: $1,000, $200 deposit. Two Fridays 8 AM-3 PM. NCCER Certified Signal Person.",
              "- NCCER assessments: $150 flat per assessment, 36 crafts, Mon-Fri 8 AM-5 PM by appointment. Written and hands-on, credential recorded on the NCCER Registry.",
              "- Payment: card deposit, Klarna and Afterpay (pay in full at checkout), Zelle, in-house financing with no credit check. Deposit non-refundable; one reschedule with 48 hours' notice.",
-             "- Class size: 8 seats. Crew bookings available. No Spanish-language instruction. No employer/onsite training.", "",
+             "- Class size: 8 seats. Crew and employer bookings at the Portland center (group classes, private dates, crew assessments); no training at employer sites. No Spanish-language instruction; a Spanish-language summary page exists at /es/.", "",
              "## Pages", ""]
-    names = {"/": "Home and online booking"}
+    names = {"/": "Home and online booking", "/employers/": "Crew training for employers (group classes, private dates, crew assessments, quote form)",
+             "/es/": "Resumen en español (Spanish-language summary of courses, assessments, financing, location)", "/guides/": "Guides (plain-English articles)"}
+    names.update(("/guides/%s/" % g["slug"], "Guide: " + g["title"]) for g in GUIDES)
     for u, p in PAGES:
         lines.append("- [%s](%s%s)" % (names.get(u, u.strip("/").replace("-", " ").replace("/", " / ").title()), BASE, u))
     lines += ["", "## Policies", "- [Privacy Policy](%s/privacy.html)" % BASE, "- [Terms & Enrollment Policy](%s/terms.html)" % BASE, ""]
@@ -1178,6 +1575,9 @@ def main():
     build_about()
     build_reviews()
     build_faq()
+    build_employers()
+    build_es()
+    build_guides()
     build_404()
     write_sitemap()
     write_llms()
