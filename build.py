@@ -539,12 +539,12 @@ def build_assessments():
   </div>
   %s
 </div></section>""" % (sec_head("01", "Test Out", "Skip The Class.<br>Prove The Craft."),
-                       checks(["Book a date online or call the office. Crews can block the whole room.",
+                       checks(["Book a date online or call the office. Bringing a crew? Call for group scheduling.",
                                "Bring a government-issued photo ID. NCCER requires it.",
                                "Written assessment, then the hands-on performance verification where the craft calls for one.",
                                "Pass and your credential goes on the NCCER Registry.",
                                "One flat $150 per assessment, paid in full when you book."]),
-                       cta_box("NCCER Assessment · $150", ["Monday through Friday, 8 AM to 5 PM, by appointment.", "Bringing a crew? Call and we'll block the testing room."], price="$150", href="/?book=assessment#schedule", label="Request a Test Date"))
+                       cta_box("NCCER Assessment · $150", ["Monday through Friday, 8 AM to 5 PM, by appointment.", "Bringing a crew? Call the office for group scheduling."], price="$150", href="/?book=assessment#schedule", label="Request a Test Date"))
     body += """<section class="section alt" id="crafts"><div class="wrap">
   %s%s
 </div></section>""" % (sec_head("02", "36 Crafts", "Crafts We Assess", "Pick your craft for what the assessment covers and who it's for. Don't see yours? Call the office; more crafts are available on request.", center=True), craft_groups_html())
@@ -597,7 +597,7 @@ def build_craft(c):
     body += """<section class="section how"><div class="how-bg" aria-hidden="true"><img src="/img/bg-classroom.jpg" alt="" loading="lazy"></div><div class="wrap">
   %s
   <div class="how-grid">
-    <div class="how-card rv"><span class="idx">01</span><h3>Book Your Date</h3><p>Online in two minutes, or call the office. Crews can block the whole testing room.</p></div>
+    <div class="how-card rv"><span class="idx">01</span><h3>Book Your Date</h3><p>Online in two minutes, or call the office. Bringing a crew? Call for group scheduling.</p></div>
     <div class="how-card rv"><span class="idx">02</span><h3>Test In Portland</h3><p>Written assessment first, then the hands-on performance verification where the craft calls for one.</p></div>
     <div class="how-card rv"><span class="idx">03</span><h3>Get The Credential</h3><p>Pass and it's recorded on the NCCER Registry, where every contractor in the country can verify it.</p></div>
   </div>
@@ -700,7 +700,7 @@ def build_financing():
                                "Employers can book whole crews: up to 8 seats per class, day, night or weekend",
                                "Crews test out on site and credentials post to the NCCER Registry"]),
                        I["arrow"],
-                       cta_box("Sending A Crew?", ["Group classes, private dates and crew assessments, with one point of contact at the office.", "Use the crew quote form and the office will call you back."], href="/employers/#quote", label="Request a Crew Quote"))
+                       cta_box("Sending A Crew?", ["Company bookings for up to 8 students and crew assessments, with one point of contact at the office.", "Use the crew quote form and the office will call you back."], href="/employers/#quote", label="Request a Crew Quote"))
     body += """<section class="section"><div class="wrap">%s%s</div></section>""" % (sec_head("03", "Common Questions", "Financing FAQ", center=True), faq_html(faq))
     body += band(h2="Your Goals<br class=\"mbr\"> Are Worth It.", p="Reserve your seat with $200 and we'll walk you through the rest on the phone if you'd rather talk it through.")
     emit(url, page(url, "Financing & Payment Plans · No Credit Check", "Pay for NCCER rigger certification your way: $200 deposit, Klarna, Afterpay, Zelle, or in-house financing with no credit check. Portland, TX.", body, crumbs, [faq_schema(faq)], hero_img="/img/bg-crane-golden.jpg"), "0.8")
@@ -1531,9 +1531,9 @@ def write_llms():
              "- Signal Person course: $1,000, $200 deposit. Two Fridays 8 AM-3 PM. NCCER Certified Signal Person.",
              "- NCCER assessments: $150 flat per assessment, 36 crafts, Mon-Fri 8 AM-5 PM by appointment. Written and hands-on, credential recorded on the NCCER Registry.",
              "- Payment: card deposit, Klarna and Afterpay (pay in full at checkout), Zelle, in-house financing with no credit check. Deposit non-refundable; one reschedule with 48 hours' notice.",
-             "- Class size: 8 seats. Crew and employer bookings at the Portland center (group classes, private dates, crew assessments); no training at employer sites. No Spanish-language instruction; a Spanish-language summary page exists at /es/.", "",
+             "- Class size: 8 seats. Crew and employer bookings at the Portland center (company bookings up to 8 students, crew assessments); no training at employer sites. No Spanish-language instruction; a Spanish-language summary page exists at /es/.", "",
              "## Pages", ""]
-    names = {"/": "Home and online booking", "/employers/": "Crew training for employers (group classes, private dates, crew assessments, quote form)",
+    names = {"/": "Home and online booking", "/employers/": "Crew training for employers (company bookings up to 8, crew assessments, quote form)",
              "/es/": "Resumen en español (Spanish-language summary of courses, assessments, financing, location)", "/guides/": "Guides (plain-English articles)"}
     names.update(("/guides/%s/" % g["slug"], "Guide: " + g["title"]) for g in GUIDES)
     for u, p in PAGES:
