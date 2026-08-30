@@ -1475,7 +1475,7 @@ $$(".nm-item").forEach(a=>a.addEventListener("click",()=>{
   let i=0,t=null; const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
   const go=n=>{ slides[i].classList.remove("on"); i=(n+slides.length)%slides.length; slides[i].classList.add("on"); };
   const stop=()=>{ if(t){ clearInterval(t); t=null; } };
-  const start=()=>{ if(reduce||t) return; t=setInterval(()=>go(i+1),6500); };
+  const start=()=>{ if(reduce||t) return; t=setInterval(()=>go(i+1),3000); };   /* ~3s per grad; 6.5s read as frozen */
   fig.addEventListener("pointerenter",stop); fig.addEventListener("pointerleave",start);
   fig.addEventListener("click",e=>{ if(e.target.closest("a")) return; go(i+1); stop(); start(); });
   new IntersectionObserver(e=>{ e[0].isIntersecting?start():stop(); },{threshold:.3}).observe(fig);

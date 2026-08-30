@@ -1540,8 +1540,8 @@ p:last-child{margin-bottom:0}
 .hero-fig{position:relative; cursor:pointer}
 /* photo, name and quote fade as one: the slide's own opacity carries all three;
    hidden slides also drop out of the tab order so their instructor links can't be focused */
-.hero-slide{position:absolute; inset:0 0 auto 0; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .7s ease, visibility 0s linear .7s}
-.hero-slide.on{opacity:1; visibility:visible; pointer-events:auto; transition:opacity .7s ease, visibility 0s}
+.hero-slide{position:absolute; inset:0 0 auto 0; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .45s ease, visibility 0s linear .45s}
+.hero-slide.on{opacity:1; visibility:visible; pointer-events:auto; transition:opacity .45s ease, visibility 0s}
 .hero-slide .hero-photo{width:100%}
 @media(max-width:899px){
   .hero-slide{display:flex; flex-direction:column; align-items:center}
