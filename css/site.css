@@ -63,7 +63,12 @@
   --pad:clamp(20px,5vw,52px);
   --gut:clamp(28px,4.4vw,64px);
   --sec:clamp(72px,10vw,140px);
-  --r:3px;
+  /* square everything: their flyers are hard-edged plates and diagonal cuts */
+  --r:0;
+  /* the accent, pulled down far enough to carry text on the paper panels */
+  --accent-deep:#0E7FB0;
+  --marker:'Permanent Marker',cursive;
+  --grunge:url(/img/grunge.png);
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -99,22 +104,17 @@ p:last-child{margin-bottom:0}
   line-height:1; letter-spacing:.045em; text-transform:none;
 }
 
-/* eyebrow: index + brand rule + label */
+/* eyebrow: label between the chevron wings (one heavy stroke, a thinner one
+   floating below it, lifted from the logo). No index numerals. */
 .eyebrow{
-  display:flex; align-items:center; gap:16px; margin:0 0 22px;
+  display:flex; align-items:center; gap:14px; margin:0 0 22px;
   font-family:var(--f-display); font-weight:700; text-transform:uppercase;
-  font-size:11.5px; letter-spacing:.26em; color:var(--accent);
-  justify-content:center;
+  font-size:11.5px; letter-spacing:.22em; color:var(--accent);
+  justify-content:center; text-align:center;
 }
-/* the numeral runs inline with the label caps, so it takes their size and
-   tracking and separates itself by weight alone */
-.eyebrow .idx{font-size:12.5px; font-weight:800; letter-spacing:.18em; margin-right:-4px}
-/* on narrow screens the label wraps to 2–3 lines and the numeral crowds it */
-@media(max-width:560px){.eyebrow .idx{display:none}}
-/* The rule echoes the logo's chevron: one heavy stroke with a thinner
-   stroke floating below it. Solid — no dashes. */
+.eyebrow .idx{display:none}
 .eyebrow::after,.eyebrow::before{
-  content:""; flex:none; height:9px; width:clamp(40px,7.5vw,82px);
+  content:""; flex:0 1 clamp(40px,7.5vw,82px); min-width:22px; height:9px;
   background-image:
     linear-gradient(var(--accent),var(--accent)),
     linear-gradient(var(--accent),var(--accent));
@@ -123,8 +123,10 @@ p:last-child{margin-bottom:0}
 }
 .eyebrow::before{background-position:0 0, 100% 6px}
 .eyebrow::after{background-position:0 0, 0 6px}
+/* phones: the wings give way before the label breaks into three lines */
+@media(max-width:560px){.eyebrow{gap:10px; font-size:10.5px; letter-spacing:.18em}}
 @media(min-width:900px){
-  .eyebrow{justify-content:flex-start}
+  .eyebrow{justify-content:flex-start; text-align:left}
   .eyebrow:not(.is-center)::before{display:none}
   .eyebrow.is-center{justify-content:center}
 }
@@ -171,7 +173,7 @@ p:last-child{margin-bottom:0}
   white-space:nowrap;
 }
 .btn svg{width:17px; height:17px; flex:none}
-.btn-primary{background:var(--accent); color:#140800; box-shadow:0 12px 34px -14px rgba(41,182,232,.9)}
+.btn-primary{background:var(--accent); color:#04161F}
 .btn-primary:hover{background:var(--accent-2); transform:translateY(-2px)}
 .btn-ghost{border-color:var(--edge-2); color:var(--text); background:rgba(255,255,255,.028)}
 .btn-ghost:hover{border-color:var(--accent); color:#fff; transform:translateY(-2px)}
@@ -1247,3 +1249,222 @@ p:last-child{margin-bottom:0}
 .rv.in{opacity:1; transform:none}
 @media(prefers-reduced-motion:reduce){.rv{opacity:1; transform:none; transition:none}}
 .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+
+/* ============================================================
+   V3 SKIN — built from their own flyers: hard-edged plates, one diagonal cut,
+   distressed display type, real people up top, the price where they print it.
+   ============================================================ */
+
+/* distressed print on the big display type and the accent plates */
+.hero h1,.h-sec,.phero h1,.band h2,.plate,.fin-flyer{
+  -webkit-mask-image:var(--grunge); mask-image:var(--grunge);
+  -webkit-mask-size:640px; mask-size:640px;
+}
+
+/* one diagonal cut, alternating direction, on the sections that change ground */
+.diag-t{position:relative; margin-top:-3vw; padding-top:calc(var(--sec) + 3vw); clip-path:polygon(0 3vw,100% 0,100% 100%,0 100%)}
+.diag-t.rev{clip-path:polygon(0 0,100% 3vw,100% 100%,0 100%)}
+
+/* ---- hero: copy left, a graduate right, the price on a plate ---- */
+.hero{align-items:flex-end}
+.hero-in{padding-block:150px 0}
+@media(max-width:640px){.hero-in{padding-block:128px 0}}
+@media(min-width:900px){
+  .hero-in{
+    display:grid; grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);
+    gap:clamp(28px,4vw,64px); align-items:end; padding-block:170px 0;
+  }
+  .hero-copy{padding-bottom:clamp(48px,6vw,84px)}
+}
+.hero .eyebrow{margin-bottom:18px}
+.hero h1{font-size:clamp(46px,6.6vw,88px); max-width:none}
+@media(max-width:640px){.hero h1{font-size:clamp(50px,13.6vw,66px)}}
+.hero-sub{max-width:46ch}
+.hero-cta{margin-top:26px}
+
+.plate{
+  display:inline-grid; grid-template-columns:auto auto; gap:2px 20px; align-items:end;
+  margin:30px 0 0; padding:16px 24px 14px 20px; text-align:left;
+  background:var(--accent); color:#04161F;
+  transform:skewX(-7deg); transform-origin:left bottom;
+}
+.plate>*{transform:skewX(7deg)}
+.plate-p{grid-row:1/3; font-family:var(--f-head); font-size:clamp(50px,5.4vw,74px); line-height:.86; letter-spacing:.005em}
+.plate-k{font-family:var(--f-display); font-weight:700; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; align-self:start; padding-top:4px}
+.plate-s{font-family:var(--f-display); font-weight:700; font-size:13px; line-height:1.3; letter-spacing:.01em}
+.plate-s b{display:block; font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:17px; letter-spacing:.03em; margin-top:5px}
+.plate-s i{display:block; font-style:normal; font-weight:600; font-size:11px; opacity:.75; letter-spacing:.02em}
+@media(max-width:400px){.plate{padding:14px 18px 12px 16px; gap:2px 14px} .plate-p{font-size:46px}}
+
+.hero-fig{position:relative; margin:44px auto 0; max-width:420px; z-index:2}
+@media(min-width:900px){.hero-fig{margin:0; max-width:none; align-self:end}}
+.hero-photo{margin:0; position:relative; overflow:hidden; background:var(--steel-3); clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+@media(min-width:900px){.hero-photo{clip-path:polygon(11% 0,100% 0,100% 100%,0 100%)}}
+.hero-photo img{width:100%; height:auto; aspect-ratio:4/5; object-fit:cover; object-position:50% 12%; display:block}
+.hero-photo figcaption{
+  position:absolute; inset:auto 0 0 0; padding:90px 22px 22px;
+  background:linear-gradient(180deg,transparent,rgba(10,10,12,.94) 70%);
+}
+@media(min-width:900px){.hero-photo figcaption{padding-left:calc(11% + 22px)}}
+.hero-photo figcaption b{display:block; font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:26px; letter-spacing:.02em; line-height:1}
+.hero-photo figcaption span{display:block; margin-top:6px; font-family:var(--f-display); font-weight:700; font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent)}
+.hero-fig q{
+  quotes:none; position:absolute; left:-14px; top:26px; max-width:min(262px,78%);
+  padding:13px 16px; background:var(--accent); color:#04161F;
+  font-family:var(--f-display); font-weight:700; font-size:13px; line-height:1.42; text-align:left;
+  transform:skewX(-7deg); transform-origin:left bottom;
+}
+.hero-fig q::before{content:"\201C"} .hero-fig q::after{content:"\201D"}
+@media(min-width:900px){.hero-fig q{left:-8px; top:34px; font-size:13.5px}}
+
+/* ---- graduates ---- */
+.gradwall{background:var(--steel)}
+.gw-head{display:grid; gap:26px var(--gut); min-width:0; margin-bottom:clamp(30px,4vw,44px)}
+@media(min-width:900px){.gw-head{grid-template-columns:minmax(0,1fr) minmax(0,.86fr); align-items:end}}
+@media(max-width:899px){.gw-head{text-align:center}}
+.gw-quote{margin:0; padding-left:20px; border-left:3px solid var(--accent); text-align:left}
+.gw-quote p{margin:0 0 12px; font-size:clamp(16.5px,1.5vw,20px); line-height:1.45; font-weight:500; color:#E9E7E3}
+.gw-quote cite{font-style:normal; display:flex; gap:10px; align-items:baseline; flex-wrap:wrap}
+.gw-quote b{font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:15px; letter-spacing:.03em}
+.gw-quote span{font-size:12px; color:var(--muted-2)}
+.gw-strip{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin-top:0}
+@media(min-width:760px){.gw-strip{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.gw-strip figure{margin:0; position:relative; overflow:hidden; min-width:0; background:var(--steel-3); border:0; border-radius:0}
+.gw-strip img{width:100%; height:auto; aspect-ratio:3/4; object-fit:cover; object-position:50% 14%; transition:transform .6s ease}
+.gw-strip figure:hover img{transform:scale(1.05)}
+.gw-strip figcaption{
+  position:absolute; inset:auto 0 0 0; padding:34px 12px 11px; background:linear-gradient(180deg,transparent,rgba(10,10,12,.95));
+  font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:15px; letter-spacing:.03em; line-height:1.05; color:#fff;
+}
+.gw-strip figcaption small{display:block; font-family:var(--f-display); font-weight:700; font-size:8.5px; letter-spacing:.16em; color:var(--accent); margin-top:4px}
+.gw-marks{
+  list-style:none; margin:26px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:10px 28px; justify-content:center;
+  font-family:var(--f-display); font-weight:700; font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
+}
+@media(min-width:900px){.gw-marks{justify-content:flex-start}}
+.gw-marks li{display:flex; align-items:center; gap:9px}
+.gw-marks li::before{content:""; width:8px; height:8px; background:var(--accent); transform:skewX(-12deg); flex:none}
+
+/* ---- courses: plates, not cards ---- */
+.course{border:0; border-top:3px solid var(--steel-3); background:var(--steel)}
+.course.is-feature{border-top-color:var(--accent)}
+.course:hover{border-color:var(--steel-3); border-top-color:var(--accent)}
+.course-num{display:none}
+.price{font-size:54px; color:var(--accent)}
+.assess{border:0; background:var(--steel-2)}
+.chip{border:0; border-radius:0; background:var(--steel-3); padding:11px 15px}
+.chip:hover{background:var(--ink)}
+.chip-more{color:var(--accent); background:transparent; box-shadow:inset 0 0 0 1px var(--edge-2)}
+.chip-more:hover{background:transparent; color:#fff}
+
+/* ---- booking ---- */
+.sched{background:var(--steel)}
+.sched-shell{border:0; background:var(--ink)}
+.sched-bar{background:var(--steel-2)}
+.prog,.date,.summary,.field input,.field select,.field textarea{background:var(--steel)}
+
+/* ---- reel + how it runs ---- */
+.steps{list-style:none; margin:26px 0 0; padding:0; counter-reset:s; border-top:1px solid var(--edge-2)}
+.steps li{display:grid; grid-template-columns:auto 1fr; gap:16px; padding:16px 0; border-bottom:1px solid var(--edge); text-align:left}
+.steps li::before{counter-increment:s; content:counter(s,decimal-leading-zero); font-family:var(--f-head); font-size:26px; color:var(--accent); line-height:1; padding-top:2px}
+.steps b{display:block; font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:19px; letter-spacing:.015em; margin-bottom:4px}
+.steps span{display:block; font-size:14.5px; color:var(--muted); line-height:1.5}
+.reel-frame{border:0}
+@media(max-width:879px){.reel-copy{text-align:center} .reel-copy .lede{margin-inline:auto}}
+
+/* ---- team ---- */
+.team-sec{border-top:1px solid var(--edge)}
+.person{border:0; background:transparent}
+.person-body{padding:20px 0 0}
+.person-img{border-bottom:3px solid var(--accent)}
+
+/* ---- reviews in their own layout: photo, big first name, the quote ---- */
+.proof{background:var(--steel)}
+.rev3{display:grid; grid-template-columns:minmax(0,1fr)}
+@media(min-width:820px){.rev3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.rv-panel{position:relative; display:flex; flex-direction:column; min-width:0; padding-bottom:30px; min-height:100%}
+.rv-panel img{width:100%; height:auto; aspect-ratio:4/5; object-fit:cover; object-position:50% 12%; display:block}
+.rv-panel.blue img{clip-path:polygon(0 0,100% 0,100% 100%,0 91%)}
+.rv-panel.paper img{clip-path:polygon(0 0,100% 0,100% 91%,0 100%)}
+.rv-panel .who{padding:24px 26px 0}
+.rv-panel .who b{display:block; font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:clamp(30px,2.8vw,40px); line-height:.95; letter-spacing:.01em}
+.rv-panel .who p{margin:14px 0 0; font-size:15.5px; line-height:1.5; font-weight:500}
+.rv-panel .who small{display:block; margin-top:14px; font-family:var(--f-display); font-weight:700; font-size:10px; letter-spacing:.16em; text-transform:uppercase; opacity:.7}
+.rv-panel.blue{background:var(--accent); color:#04161F}
+.rv-panel.paper{background:var(--paper); color:#0A0A0C}
+.rv-panel.ink{background:#050506; color:#fff; padding-top:26px}
+.rv-panel.ink .who p{color:var(--accent); text-transform:uppercase; font-family:var(--f-display); font-weight:700; font-size:14.5px; letter-spacing:.02em; line-height:1.5}
+.big-q{font-family:var(--f-fig); font-stretch:125%; font-weight:900; font-size:150px; line-height:.55; color:var(--accent); opacity:.28; padding:40px 26px 0; display:block}
+.rev-list{display:grid; gap:0 var(--gut); grid-template-columns:1fr; margin-top:clamp(28px,4vw,48px); border-top:1px solid var(--edge-2)}
+@media(min-width:820px){.rev-list{grid-template-columns:1fr 1fr}}
+.rev-list article{display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:start; padding:22px 0; border-bottom:1px solid var(--edge)}
+.rev-list svg{width:16px; height:16px; color:#7C93C9; margin-top:5px; flex:none}
+.rev-list p{margin:0 0 7px; font-size:15.5px; line-height:1.55; color:#D8D6D2}
+.rev-list b{font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:14px; letter-spacing:.03em}
+.rev-list small{font-size:12px; color:var(--muted-2); margin-left:9px}
+
+/* ---- financing as their flyer: a paper poster on the dark page ---- */
+.fin{background:var(--ink)}
+.fin-flyer{
+  display:grid; gap:clamp(26px,4vw,56px); grid-template-columns:1fr;
+  padding:clamp(34px,5vw,72px) clamp(24px,4vw,64px);
+  background:var(--paper); color:var(--ink);
+}
+@media(min-width:960px){.fin-flyer{grid-template-columns:1.05fr .95fr; align-items:center}}
+@media(max-width:959px){.fin-copy{text-align:center}}
+.fin-flyer .eyebrow{color:var(--accent-deep)}
+.fin-flyer .eyebrow::before,.fin-flyer .eyebrow::after{background-image:linear-gradient(var(--accent-deep),var(--accent-deep)),linear-gradient(var(--accent-deep),var(--accent-deep))}
+.fin-flyer h2{font-size:clamp(52px,7.4vw,108px); line-height:.86; margin:4px 0 20px; color:var(--ink)}
+.fin-flyer h2 em{font-style:normal; color:var(--accent-deep)}
+.fin-lede{font-size:clamp(16.5px,1.45vw,19.5px); line-height:1.5; max-width:44ch; color:#2A2C31; margin:0 0 26px}
+@media(max-width:959px){.fin-lede{margin-inline:auto}}
+.fin-list{list-style:none; margin:0; padding:0; border-top:2px solid var(--ink)}
+.fin-list li{padding:15px 0; border-bottom:1px solid rgba(10,10,12,.16)}
+.fin-list b{display:block; font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:20px; letter-spacing:.015em; margin-bottom:3px}
+.fin-list span{display:block; font-size:14.5px; color:#3A3D44; line-height:1.5}
+.fin-fine{grid-column:1/-1; margin:0; font-size:13px; color:#55585F; line-height:1.5}
+.btn-dark{background:var(--ink); color:#fff}
+.btn-dark:hover{background:#26282E; transform:translateY(-2px)}
+
+/* ---- faq / location ---- */
+.faq-sec{background:var(--steel)}
+.faq-more{text-align:center; margin:26px 0 0}
+.faq-more a{font-family:var(--f-display); font-weight:700; font-size:11.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); border-bottom:1px solid rgba(41,182,232,.4); padding-bottom:6px}
+.faq-more a:hover{color:#fff; border-bottom-color:#fff}
+.loc{background:var(--ink)}
+.map,.storefront{border:0}
+
+/* ---- closing band: their line, in their hand ---- */
+.band h2{font-size:clamp(48px,7.4vw,100px); line-height:.9; max-width:none}
+.band h2 .mk{
+  display:block; font-family:var(--marker); text-transform:none; font-size:.66em;
+  letter-spacing:0; color:var(--accent); line-height:1.1; transform:rotate(-2.5deg); margin-top:.02em;
+}
+.band .eyebrow{margin-bottom:24px}
+/* centered heads keep both wings on desktop too */
+@media(min-width:900px){
+  .sec-head.is-center .eyebrow,.band .eyebrow{justify-content:center; text-align:center}
+  .sec-head.is-center .eyebrow::before,.band .eyebrow::before{display:block}
+}
+.band .eyebrow{white-space:nowrap}
+@media(max-width:560px){.band .eyebrow{white-space:normal}}
+/* phones: the plate stacks and centres; the skew eases so it doesn't eat the margins */
+@media(max-width:640px){
+  .plate{
+    display:grid; grid-template-columns:1fr; gap:4px; width:100%; text-align:center;
+    padding:20px 18px 18px; transform:skewX(-4deg); margin-top:26px;
+  }
+  .plate>*{transform:skewX(4deg)}
+  .plate-p{grid-row:auto; font-size:clamp(58px,17vw,72px); margin-bottom:6px}
+  .plate-k{padding-top:0; letter-spacing:.16em}
+  .plate-s b{font-size:18px}
+}
+/* 3-up strip on phones: name only, the credential line would wrap to three */
+@media(max-width:759px){
+  .gw-strip figcaption{font-size:13px; padding:24px 8px 8px; letter-spacing:.02em}
+  .gw-strip figcaption small{display:none}
+}
+@media(max-width:560px){
+  .gw-marks{flex-direction:column; align-items:flex-start; gap:10px; margin-top:22px}
+  .band .eyebrow{font-size:10px; letter-spacing:.16em}
+}

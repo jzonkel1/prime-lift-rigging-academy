@@ -88,7 +88,8 @@
       var host = document.querySelector("chat-widget"), sr = host && host.shadowRoot;
       var box = sr && sr.getElementById("lc_text-widget"), btn = sr && sr.getElementById("lc_text-widget--btn");
       if (!box || !btn) { if (tries++ < 60) setTimeout(place, 500); return; }
-      var up = window.innerWidth <= 900 && cb && cb.classList.contains("show");
+      var mobile = window.innerWidth <= 900, up = mobile && cb && cb.classList.contains("show");
+      host.style.visibility = (mobile && !up) ? "hidden" : "visible";
       var b = up ? "78px" : "20px";
       box.style.bottom = b; btn.style.bottom = b;
     }
