@@ -571,18 +571,6 @@ p:last-child{margin-bottom:0}
    ============================================================ */
 .sched{background:var(--ink)}
 .sched-shell{border:1px solid var(--edge-2); border-radius:var(--r); overflow:hidden; background:var(--steel)}
-.sched-bar{
-  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
-  padding:16px clamp(20px,2.6vw,34px); border-bottom:1px solid var(--edge-2);
-  background:var(--steel-2);
-}
-.sched-bar .dot{width:8px; height:8px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 4px rgba(95,208,138,.15); flex:none}
-.sched-bar b{font-family:var(--f-display); font-weight:700; text-transform:uppercase; letter-spacing:.14em; font-size:12px}
-.sched-bar .live{
-  margin-left:auto; font-family:var(--f-display); font-size:10.5px; letter-spacing:.16em;
-  text-transform:uppercase; color:var(--muted-2); font-weight:700;
-}
-
 /* the numbered rail — hairline columns, no pills */
 .rail{display:grid; grid-template-columns:repeat(4,1fr); border-bottom:1px solid var(--edge-2)}
 .rail-step{
@@ -635,8 +623,7 @@ p:last-child{margin-bottom:0}
    heading, left-aligned with it. Same for the scheduler's status line. */
 @media(max-width:640px){
   .pane-h{gap:7px 14px}
-  .pane-h span,.sched-bar .live{margin-left:0}
-  .sched-bar{gap:8px 12px}
+  .pane-h span{margin-left:0}
 }
 
 /* program tiles — real photo, editorial */
@@ -1385,7 +1372,6 @@ p:last-child{margin-bottom:0}
 /* ---- booking ---- */
 .sched{background:var(--steel)}
 .sched-shell{border:0; background:var(--ink)}
-.sched-bar{background:var(--steel-2)}
 .prog,.date,.summary,.field input,.field select,.field textarea{background:var(--steel)}
 
 /* ---- reel + how it runs ---- */
