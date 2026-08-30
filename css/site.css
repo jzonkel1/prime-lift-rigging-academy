@@ -1468,3 +1468,27 @@ p:last-child{margin-bottom:0}
   .gw-marks{flex-direction:column; align-items:flex-start; gap:10px; margin-top:22px}
   .band .eyebrow{font-size:10px; letter-spacing:.16em}
 }
+/* the graduate panel floats above the hero's bottom edge instead of sitting on it,
+   so the next section's diagonal never slices through the photo's fade */
+.hero-fig{margin-bottom:36px}
+@media(min-width:900px){
+  .hero-fig{margin-bottom:clamp(48px,5.6vw,84px)}
+  .hero-copy{padding-bottom:clamp(64px,7.4vw,108px)}
+  .hero-fig q{top:22px}
+}
+.hero-photo figcaption{
+  padding:62px 22px 20px;
+  background:linear-gradient(180deg,transparent 0%,rgba(10,10,12,.5) 34%,rgba(10,10,12,.97) 100%);
+}
+/* subject sits at 39% 12% of the frame; keep him centred whatever the crop */
+.hero-photo img{object-position:50% 12%}
+/* phones: the quote sits centred above the photo, the name plate centres too */
+@media(max-width:899px){
+  .hero-fig{display:flex; flex-direction:column; align-items:center}
+  .hero-fig q{
+    position:static; order:-1; display:block; margin:0 auto 14px; max-width:96%;
+    text-align:center; transform:skewX(-4deg);
+  }
+  .hero-photo{width:100%}
+  .hero-photo figcaption{text-align:center}
+}
