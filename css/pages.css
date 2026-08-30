@@ -23,11 +23,18 @@ body.mnav-open .mnav{display:block; animation:fade .2s ease}
 body.mnav-open{overflow:hidden}
 body.mnav-open .nav{background:var(--ink); z-index:80}
 .mnav-in{padding:0 var(--pad) 40px; max-width:560px; margin-inline:auto}
-.mnav-h{font-family:var(--f-display); font-weight:700; font-size:10.5px; letter-spacing:.24em; text-transform:uppercase; color:var(--accent); margin:26px 0 6px; padding-bottom:10px; border-bottom:1px solid var(--edge)}
-.mnav-in>a{display:grid; grid-template-columns:1fr auto; align-items:center; gap:2px 12px; padding:14px 4px; border-bottom:1px solid var(--edge)}
-.mnav-in>a b{font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:21px; letter-spacing:.012em; line-height:1.05}
-.mnav-in>a span{grid-column:1; font-size:13px; color:var(--muted-2); line-height:1.4}
-.mnav-in>a em{grid-column:2; grid-row:1/3; font-style:normal; font-family:var(--f-fig); font-stretch:125%; font-weight:700; font-size:14px; color:var(--accent)}
+/* rows: top-level links, the two accordion triggers (Courses / Academy) and the links inside them */
+.mnav-in>a,.macc-t,.macc-p a{display:grid; grid-template-columns:1fr auto; align-items:center; gap:2px 12px; padding:14px 4px; border-bottom:1px solid var(--edge); color:inherit}
+.mnav-in>a b,.macc-t b,.macc-p a b{font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:21px; letter-spacing:.012em; line-height:1.05; text-align:left}
+.mnav-in>a span,.macc-t span,.macc-p a span{grid-column:1; font-size:13px; color:var(--muted-2); line-height:1.4; text-align:left}
+.mnav-in>a em,.macc-p a em{grid-column:2; grid-row:1/3; font-style:normal; font-family:var(--f-fig); font-stretch:125%; font-weight:700; font-size:14px; color:var(--accent)}
+.macc-t{appearance:none; -webkit-appearance:none; width:100%; background:none; border:0; border-bottom:1px solid var(--edge); border-radius:0; font:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent}
+.macc-t svg{grid-column:2; grid-row:1/3; width:18px; height:18px; color:var(--accent); transition:transform .25s ease}
+.macc.open .macc-t svg{transform:rotate(180deg)}
+.macc-p{display:none; margin:0 0 4px 6px; padding-left:16px; border-left:2px solid rgba(41,182,232,.35)}
+.macc.open .macc-p{display:block; animation:fade .2s ease}
+.macc-p a{padding:12px 4px}
+.macc-p a b{font-size:18px}
 .mnav-cta{display:grid; gap:10px; margin-top:28px}
 .nm-h{margin:8px 0 2px; padding:12px 13px 6px; border-top:1px solid var(--edge); font-family:var(--f-display); font-weight:700; font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent)}
 .nm-all+.nm-all{margin-top:0}

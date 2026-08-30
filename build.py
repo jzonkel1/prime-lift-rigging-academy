@@ -169,21 +169,29 @@ def nav(home=False):
   </div>
   <nav class="mnav" id="mnav" aria-label="Mobile">
     <div class="mnav-in">
-      <p class="mnav-h">Courses</p>
-      <a href="/advanced-rigger/"><b>Advanced Rigger</b><span>4 days · day, night or weekend</span><em>$1,000</em></a>
-      <a href="/signal-person/"><b>Signal Person</b><span>Two Fridays</span><em>$1,000</em></a>
-      <a href="/nccer-assessments/"><b>NCCER Assessments</b><span>Test out in 36 crafts</span><em>$150</em></a>
-      <a href="/weekend-express/"><b>3-Day Weekend Express</b><span>Fri – Sun, certified by Sunday</span></a>
-      <a href="/night-classes/"><b>Night Classes</b><span>Mon – Thu, 6 – 11 PM</span></a>
-      <a href="/rigger-recertification/"><b>Recertification</b><span>Credential coming due?</span></a>
-      <p class="mnav-h">Academy</p>
-      <a href="/class-dates/"><b>Class Dates</b></a>
+      <div class="macc">
+        <button class="macc-t" type="button" aria-expanded="false" aria-controls="macc-courses"><b>Courses</b><span>Certifications, schedules &amp; renewal</span>%(caret)s</button>
+        <div class="macc-p" id="macc-courses">
+          <a href="/advanced-rigger/"><b>Advanced Rigger</b><span>4 days · day, night or weekend</span><em>$1,000</em></a>
+          <a href="/signal-person/"><b>Signal Person</b><span>Two Fridays</span><em>$1,000</em></a>
+          <a href="/nccer-assessments/"><b>NCCER Assessments</b><span>Test out in 36 crafts</span><em>$150</em></a>
+          <a href="/weekend-express/"><b>3-Day Weekend Express</b><span>Fri – Sun, certified by Sunday</span></a>
+          <a href="/night-classes/"><b>Night Classes</b><span>Mon – Thu, 6 – 11 PM</span></a>
+          <a href="/rigger-recertification/"><b>Recertification</b><span>Credential coming due?</span></a>
+        </div>
+      </div>
+      <div class="macc">
+        <button class="macc-t" type="button" aria-expanded="false" aria-controls="macc-academy"><b>Academy</b><span>Dates · Instructors · Guides</span>%(caret)s</button>
+        <div class="macc-p" id="macc-academy">
+          <a href="/class-dates/"><b>Class Dates</b><span>Every upcoming start date</span></a>
+          <a href="/instructors/"><b>Instructors</b><span>Andres · Juan · Frank</span></a>
+          <a href="/guides/"><b>Guides</b><span>NCCER vs. NCCCO · test prep · verifying credentials</span></a>
+        </div>
+      </div>
       <a href="/financing/"><b>Financing</b></a>
-      <a href="/instructors/"><b>Instructors</b><span>Andres · Juan · Frank</span></a>
       <a href="/about/"><b>About</b></a>
       <a href="/reviews/"><b>Student Reviews</b></a>
       <a href="/faq/"><b>FAQ</b></a>
-      <a href="/guides/"><b>Guides</b><span>NCCER vs. NCCCO · test prep · verifying credentials</span></a>
       <a href="/contact/"><b>Contact</b></a>
       <a href="/es/" lang="es" hreflang="es"><b>Español</b><span>Información en español</span></a>
       <div class="mnav-cta">
@@ -1158,11 +1166,18 @@ body.mnav-open .mnav{display:block; animation:fade .2s ease}
 body.mnav-open{overflow:hidden}
 body.mnav-open .nav{background:var(--ink); z-index:80}
 .mnav-in{padding:0 var(--pad) 40px; max-width:560px; margin-inline:auto}
-.mnav-h{font-family:var(--f-display); font-weight:700; font-size:10.5px; letter-spacing:.24em; text-transform:uppercase; color:var(--accent); margin:26px 0 6px; padding-bottom:10px; border-bottom:1px solid var(--edge)}
-.mnav-in>a{display:grid; grid-template-columns:1fr auto; align-items:center; gap:2px 12px; padding:14px 4px; border-bottom:1px solid var(--edge)}
-.mnav-in>a b{font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:21px; letter-spacing:.012em; line-height:1.05}
-.mnav-in>a span{grid-column:1; font-size:13px; color:var(--muted-2); line-height:1.4}
-.mnav-in>a em{grid-column:2; grid-row:1/3; font-style:normal; font-family:var(--f-fig); font-stretch:125%; font-weight:700; font-size:14px; color:var(--accent)}
+/* rows: top-level links, the two accordion triggers (Courses / Academy) and the links inside them */
+.mnav-in>a,.macc-t,.macc-p a{display:grid; grid-template-columns:1fr auto; align-items:center; gap:2px 12px; padding:14px 4px; border-bottom:1px solid var(--edge); color:inherit}
+.mnav-in>a b,.macc-t b,.macc-p a b{font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:21px; letter-spacing:.012em; line-height:1.05; text-align:left}
+.mnav-in>a span,.macc-t span,.macc-p a span{grid-column:1; font-size:13px; color:var(--muted-2); line-height:1.4; text-align:left}
+.mnav-in>a em,.macc-p a em{grid-column:2; grid-row:1/3; font-style:normal; font-family:var(--f-fig); font-stretch:125%; font-weight:700; font-size:14px; color:var(--accent)}
+.macc-t{appearance:none; -webkit-appearance:none; width:100%; background:none; border:0; border-bottom:1px solid var(--edge); border-radius:0; font:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent}
+.macc-t svg{grid-column:2; grid-row:1/3; width:18px; height:18px; color:var(--accent); transition:transform .25s ease}
+.macc.open .macc-t svg{transform:rotate(180deg)}
+.macc-p{display:none; margin:0 0 4px 6px; padding-left:16px; border-left:2px solid rgba(41,182,232,.35)}
+.macc.open .macc-p{display:block; animation:fade .2s ease}
+.macc-p a{padding:12px 4px}
+.macc-p a b{font-size:18px}
 .mnav-cta{display:grid; gap:10px; margin-top:28px}
 .nm-h{margin:8px 0 2px; padding:12px 13px 6px; border-top:1px solid var(--edge); font-family:var(--f-display); font-weight:700; font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent)}
 .nm-all+.nm-all{margin-top:0}
@@ -1409,11 +1424,15 @@ SITE_JS = r"""
   const home=!!$(".hero");            /* the home page keeps its own scroll logic */
 
   if(burger){
+    const setAcc=(acc,open)=>{ acc.classList.toggle("open",open); acc.querySelector(".macc-t").setAttribute("aria-expanded",open?"true":"false"); };
     burger.addEventListener("click",()=>{
       const open=document.body.classList.toggle("mnav-open");
       burger.setAttribute("aria-expanded",open?"true":"false");
       burger.setAttribute("aria-label",open?"Close menu":"Open menu");
+      if(!open) $$(".macc.open").forEach(a=>setAcc(a,false));   /* collapse on close so it reopens tidy */
     });
+    /* Courses / Academy accordions inside the mobile menu */
+    $$(".macc-t").forEach(t=>t.addEventListener("click",()=>{ const acc=t.parentElement; setAcc(acc,!acc.classList.contains("open")); }));
     $$("#mnav a").forEach(a=>a.addEventListener("click",()=>{ document.body.classList.remove("mnav-open"); burger.setAttribute("aria-expanded","false"); }));
     document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&document.body.classList.contains("mnav-open")) burger.click(); });
   }

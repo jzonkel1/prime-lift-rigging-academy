@@ -6,11 +6,15 @@
   const home=!!$(".hero");            /* the home page keeps its own scroll logic */
 
   if(burger){
+    const setAcc=(acc,open)=>{ acc.classList.toggle("open",open); acc.querySelector(".macc-t").setAttribute("aria-expanded",open?"true":"false"); };
     burger.addEventListener("click",()=>{
       const open=document.body.classList.toggle("mnav-open");
       burger.setAttribute("aria-expanded",open?"true":"false");
       burger.setAttribute("aria-label",open?"Close menu":"Open menu");
+      if(!open) $$(".macc.open").forEach(a=>setAcc(a,false));   /* collapse on close so it reopens tidy */
     });
+    /* Courses / Academy accordions inside the mobile menu */
+    $$(".macc-t").forEach(t=>t.addEventListener("click",()=>{ const acc=t.parentElement; setAcc(acc,!acc.classList.contains("open")); }));
     $$("#mnav a").forEach(a=>a.addEventListener("click",()=>{ document.body.classList.remove("mnav-open"); burger.setAttribute("aria-expanded","false"); }));
     document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&document.body.classList.contains("mnav-open")) burger.click(); });
   }
