@@ -375,6 +375,7 @@
         <!-- Step 4 -->
         <div class="pane" data-pane="4">
           <p class="pane-h"><b>Almost done</b><span>Takes about a minute</span></p>
+          <p class="deep-note" id="deepNote" hidden>You picked <b id="deepPick"></b>.<button type="button" data-goto="1">Not right? Change it</button></p>
           <div class="review-box">
             <div>
               <div class="two-up">
@@ -1028,6 +1029,7 @@ $("#progGrid").addEventListener("click",e=>{
 });
 
 function pickProgram(id){
+  $("#deepNote").hidden=true;
   S.prog=CONFIG.programs.find(p=>p.id===id);
   S.fmt=null; S.date=null;
   $$("#progGrid .prog").forEach(o=>o.classList.toggle("sel", o.dataset.prog===id));
@@ -1124,6 +1126,9 @@ $$("[data-book]").forEach(b=>b.addEventListener("click",()=>{
     S.date=d;
     $$("#dateGrid .date").forEach(o=>o.classList.toggle("sel", o.dataset.date===d));
     setStep(4);
+    // arrived from the dates page or a course strip: say what got picked, with a way out
+    $("#deepPick").textContent=`${S.prog.name} · ${S.fmt.name} starting ${fmtLong(d)}`;
+    $("#deepNote").hidden=false;
   }
   history.replaceState(null,"",location.pathname+"#schedule");
   requestAnimationFrame(()=>goSched(S.step));

@@ -688,6 +688,7 @@ def build_dates():
   const SEATS=8, LEAD=1, MON=1, FRI=5, X=__SCHED__;
   const MONS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], DOW=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  const SHORT={day:"Day class",night:"Night class",weekend:"Weekend Express",friday:"Two Fridays",assess:"Assessment"};
   const closed=d=>!!X.closed[iso(d)];
   const full=(d,k)=>{ const f=X.full[iso(d)]||[]; return f.includes(k)||f.includes("*"); };
   function first(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+LEAD); return d; }
@@ -700,7 +701,7 @@ def build_dates():
       <div class="date-grid">${p.dates.map(d=>{ const isFull=full(d,p.id+":"+p.fmt); return `
         <a class="date${isFull?" is-full":""}" href="${isFull?"#":`/?book=${p.id}&fmt=${p.fmt}&date=${iso(d)}#schedule`}"${isFull?' aria-disabled="true" tabindex="-1"':""}>
           <span class="date-cal"><em>${MONS[d.getMonth()]}</em><b>${d.getDate()}</b></span>
-          <span class="date-info"><b>${DOW[d.getDay()]}</b><span>Starts ${MONS[d.getMonth()]} ${d.getDate()}</span></span>
+          <span class="date-info"><b>${DOW[d.getDay()]}</b><span>${p.name} · ${SHORT[p.fmt]||p.label}</span></span>
           <span class="seats"><b>${isFull?"—":SEATS}</b><span>${isFull?"full":"seats/class"}</span></span>
         </a>`; }).join("")}</div>
     </div>`).join("");

@@ -710,6 +710,10 @@ p:last-child{margin-bottom:0}
 .seats span{font-family:var(--f-display); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted-2); font-weight:700}
 
 .pane-nav{display:flex; gap:12px; flex-wrap:wrap; margin-top:28px; padding-top:22px; border-top:1px solid var(--edge)}
+/* deep-link landing note: "You picked X starting Y. Not right? Change it" */
+.deep-note{margin:-4px 0 20px; padding:12px 14px; border-left:3px solid var(--accent); background:rgba(41,182,232,.07); font-size:14px; line-height:1.5; color:#D8D6D2}
+.deep-note b{color:#fff; font-weight:600}
+.deep-note button{background:none; border:0; padding:0; margin-left:8px; color:var(--accent); font:inherit; text-decoration:underline; text-underline-offset:3px; cursor:pointer}
 .link-back{
   display:inline-flex; align-items:center; gap:9px;
   font-family:var(--f-display); font-size:11.5px; font-weight:700;
