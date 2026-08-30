@@ -108,16 +108,26 @@ def sched_json():
 def nav(home=False):
     h = "" if home else "/"           # anchor prefix for home sections
     def course_items():
-        return "".join("""
+        def item(slug, n, name, sub, price):
+            return """
             <a class="nm-item" href="/%s/">
               <span class="nm-n idx">%02d</span>
               <span class="nm-b"><b>%s</b><span>%s</span></span>
               <span class="nm-p">%s</span>
-            </a>""" % (c["slug"], i+1, esc(c["name"]), esc(sub), money(price))
-            for i, (c, sub, price) in enumerate([
-                (COURSES[0], "Days, nights, or the 3-day weekend express", 1000),
-                (COURSES[1], "Two Fridays of class and hands-on", 1000),
-                (ASSESSMENT, "Test out in 36 crafts, proctored on-site", 150)]))
+            </a>""" % (slug, n, esc(name), esc(sub), price)
+        courses = [
+            (COURSES[0]["slug"], COURSES[0]["name"], "Days, nights, or the 3-day weekend express", money(1000)),
+            (COURSES[1]["slug"], COURSES[1]["name"], "Two Fridays of class and hands-on", money(1000)),
+            (ASSESSMENT["slug"], ASSESSMENT["name"], "Test out in 36 crafts, proctored on-site", money(150))]
+        # the format + renewal pages used to be reachable only from the footer
+        formats = [
+            ("weekend-express", "3-Day Weekend Express", "Fri – Sun, certified by Sunday", ""),
+            ("night-classes", "Night Classes", "Mon – Thu, 6 – 11 PM", ""),
+            ("rigger-recertification", "Recertification", "Credential coming due?", "")]
+        out = "".join(item(s, i + 1, n, sub, p) for i, (s, n, sub, p) in enumerate(courses))
+        out += '\n            <p class="nm-h">Schedules &amp; Renewals</p>'
+        out += "".join(item(s, i + 4, n, sub, p) for i, (s, n, sub, p) in enumerate(formats))
+        return out
     def people_items():
         return "".join("""
             <a class="nm-item" href="/instructors/%s/">
@@ -138,6 +148,7 @@ def nav(home=False):
         <a href="%(h)s#courses" aria-haspopup="true">Courses %(caret)s</a>
         <div class="nav-menu"><div class="nav-menu-in">%(courses)s
             <a class="nm-all" href="/class-dates/">See All Class Dates %(arrow)s</a>
+            <a class="nm-all" href="/guides/">Read The Rigging Guides %(arrow)s</a>
         </div></div>
       </div>
       <a href="/class-dates/">Dates</a>
@@ -172,6 +183,7 @@ def nav(home=False):
       <a href="/about/"><b>About</b></a>
       <a href="/reviews/"><b>Student Reviews</b></a>
       <a href="/faq/"><b>FAQ</b></a>
+      <a href="/guides/"><b>Guides</b><span>NCCER vs. NCCCO · test prep · verifying credentials</span></a>
       <a href="/contact/"><b>Contact</b></a>
       <a href="/es/" lang="es" hreflang="es"><b>Español</b><span>Información en español</span></a>
       <div class="mnav-cta">
@@ -1133,8 +1145,12 @@ PAGES_CSS = r"""
 body.mnav-open .nav-burger span:nth-child(1){transform:translateY(7px) rotate(45deg)}
 body.mnav-open .nav-burger span:nth-child(2){opacity:0}
 body.mnav-open .nav-burger span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+/* .mnav lives INSIDE header.nav, so its z-index only competes with its sibling
+   .nav-in (logo + burger). The row has to stack above the overlay or the close
+   button is buried under it and the menu can't be dismissed. */
+.nav-in{position:relative; z-index:2}
 .mnav{
-  position:fixed; inset:0; top:0; z-index:70; display:none; overflow:auto;
+  position:fixed; inset:0; top:0; z-index:1; display:none; overflow:auto;
   background:rgba(10,10,12,.985); backdrop-filter:blur(14px);
   padding-top:96px; -webkit-overflow-scrolling:touch;
 }
@@ -1148,6 +1164,8 @@ body.mnav-open .nav{background:var(--ink); z-index:80}
 .mnav-in>a span{grid-column:1; font-size:13px; color:var(--muted-2); line-height:1.4}
 .mnav-in>a em{grid-column:2; grid-row:1/3; font-style:normal; font-family:var(--f-fig); font-stretch:125%; font-weight:700; font-size:14px; color:var(--accent)}
 .mnav-cta{display:grid; gap:10px; margin-top:28px}
+.nm-h{margin:8px 0 2px; padding:12px 13px 6px; border-top:1px solid var(--edge); font-family:var(--f-display); font-weight:700; font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent)}
+.nm-all+.nm-all{margin-top:0}
 .nm-narrow{width:330px}
 .nm-narrow .nm-item{grid-template-columns:24px minmax(0,1fr)}
 .nm-narrow .nm-p{display:none}
@@ -1366,7 +1384,7 @@ body.sub .callbar{display:none}
 .guide-body p{margin:0 0 20px}
 .guide-body h2{font-size:clamp(24px,3vw,32px); line-height:1.05; margin:38px 0 14px}
 .guide-body ul{margin:0 0 22px; padding-left:22px; display:grid; gap:8px}
-.guide-body a{color:var(--accent)}
+.guide-body a:not(.btn){color:var(--accent)}
 .guide-body strong{color:#DCDAD6}
 .guide-cta{margin:34px 0; padding:26px; border:1px solid var(--edge-2); border-left:3px solid var(--accent); border-radius:var(--r); background:var(--steel)}
 .guide-cta b{display:block; font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:22px; margin-bottom:8px; letter-spacing:.012em}
