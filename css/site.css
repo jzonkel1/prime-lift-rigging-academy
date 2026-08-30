@@ -692,6 +692,7 @@ p:last-child{margin-bottom:0}
 .date:hover:not(:disabled){border-color:rgba(41,182,232,.5); transform:translateY(-2px)}
 .date.sel{border-color:var(--accent); background:rgba(41,182,232,.07)}
 .date:disabled{opacity:.34; cursor:not-allowed}
+.date.is-full{opacity:.34; cursor:not-allowed; pointer-events:none}
 .date-cal{flex:none; width:54px; border:1px solid var(--edge-2); border-radius:2px; overflow:hidden; text-align:center}
 .date-cal em{
   display:block; font-style:normal; background:var(--steel-3); color:var(--muted);

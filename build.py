@@ -67,21 +67,42 @@ SCHEDULE_RULES = [
     {"id": "signal", "fmt": "friday", "name": "Signal Person", "label": "Two Fridays", "time": "Fridays · 8:00 AM – 3:00 PM", "wd": FRI, "n": 6},
     {"id": "assessment", "fmt": "assess", "name": "NCCER Assessments", "label": "Any Weekday", "time": "Mon – Fri · 8:00 AM – 5:00 PM", "wd": "weekday", "n": 10},
 ]
-def next_dates(wd, n):
-    """Next n start dates for a rule: wd = JS weekday number, or "weekday" for Mon-Fri."""
+# Office exceptions. Edit here, run build.py, deploy (two minutes, see SOP in
+# the project memory). CLOSED dates vanish from every list on the site
+# (holiday, no class that week). FULL classes stay visible but can't be picked.
+# FULL keys: "advanced:day", "advanced:night", "advanced:weekend",
+# "signal:friday", "assessment:assess", or "*" for every class that day.
+CLOSED = {
+    "2026-09-07": "Labor Day",   # pending Andres: does the Labor Day week class run?
+}
+FULL = {
+    # "2026-09-14": ["advanced:day"],
+}
+def is_full(iso, key):
+    f = FULL.get(iso, ())
+    return key in f or "*" in f
+
+def next_dates(wd, n, key=None):
+    """Next n bookable start dates for a rule: wd = JS weekday number, or "weekday"
+    for Mon-Fri. Skips CLOSED dates and, when key is given, FULL classes."""
     d = datetime.date.today() + datetime.timedelta(days=LEAD_DAYS)
     out = []
+    ok = lambda x: x.isoformat() not in CLOSED and not (key and is_full(x.isoformat(), key))
     if wd == "weekday":
         while len(out) < n:
-            if d.weekday() <= 4: out.append(d)
+            if d.weekday() <= 4 and ok(d): out.append(d)
             d += datetime.timedelta(days=1)
         return out
     while (d.weekday() + 1) % 7 != wd: d += datetime.timedelta(days=1)
-    for _ in range(n):
-        out.append(d); d += datetime.timedelta(days=7)
+    while len(out) < n:
+        if ok(d): out.append(d)
+        d += datetime.timedelta(days=7)
     return out
 def rules_json():
     return json.dumps(SCHEDULE_RULES, separators=(",", ":"))
+def sched_json():
+    """CLOSED/FULL as one JS object literal, injected wherever dates are computed client-side."""
+    return json.dumps({"closed": CLOSED, "full": FULL}, separators=(",", ":"))
 
 # ------------------------------------------------------------------ nav
 def nav(home=False):
@@ -664,26 +685,28 @@ def build_dates():
 <script>
 /* Recurrence rules come from SCHEDULE_RULES in build.py (shared with the course pages). Change the rule there, never a list of dates. */
 (function(){
-  const SEATS=8, LEAD=1, MON=1, FRI=5;
+  const SEATS=8, LEAD=1, MON=1, FRI=5, X=__SCHED__;
   const MONS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], DOW=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  const closed=d=>!!X.closed[iso(d)];
+  const full=(d,k)=>{ const f=X.full[iso(d)]||[]; return f.includes(k)||f.includes("*"); };
   function first(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+LEAD); return d; }
-  function every(wd,n){ const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); for(let i=0;i<n;i++){ o.push(new Date(d)); d.setDate(d.getDate()+7);} return o; }
-  function weekdays(n){ const d=first(),o=[]; while(o.length<n){ if(d.getDay()>=MON&&d.getDay()<=FRI) o.push(new Date(d)); d.setDate(d.getDate()+1);} return o; }
+  function every(wd,n){ const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); while(o.length<n){ if(!closed(d)) o.push(new Date(d)); d.setDate(d.getDate()+7);} return o; }
+  function weekdays(n){ const d=first(),o=[]; while(o.length<n){ if(d.getDay()>=MON&&d.getDay()<=FRI&&!closed(d)) o.push(new Date(d)); d.setDate(d.getDate()+1);} return o; }
   const P=__RULES__.map(r=>Object.assign({},r,{dates:r.wd==="weekday"?weekdays(r.n):every(r.wd,r.n)}));
   document.getElementById("schedList").innerHTML=P.map((p,i)=>`
     <div class="sched-block rv">
       <div class="sched-head"><span class="idx">${String(i+1).padStart(2,"0")}</span><div><b>${p.name}</b><span>${p.label} · ${p.time}</span></div></div>
-      <div class="date-grid">${p.dates.map(d=>`
-        <a class="date" href="/?book=${p.id}&fmt=${p.fmt}&date=${iso(d)}#schedule">
+      <div class="date-grid">${p.dates.map(d=>{ const isFull=full(d,p.id+":"+p.fmt); return `
+        <a class="date${isFull?" is-full":""}" href="${isFull?"#":`/?book=${p.id}&fmt=${p.fmt}&date=${iso(d)}#schedule`}"${isFull?' aria-disabled="true" tabindex="-1"':""}>
           <span class="date-cal"><em>${MONS[d.getMonth()]}</em><b>${d.getDate()}</b></span>
           <span class="date-info"><b>${DOW[d.getDay()]}</b><span>Starts ${MONS[d.getMonth()]} ${d.getDate()}</span></span>
-          <span class="seats"><b>${SEATS}</b><span>seats/class</span></span>
-        </a>`).join("")}</div>
+          <span class="seats"><b>${isFull?"—":SEATS}</b><span>${isFull?"full":"seats/class"}</span></span>
+        </a>`; }).join("")}</div>
     </div>`).join("");
   document.querySelectorAll("#schedList .rv").forEach(el=>el.classList.add("in"));
 })();
-</script>""" % (sec_head("01", "Pick A Date", "Next Classes<br>In Portland, TX", "Dates roll forward every week. Tap one to hold it.", center=True), BIZ["phone_raw"], BIZ["phone"])).replace("__RULES__", rules_json())
+</script>""" % (sec_head("01", "Pick A Date", "Next Classes<br>In Portland, TX", "Dates roll forward every week. Tap one to hold it.", center=True), BIZ["phone_raw"], BIZ["phone"])).replace("__RULES__", rules_json()).replace("__SCHED__", sched_json())
     body += band(primary='<a class="btn btn-primary" href="/#schedule">Reserve Your Seat — $200</a>')
     emit(url, page(url, "Class Dates & Schedules · Rigging Classes in Portland, TX", "Upcoming Advanced Rigger and Signal Person class dates in Portland, TX: weekday day and night classes, 3-day weekend express, assessment dates. $200 holds a seat.", body, crumbs, hero_img="/img/bg-classroom.jpg"), "0.8")
 
@@ -883,7 +906,7 @@ def next_dates_strip(cid):
     for r in SCHEDULE_RULES:
         if r["id"] != cid: continue
         links = "".join('<a class="nd-date" href="/?book=%s&amp;fmt=%s&amp;date=%s#schedule">%s</a>' % (
-            r["id"], r["fmt"], d.isoformat(), d.strftime("%a, %b ") + str(d.day)) for d in next_dates(r["wd"], 3))
+            r["id"], r["fmt"], d.isoformat(), d.strftime("%a, %b ") + str(d.day)) for d in next_dates(r["wd"], 3, r["id"] + ":" + r["fmt"]))
         rows.append('<div class="nd-row" data-wd="%s" data-lead="%d" data-book="%s" data-fmt="%s"><b>%s</b><div class="nd-dates">%s</div></div>' % (
             r["wd"], LEAD_DAYS, r["id"], r["fmt"], esc(r["label"]), links))
     return '<div class="nextdates"><div class="wrap nextdates-in"><p class="nd-h">Next start dates</p>%s<a class="more nd-all" href="/class-dates/">See all dates %s</a></div></div>' % ("".join(rows), I["arrow"])
@@ -1072,6 +1095,8 @@ def rewrite_index():
         return s[:i] + new + s[j:]
     s = between(s, "<!-- ================= NAV ================= -->", "<!-- ================= HERO ================= -->", nav(home=True) + "\n")
     s = between(s, "<!-- ================= FOOTER ================= -->", "<!-- ================= STICKY CALL BAR ================= -->", footer(home=True) + "\n")
+    # booking form: closed / full dates from CLOSED + FULL above
+    s = between(s, "/* SCHED:START */", "/* SCHED:END */", "/* SCHED:START */ const SCHED=%s; " % sched_json())
     # head: robots + canonical + og origin + schema
     s = re.sub(r'<meta name="robots"[^>]*>', '<meta name="robots" content="noindex, nofollow">' if NOINDEX else '<meta name="robots" content="index, follow, max-image-preview:large">', s)
     s = re.sub(r'https://(?:jzonkel1\.github\.io/prime-lift-rigging-academy|prime-lift-rigging-academy\.netlify\.app|primeliftrigging-academy\.com)/', ORIGIN + "/", s)
@@ -1409,14 +1434,17 @@ SITE_JS = r"""
      SCHEDULE_RULES in build.py; recompute from today's date so it never goes
      stale between builds. Same rule: next N occurrences of the weekday, from
      tomorrow (booking closes the day before). */
-  const MONS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], DOWS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const MONS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], DOWS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], SCHED=__SCHED__;
   const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  const bookable=(x,k)=>!SCHED.closed[iso(x)] && !((SCHED.full[iso(x)]||[]).some(f=>f===k||f==="*"));
   $$(".nd-row").forEach(row=>{
     const wd=+row.dataset.wd; if(isNaN(wd)) return;
+    const key=row.dataset.book+":"+row.dataset.fmt, links=$$(".nd-date",row);
     const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+(+row.dataset.lead||1));
     while(d.getDay()!==wd) d.setDate(d.getDate()+1);
-    $$(".nd-date",row).forEach((a,i)=>{
-      const x=new Date(d); x.setDate(d.getDate()+7*i);
+    const dates=[]; while(dates.length<links.length){ if(bookable(d,key)) dates.push(new Date(d)); d.setDate(d.getDate()+7); }
+    links.forEach((a,i)=>{
+      const x=dates[i];
       a.href="/?book="+row.dataset.book+"&fmt="+row.dataset.fmt+"&date="+iso(x)+"#schedule";
       a.textContent=DOWS[x.getDay()]+", "+MONS[x.getMonth()]+" "+x.getDate();
     });
@@ -1463,7 +1491,7 @@ SITE_JS = r"""
 
 def write_assets():
     w("css/pages.css", PAGES_CSS.lstrip("\n"))
-    w("js/site.js", SITE_JS.lstrip("\n"))
+    w("js/site.js", SITE_JS.lstrip("\n").replace("__SCHED__", sched_json()))
 
 def write_sitemap():
     items = "".join("  <url><loc>%s%s</loc><lastmod>%s</lastmod><priority>%s</priority></url>\n" % (ORIGIN, u, TODAY, p) for u, p in PAGES)

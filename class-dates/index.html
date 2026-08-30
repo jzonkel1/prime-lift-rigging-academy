@@ -139,22 +139,24 @@
 <script>
 /* Recurrence rules come from SCHEDULE_RULES in build.py (shared with the course pages). Change the rule there, never a list of dates. */
 (function(){
-  const SEATS=8, LEAD=1, MON=1, FRI=5;
+  const SEATS=8, LEAD=1, MON=1, FRI=5, X={"closed":{"2026-09-07":"Labor Day"},"full":{}};
   const MONS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], DOW=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  const closed=d=>!!X.closed[iso(d)];
+  const full=(d,k)=>{ const f=X.full[iso(d)]||[]; return f.includes(k)||f.includes("*"); };
   function first(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+LEAD); return d; }
-  function every(wd,n){ const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); for(let i=0;i<n;i++){ o.push(new Date(d)); d.setDate(d.getDate()+7);} return o; }
-  function weekdays(n){ const d=first(),o=[]; while(o.length<n){ if(d.getDay()>=MON&&d.getDay()<=FRI) o.push(new Date(d)); d.setDate(d.getDate()+1);} return o; }
+  function every(wd,n){ const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); while(o.length<n){ if(!closed(d)) o.push(new Date(d)); d.setDate(d.getDate()+7);} return o; }
+  function weekdays(n){ const d=first(),o=[]; while(o.length<n){ if(d.getDay()>=MON&&d.getDay()<=FRI&&!closed(d)) o.push(new Date(d)); d.setDate(d.getDate()+1);} return o; }
   const P=[{"id":"advanced","fmt":"day","name":"Advanced Rigger","label":"Weekday Day Class","time":"Mon \u2013 Thu \u00b7 8:00 AM \u2013 2:00 PM","wd":1,"n":6},{"id":"advanced","fmt":"night","name":"Advanced Rigger","label":"Weekday Night Class","time":"Mon \u2013 Thu \u00b7 6:00 PM \u2013 11:00 PM","wd":1,"n":6},{"id":"advanced","fmt":"weekend","name":"Advanced Rigger","label":"3-Day Weekend Express","time":"Fri \u2013 Sun \u00b7 8:00 AM \u2013 5:00 PM","wd":5,"n":6},{"id":"signal","fmt":"friday","name":"Signal Person","label":"Two Fridays","time":"Fridays \u00b7 8:00 AM \u2013 3:00 PM","wd":5,"n":6},{"id":"assessment","fmt":"assess","name":"NCCER Assessments","label":"Any Weekday","time":"Mon \u2013 Fri \u00b7 8:00 AM \u2013 5:00 PM","wd":"weekday","n":10}].map(r=>Object.assign({},r,{dates:r.wd==="weekday"?weekdays(r.n):every(r.wd,r.n)}));
   document.getElementById("schedList").innerHTML=P.map((p,i)=>`
     <div class="sched-block rv">
       <div class="sched-head"><span class="idx">${String(i+1).padStart(2,"0")}</span><div><b>${p.name}</b><span>${p.label} · ${p.time}</span></div></div>
-      <div class="date-grid">${p.dates.map(d=>`
-        <a class="date" href="/?book=${p.id}&fmt=${p.fmt}&date=${iso(d)}#schedule">
+      <div class="date-grid">${p.dates.map(d=>{ const isFull=full(d,p.id+":"+p.fmt); return `
+        <a class="date${isFull?" is-full":""}" href="${isFull?"#":`/?book=${p.id}&fmt=${p.fmt}&date=${iso(d)}#schedule`}"${isFull?' aria-disabled="true" tabindex="-1"':""}>
           <span class="date-cal"><em>${MONS[d.getMonth()]}</em><b>${d.getDate()}</b></span>
           <span class="date-info"><b>${DOW[d.getDay()]}</b><span>Starts ${MONS[d.getMonth()]} ${d.getDate()}</span></span>
-          <span class="seats"><b>${SEATS}</b><span>seats/class</span></span>
-        </a>`).join("")}</div>
+          <span class="seats"><b>${isFull?"—":SEATS}</b><span>${isFull?"full":"seats/class"}</span></span>
+        </a>`; }).join("")}</div>
     </div>`).join("");
   document.querySelectorAll("#schedList .rv").forEach(el=>el.classList.add("in"));
 })();

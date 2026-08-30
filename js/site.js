@@ -50,14 +50,17 @@
      SCHEDULE_RULES in build.py; recompute from today's date so it never goes
      stale between builds. Same rule: next N occurrences of the weekday, from
      tomorrow (booking closes the day before). */
-  const MONS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], DOWS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const MONS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], DOWS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], SCHED={"closed":{"2026-09-07":"Labor Day"},"full":{}};
   const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  const bookable=(x,k)=>!SCHED.closed[iso(x)] && !((SCHED.full[iso(x)]||[]).some(f=>f===k||f==="*"));
   $$(".nd-row").forEach(row=>{
     const wd=+row.dataset.wd; if(isNaN(wd)) return;
+    const key=row.dataset.book+":"+row.dataset.fmt, links=$$(".nd-date",row);
     const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+(+row.dataset.lead||1));
     while(d.getDay()!==wd) d.setDate(d.getDate()+1);
-    $$(".nd-date",row).forEach((a,i)=>{
-      const x=new Date(d); x.setDate(d.getDate()+7*i);
+    const dates=[]; while(dates.length<links.length){ if(bookable(d,key)) dates.push(new Date(d)); d.setDate(d.getDate()+7); }
+    links.forEach((a,i)=>{
+      const x=dates[i];
       a.href="/?book="+row.dataset.book+"&fmt="+row.dataset.fmt+"&date="+iso(x)+"#schedule";
       a.textContent=DOWS[x.getDay()]+", "+MONS[x.getMonth()]+" "+x.getDate();
     });
