@@ -420,11 +420,24 @@ def band(h2="Building Skills.<br class=\"mbr\"> Bettering Futures.", p="Spots ar
   </div>
 </section>""" % (esc(eyebrow), h2, esc(p), primary, BIZ["phone_raw"], esc(call), BIZ["phone"])
 
+# Student reviews that name an instructor link that name to his page.
+# First names come from PEOPLE; students call Andres "Andy" in the reviews.
+INSTRUCTOR_LINKS = {p["name"].split()[0]: p for p in PEOPLE}
+INSTRUCTOR_LINKS["Andy"] = INSTRUCTOR_LINKS["Andres"]
+_INSTRUCTOR_RE = re.compile(r"\b(%s)\b" % "|".join(sorted(INSTRUCTOR_LINKS, key=len, reverse=True)))
+
+def link_names(t):
+    """t is already HTML-escaped review text."""
+    def sub(m):
+        p = INSTRUCTOR_LINKS[m.group(1)]
+        return '<a class="iname" href="/instructors/%s/" title="Meet %s, %s">%s</a>' % (p["slug"], esc(p["name"]), esc(p["role"]), m.group(1))
+    return _INSTRUCTOR_RE.sub(sub, t)
+
 def review_card(r):
     src = ('%s<span><b>%s</b><span>5-star review on Google</span></span>' % (I["google"], esc(r["who"]))) if r["src"] == "google" \
         else ('%s<span><b>%s</b><span>Recommends on Facebook</span></span>' % (I["fb"], esc(r["who"])))
     stars = ('<span class="stars" role="img" aria-label="5 out of 5 stars">%s</span>' % (I["star"] * 5)) if r["src"] == "google" else ""
-    return '<article class="rev rv"><span class="rev-quote">&ldquo;</span>%s<p>%s</p><div class="rev-who">%s</div></article>' % (stars, esc(r["text"]), src)
+    return '<article class="rev rv"><span class="rev-quote">&ldquo;</span>%s<p>%s</p><div class="rev-who">%s</div></article>' % (stars, link_names(esc(r["text"])), src)
 
 def rev_grid(revs):
     return '<div class="rev-grid" data-orphan="%d">%s</div>' % (len(revs) % 3, "".join(review_card(r) for r in revs))

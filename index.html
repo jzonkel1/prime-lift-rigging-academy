@@ -169,7 +169,7 @@
           <img src="img/grad-dustin.jpg" alt="Dustin T., a Prime Lift graduate, holding his NCCER Certified Advanced Rigger certificate" width="1400" height="1750" fetchpriority="high">
           <figcaption><b>Dustin T.</b><span>Certified Advanced Rigger</span></figcaption>
         </figure>
-        <q>Best class ever. They give all the information so you don't fail. Frank and Andy do an excellent job to make sure you are trained right.</q>
+        <q>Best class ever. They give all the information so you don't fail. <a class="iname" href="/instructors/frank-torres/" title="Meet Frank Torres, Advanced Rigging Instructor">Frank</a> and <a class="iname" href="/instructors/andres-herrera/" title="Meet Andres Herrera, NCCER Practical Examiner">Andy</a> do an excellent job to make sure you are trained right.</q>
       </div>
       <div class="hero-slide">
         <figure class="hero-photo">
@@ -198,7 +198,7 @@
         <h2 class="h-sec">Trained Today.<br>Trusted Tomorrow.</h2>
       </div>
       <blockquote class="gw-quote rv">
-        <p>&ldquo;Great teachers and instructors. Frank and Andy will make sure you understand before moving on to the next lesson. 5/5 stars, highly recommend.&rdquo;</p>
+        <p>&ldquo;Great teachers and instructors. <a class="iname" href="/instructors/frank-torres/" title="Meet Frank Torres, Advanced Rigging Instructor">Frank</a> and <a class="iname" href="/instructors/andres-herrera/" title="Meet Andres Herrera, NCCER Practical Examiner">Andy</a> will make sure you understand before moving on to the next lesson. 5/5 stars, highly recommend.&rdquo;</p>
         <cite><b>Ryan P</b><span>5-star review on Google</span></cite>
       </blockquote>
     </div>
@@ -514,7 +514,7 @@
       </article>
       <article class="rv-panel ink">
         <span class="big-q" aria-hidden="true">&ldquo;</span>
-        <div class="who"><b>Ryan P</b><p>&ldquo;Awesome experience, a lot of knowledge on all rigging, from forklifts to rigging I've never even seen or heard of. Great teachers and instructors, Frank and Andy will make sure you understand before moving on to the next lesson. 5/5 stars, highly recommend to any and everybody wanting to get their certifications.&rdquo;</p><small>5-star review on Google</small></div>
+        <div class="who"><b>Ryan P</b><p>&ldquo;Awesome experience, a lot of knowledge on all rigging, from forklifts to rigging I've never even seen or heard of. Great teachers and instructors, <a class="iname" href="/instructors/frank-torres/" title="Meet Frank Torres, Advanced Rigging Instructor">Frank</a> and <a class="iname" href="/instructors/andres-herrera/" title="Meet Andres Herrera, NCCER Practical Examiner">Andy</a> will make sure you understand before moving on to the next lesson. 5/5 stars, highly recommend to any and everybody wanting to get their certifications.&rdquo;</p><small>5-star review on Google</small></div>
       </article>
     </div>
 
@@ -533,7 +533,7 @@
       </article>
       <article>
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.35 11.1H12v2.9h5.35c-.25 1.4-1.6 4.1-5.35 4.1a6.1 6.1 0 1 1 0-12.2c1.9 0 3.15.8 3.85 1.5l2.6-2.5A10 10 0 0 0 12 2a10 10 0 1 0 0 20c5.75 0 9.6-4.05 9.6-9.75 0-.65-.1-1.15-.25-1.15z"/></svg>
-        <div><p>Best class ever. They give all the information so you don't fail. Frank and Andy do an excellent job to make sure you are trained right.</p><b>Dustin T.</b><small>Certified Advanced Rigger</small></div>
+        <div><p>Best class ever. They give all the information so you don't fail. <a class="iname" href="/instructors/frank-torres/" title="Meet Frank Torres, Advanced Rigging Instructor">Frank</a> and <a class="iname" href="/instructors/andres-herrera/" title="Meet Andres Herrera, NCCER Practical Examiner">Andy</a> do an excellent job to make sure you are trained right.</p><b>Dustin T.</b><small>Certified Advanced Rigger</small></div>
       </article>
     </div>
   </div>
@@ -1413,7 +1413,7 @@ $$(".nm-item").forEach(a=>a.addEventListener("click",()=>{
   const stop=()=>{ if(t){ clearInterval(t); t=null; } };
   const start=()=>{ if(reduce||t) return; t=setInterval(()=>go(i+1),6500); };
   fig.addEventListener("pointerenter",stop); fig.addEventListener("pointerleave",start);
-  fig.addEventListener("click",()=>{ go(i+1); stop(); start(); });
+  fig.addEventListener("click",e=>{ if(e.target.closest("a")) return; go(i+1); stop(); start(); });
   new IntersectionObserver(e=>{ e[0].isIntersecting?start():stop(); },{threshold:.3}).observe(fig);
 })();
 </script>
