@@ -327,8 +327,11 @@ def page(url, title, desc, body, crumbs=(), schema=(), og_image="/img/og.jpg", h
 <meta name="twitter:description" content="%(desc)s">
 <meta name="twitter:image" content="%(ogimg)s">
 %(fonts)s
-<link rel="icon" href="/img/hook.png">
-<link rel="apple-touch-icon" href="/img/hook.png">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#111828">
 %(pre)s
 <link rel="stylesheet" href="/css/site.css">
 <link rel="stylesheet" href="/css/pages.css">
@@ -1137,7 +1140,7 @@ def rewrite_index():
     s = re.sub(r'https://(?:jzonkel1\.github\.io/prime-lift-rigging-academy|prime-lift-rigging-academy\.netlify\.app|primeliftrigging-academy\.com)/', ORIGIN + "/", s)
     s = re.sub(r'<link rel="canonical"[^>]*>\n?', "", s)
     s = re.sub(r'<link rel="alternate" hreflang=[^>]*>\n?', "", s)
-    s = s.replace('<link rel="icon" href="img/hook.png">', '<link rel="canonical" href="%s/">\n%s<link rel="icon" href="img/hook.png">' % (ORIGIN, hreflang_links("/")), 1)
+    s = s.replace('<link rel="icon" href="/favicon.ico" sizes="32x32">', '<link rel="canonical" href="%s/">\n%s<link rel="icon" href="/favicon.ico" sizes="32x32">' % (ORIGIN, hreflang_links("/")), 1)
     graph = [dict(org_schema(), **{"@id": BASE + "/#org"}),
              {"@type": "WebSite", "@id": BASE + "/#website", "url": BASE + "/", "name": BIZ["name"], "publisher": {"@id": BASE + "/#org"}},
              faq_schema(FAQ[:8]),
