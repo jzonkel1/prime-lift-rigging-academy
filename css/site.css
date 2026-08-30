@@ -1511,3 +1511,17 @@ p:last-child{margin-bottom:0}
   .plate{margin-top:24px}
 }
 @media(min-width:900px){.hero-in{padding-top:148px}}
+/* hero graduates rotate: slides stack, JS holds the container at the tallest slide */
+.hero-fig{position:relative; cursor:pointer}
+.hero-slide{position:absolute; inset:0 0 auto 0; opacity:0; transition:opacity .9s ease; pointer-events:none}
+.hero-slide.on{opacity:1; pointer-events:auto}
+.hero-slide .hero-photo{width:100%}
+@media(max-width:899px){
+  .hero-slide{display:flex; flex-direction:column; align-items:center}
+  .hero-slide q{position:static; order:-1; display:block; margin:0 auto 14px; max-width:96%; text-align:center; transform:skewX(-4deg)}
+}
+@media(prefers-reduced-motion:reduce){.hero-slide{transition:none}}
+/* text hands off cleanly: outgoing quote/name drop first, incoming ones arrive after the photo has faded */
+.hero-slide q,.hero-slide figcaption{transition:opacity .35s ease}
+.hero-slide:not(.on) q,.hero-slide:not(.on) figcaption{opacity:0}
+.hero-slide.on q,.hero-slide.on figcaption{transition-delay:.5s}

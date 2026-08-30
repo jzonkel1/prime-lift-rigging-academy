@@ -163,12 +163,28 @@
         </a>
       </div>
     </div>
-    <div class="hero-fig">
-      <figure class="hero-photo">
-        <img src="img/grad-dustin.jpg" alt="Dustin T., a Prime Lift graduate, holding his NCCER Certified Advanced Rigger certificate" width="1400" height="1750" fetchpriority="high">
-        <figcaption><b>Dustin T.</b><span>Certified Advanced Rigger</span></figcaption>
-      </figure>
-      <q>Best class ever. They give all the information so you don't fail. Frank and Andy do an excellent job to make sure you are trained right.</q>
+    <div class="hero-fig" id="heroFig" aria-roledescription="carousel" aria-label="Prime Lift graduates">
+      <div class="hero-slide on">
+        <figure class="hero-photo">
+          <img src="img/grad-dustin.jpg" alt="Dustin T., a Prime Lift graduate, holding his NCCER Certified Advanced Rigger certificate" width="1400" height="1750" fetchpriority="high">
+          <figcaption><b>Dustin T.</b><span>Certified Advanced Rigger</span></figcaption>
+        </figure>
+        <q>Best class ever. They give all the information so you don't fail. Frank and Andy do an excellent job to make sure you are trained right.</q>
+      </div>
+      <div class="hero-slide">
+        <figure class="hero-photo">
+          <img src="img/grad-joshua.jpg" alt="Joshua F., a Prime Lift graduate, holding his NCCER Certified Advanced Rigger certificate" width="1400" height="1750" loading="lazy">
+          <figcaption><b>Joshua F.</b><span>Certified Advanced Rigger</span></figcaption>
+        </figure>
+        <q>A lot of one-to-one explanation. All questions will be answered directly to you; the teacher will sit there and go over it as many times as you need until you understand.</q>
+      </div>
+      <div class="hero-slide">
+        <figure class="hero-photo">
+          <img src="img/grad-joel-hero.jpg" alt="Joel A., a Prime Lift graduate, holding his NCCER Certified Advanced Rigger certificate" width="1400" height="1750" loading="lazy">
+          <figcaption><b>Joel A.</b><span>Certified Advanced Rigger</span></figcaption>
+        </figure>
+        <q>Felt really connected with the instructors. No question was left unanswered, great demonstrations, hands-on was awesome. The knowledge was unmatched.</q>
+      </div>
     </div>
   </div>
 </section>
@@ -1382,6 +1398,23 @@ $$(".nm-item").forEach(a=>a.addEventListener("click",()=>{
     },{threshold:.25}).observe(car);
   }
   paint();
+})();
+</script>
+<script>
+/* ---- hero graduates: crossfade between real grads, pause on hover, tap to advance ---- */
+(function(){
+  const fig=document.getElementById("heroFig"); if(!fig) return;
+  const slides=[...fig.querySelectorAll(".hero-slide")]; if(slides.length<2) return;
+  const size=()=>{ fig.style.height=Math.max(...slides.map(s=>s.offsetHeight))+"px"; };
+  size(); addEventListener("resize",size,{passive:true});
+  fig.querySelectorAll("img").forEach(i=>{ if(!i.complete) i.addEventListener("load",size,{once:true}); });
+  let i=0,t=null; const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const go=n=>{ slides[i].classList.remove("on"); i=(n+slides.length)%slides.length; slides[i].classList.add("on"); };
+  const stop=()=>{ if(t){ clearInterval(t); t=null; } };
+  const start=()=>{ if(reduce||t) return; t=setInterval(()=>go(i+1),6500); };
+  fig.addEventListener("pointerenter",stop); fig.addEventListener("pointerleave",start);
+  fig.addEventListener("click",()=>{ go(i+1); stop(); start(); });
+  new IntersectionObserver(e=>{ e[0].isIntersecting?start():stop(); },{threshold:.3}).observe(fig);
 })();
 </script>
 <script src="/js/site.js" defer></script>
