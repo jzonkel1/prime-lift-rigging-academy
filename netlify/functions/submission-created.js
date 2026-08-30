@@ -14,7 +14,7 @@ exports.handler = async (event) => {
 
   let payload;
   try { payload = JSON.parse(event.body).payload; } catch { return { statusCode: 400, body: "bad body" }; }
-  const FORMS = { "enrollment-request": "Website Enrollment Form", "contact": "Website Contact Form", "employer-quote": "Website Employer Quote" };
+  const FORMS = { "enrollment-request": "Website Enrollment Form", "contact": "Website Contact Form" };
   if (!payload || !FORMS[payload.form_name]) return { statusCode: 200, body: "ignored" };
 
   const d = payload.data || {};
@@ -32,11 +32,6 @@ exports.handler = async (event) => {
     payment_method: d.payment_method || "",
     amount_due_today: d.amount_due_today || "",
     payer: d.payer || "",
-    company: d.company || "",
-    contact_name: d.contact_name || "",
-    headcount: d.headcount || "",
-    training: Array.isArray(d.training) ? d.training.join(", ") : (d.training || ""),
-    target_date: d.target_date || "",
     notes: [d.notes, d.note].filter(Boolean).join(" | "),
     sms_consent_nonmarketing: d.sms_consent_nonmarketing || "no",
     sms_consent_marketing: d.sms_consent_marketing || "no",

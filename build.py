@@ -18,8 +18,7 @@ real domain in one build.
 """
 import io, os, re, json, html, datetime
 from content import (BIZ, COURSES, ASSESSMENT, CRAFT_GROUPS, CRAFTS, PEOPLE,
-                     REVIEWS, FAQ, FINANCING, EMPLOYERS, EMPLOYERS_STATS, EMPLOYER_LOGOS,
-                     GROUP_RATE_NOTE, ES, GUIDES, RETEST_POLICY, CREDENTIAL_POSTING_TIME, WHY)
+                     REVIEWS, FAQ, FINANCING, ES, GUIDES, RETEST_POLICY, CREDENTIAL_POSTING_TIME, WHY)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 BASE = "https://primeliftrigging-academy.com"
@@ -128,7 +127,6 @@ def nav(home=False):
             <a class="nm-all" href="/instructors/">Meet The Whole Team %(arrow)s</a>
         </div></div>
       </div>
-      <a href="/employers/">Employers</a>
       <a href="/contact/">Contact</a>
     </nav>
     <div class="nav-cta">
@@ -153,7 +151,6 @@ def nav(home=False):
       <a href="/about/"><b>About</b></a>
       <a href="/reviews/"><b>Student Reviews</b></a>
       <a href="/faq/"><b>FAQ</b></a>
-      <a href="/employers/"><b>Employers</b><span>Crew training &amp; assessments</span></a>
       <a href="/contact/"><b>Contact</b></a>
       <a href="/es/" lang="es" hreflang="es"><b>Español</b><span>Información en español</span></a>
       <div class="mnav-cta">
@@ -551,12 +548,12 @@ def build_assessments():
   </div>
   %s
 </div></section>""" % (sec_head("01", "Test Out", "Skip The Class.<br>Prove The Craft."),
-                       checks(["Book a date online or call the office. Bringing a crew? Call for group scheduling.",
+                       checks(["Book a date online or call the office.",
                                "Bring a government-issued photo ID. NCCER requires it.",
                                "Written assessment, then the hands-on performance verification where the craft calls for one.",
                                "Pass and your credential goes on the NCCER Registry.",
                                "One flat $150 per assessment, paid in full when you book."]),
-                       cta_box("NCCER Assessment · $150", ["Monday through Friday, 8 AM to 5 PM, by appointment.", "Bringing a crew? Call the office for group scheduling."], price="$150", href="/?book=assessment#schedule", label="Request a Test Date"))
+                       cta_box("NCCER Assessment · $150", ["Monday through Friday, 8 AM to 5 PM, by appointment."], price="$150", href="/?book=assessment#schedule", label="Request a Test Date"))
     body += """<section class="section alt" id="crafts"><div class="wrap">
   %s%s
 </div></section>""" % (sec_head("02", "36 Crafts", "Crafts We Assess", "Pick your craft for what the assessment covers and who it's for. Don't see yours? Call the office; more crafts are available on request.", center=True), craft_groups_html())
@@ -603,13 +600,13 @@ def build_craft(c):
 </div></section>""" % (sec_head("01", "The Assessment", "Prove What<br>You Already Know."), esc(blurb), esc(name), esc(covers),
                        checks(["Experienced %ss who need the NCCER credential on paper" % short.lower() if not short.endswith("Operator") else "Experienced operators who need the NCCER credential on paper",
                                "Hands whose credential is coming due for renewal",
-                               "Crews a contractor needs verified before a turnaround",
+                               "Hands whose contractor needs the credential verified before a turnaround",
                                "Anyone hired on the condition of getting the card"]),
                        cta_box("%s · $150" % short, ["Written and hands-on, proctored on-site.", "Monday through Friday, 8 AM to 5 PM, by appointment."], price="$150", href="/?book=assessment#schedule", label="Request a Test Date"))
     body += """<section class="section how"><div class="how-bg" aria-hidden="true"><img src="/img/bg-classroom.jpg" alt="" loading="lazy"></div><div class="wrap">
   %s
   <div class="how-grid">
-    <div class="how-card rv"><span class="idx">01</span><h3>Book Your Date</h3><p>Online in two minutes, or call the office. Bringing a crew? Call for group scheduling.</p></div>
+    <div class="how-card rv"><span class="idx">01</span><h3>Book Your Date</h3><p>Online in two minutes, or call the office.</p></div>
     <div class="how-card rv"><span class="idx">02</span><h3>Test In Portland</h3><p>Written assessment first, then the hands-on performance verification where the craft calls for one.</p></div>
     <div class="how-card rv"><span class="idx">03</span><h3>Get The Credential</h3><p>Pass and it's recorded on the NCCER Registry, where every contractor in the country can verify it.</p></div>
   </div>
@@ -649,7 +646,7 @@ def build_dates():
     body += ("""<section class="section"><div class="wrap">
   %s
   <div class="sched-list" id="schedList"></div>
-  <p class="center-note rv" style="margin-top:30px">Seats are capped at 8 per class. Pick a date to reserve yours with a $200 deposit, or <a href="tel:%s" style="color:var(--accent)">call %s</a> to book a crew.</p>
+  <p class="center-note rv" style="margin-top:30px">Seats are capped at 8 per class. Pick a date to reserve yours with a $200 deposit, or <a href="tel:%s" style="color:var(--accent)">call %s</a> to book by phone.</p>
 </div></section>
 <script>
 /* Recurrence rules come from SCHEDULE_RULES in build.py (shared with the course pages). Change the rule there, never a list of dates. */
@@ -703,16 +700,13 @@ def build_financing():
     %s
     <p class="lede">If your company is covering the course, you don't need to front the money. Choose "My employer is paying" on the booking form and put your supervisor's or safety manager's contact in the notes; the office coordinates payment with them directly. Assessments work the same way.</p>
     %s
-    <p style="margin-top:26px"><a class="btn btn-ghost" href="/employers/">Crew Training For Employers %s</a></p>
   </div>
   %s
 </div></section>""" % (sec_head("02", "Employer-Sponsored Training", "Your Employer<br>Can Pay."),
                        checks(["Pick \"My employer is paying\" on the booking form and add their contact",
                                "The office coordinates payment with your company",
-                               "Employers can book whole crews: up to 8 seats per class, day, night or weekend",
-                               "Crews test out on site and credentials post to the NCCER Registry"]),
-                       I["arrow"],
-                       cta_box("Sending A Crew?", ["Company bookings for up to 8 students and crew assessments, with one point of contact at the office.", "Use the crew quote form and the office will call you back."], href="/employers/#quote", label="Request a Crew Quote"))
+                               "You train and test out here like any other student; the credential posts to the NCCER Registry under your name"]),
+                       cta_box("Company Paying?", ["Choose \"My employer is paying\" when you book and put your supervisor's contact in the notes.", "The office coordinates the invoice with them directly."], href="/#schedule", label="Reserve Your Seat"))
     body += """<section class="section"><div class="wrap">%s%s</div></section>""" % (sec_head("03", "Common Questions", "Financing FAQ", center=True), faq_html(faq))
     body += band(h2="Your Goals<br class=\"mbr\"> Are Worth It.", p="Reserve your seat with $200 and we'll walk you through the rest on the phone if you'd rather talk it through.")
     emit(url, page(url, "Financing & Payment Plans · No Credit Check", "Pay for NCCER rigger certification your way: $200 deposit, Klarna, Afterpay, Zelle, or in-house financing with no credit check. Portland, TX.", body, crumbs, [faq_schema(faq)], hero_img="/img/bg-crane-golden.jpg"), "0.8")
@@ -785,7 +779,7 @@ def build_contact():
     body += """<section class="section alt" id="message"><div class="wrap split">
   <div class="rv">
     %s
-    <p class="lede">Questions about a class, a crew booking, an assessment craft you don't see listed, or paying by Zelle? Send it here and the office will call or email you back during business hours. Ready to book? <a href="/#schedule" style="color:var(--accent)">Reserve online</a> and skip the wait.</p>
+    <p class="lede">Questions about a class, an assessment craft you don't see listed, or paying by Zelle? Send it here and the office will call or email you back during business hours. Ready to book? <a href="/#schedule" style="color:var(--accent)">Reserve online</a> and skip the wait.</p>
   </div>
   <form class="cform rv" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thanks.html">
     <input type="hidden" name="form-name" value="contact">
@@ -799,7 +793,7 @@ def build_contact():
     <label class="field"><span>What are you asking about?</span>
       <select name="program">
         <option>Advanced Rigger course</option><option>Signal Person course</option><option>NCCER assessment (test out)</option>
-        <option>Recertification</option><option>Booking a crew</option><option>Financing or paying by Zelle</option><option>Something else</option>
+        <option>Recertification</option><option>Financing or paying by Zelle</option><option>Something else</option>
       </select></label>
     <label class="field"><span>Your message</span><textarea name="notes" rows="4" required></textarea></label>
     <input type="hidden" name="page" value="/contact/">
@@ -830,7 +824,7 @@ def build_about():
                                "NCCER Signal Person certification: two Fridays",
                                "NCCER craft assessments in 36 crafts, $150 flat, by appointment",
                                "Financing with no credit check, so the cost never decides it",
-                               "Company bookings for crews of up to 8"]),
+                               "Classes capped at 8 seats"]),
                        cta_box("Ready When You Are", ["$200 holds a seat in any course.", "Assessments run every weekday by appointment."]))
     body += """<section class="section alt"><div class="wrap">%s%s</div></section>""" % (sec_head("02", "The Team", "Who's Teaching You", center=True), people_grid())
     body += """<section class="section"><div class="wrap">%s%s</div></section>""" % (sec_head("03", "Where We Are", "Serving The<br>Coastal Bend", "Students come to us from %s and %s, and from across South Texas." % (", ".join(BIZ["areas"][:-1]), BIZ["areas"][-1]), center=True),
@@ -867,7 +861,7 @@ def build_faq():
                        '<a class="btn btn-ghost" href="/contact/#message">Ask A Question</a>'])
     body += """<section class="section"><div class="wrap">%s</div></section>""" % faq_html(FAQ)
     body += band()
-    emit(url, page(url, "FAQ · NCCER Rigging Classes & Assessments in Portland, TX", "Course length, cost, the $200 deposit, Klarna and Afterpay, no-credit-check financing, NCCER credentials, testing out, crew bookings and where to find us.", body, crumbs, [faq_schema(FAQ)], hero_img="/img/bg-classroom.jpg"), "0.7")
+    emit(url, page(url, "FAQ · NCCER Rigging Classes & Assessments in Portland, TX", "Course length, cost, the $200 deposit, Klarna and Afterpay, no-credit-check financing, NCCER credentials, testing out and where to find us.", body, crumbs, [faq_schema(FAQ)], hero_img="/img/bg-classroom.jpg"), "0.7")
 
 
 def next_dates_strip(cid):
@@ -880,76 +874,6 @@ def next_dates_strip(cid):
         rows.append('<div class="nd-row" data-wd="%s" data-lead="%d" data-book="%s" data-fmt="%s"><b>%s</b><div class="nd-dates">%s</div></div>' % (
             r["wd"], LEAD_DAYS, r["id"], r["fmt"], esc(r["label"]), links))
     return '<div class="nextdates"><div class="wrap nextdates-in"><p class="nd-h">Next start dates</p>%s<a class="more nd-all" href="/class-dates/">See all dates %s</a></div></div>' % ("".join(rows), I["arrow"])
-
-def build_employers():
-    url = "/employers/"
-    e = EMPLOYERS
-    crumbs = [("Employers", url)]
-    body = phero("img/hero-cranes.jpg", "Two mobile cranes rigging at a Coastal Bend refinery turnaround at sunset", e["kicker"], e["h1"], e["lede"], crumbs,
-                 ctas=['<a class="btn btn-primary" href="#quote">Request a Crew Quote %s</a>' % I["arrow"],
-                       '<a class="btn btn-ghost" href="tel:%s">%s Call %s</a>' % (BIZ["phone_raw"], I["phone"], BIZ["phone"])])
-    body += specbar(e["specs"])
-    # optional proof: rendered only when the client gives us numbers
-    stats = [(v, lbl) for k, lbl, v in [("crews_trained", "crews trained", EMPLOYERS_STATS["crews_trained"]),
-                                         ("credentials_issued", "credentials posted to the Registry", EMPLOYERS_STATS["credentials_issued"]),
-                                         ("employers_served", "Coastal Bend employers served", EMPLOYERS_STATS["employers_served"])] if v]
-    stat_html = ('<div class="stat-row rv">%s</div>' % "".join('<div class="stat"><b>%s</b><span>%s</span></div>' % (esc(str(v)), esc(l)) for v, l in stats)) if stats else ""
-    logos = ('<p class="center-note rv">Crews we have trained: %s</p>' % esc(", ".join(EMPLOYER_LOGOS))) if EMPLOYER_LOGOS else ""
-    cta_lines = ["Advanced Rigger $1,000 · Signal Person $1,000 · Assessments $150 per person.", "Classes capped at 8. Larger crews run across sessions."]
-    if GROUP_RATE_NOTE: cta_lines.append(GROUP_RATE_NOTE)
-    body += """<section class="section"><div class="wrap split">
-  <div class="prose rv">
-    %s
-    <p class="lede">A crew that trains here tests here. There is no second trip to a third-party site and no waiting on someone else's calendar: the written and practical test-out happens in our on-site NCCER accredited assessment center, and passing credentials go on the NCCER Registry where your safety department verifies them.</p>
-    <h3 class="h-sub">Why crews train here</h3>
-    %s
-    %s%s
-  </div>
-  %s
-</div></section>""" % (sec_head("01", "For Employers", "Train And Test<br>In One Building."), checks(e["why"]), stat_html, logos,
-                       cta_box("Train Your Crew Here", cta_lines, href="#quote", label="Request a Crew Quote"))
-    steps_html = '<div class="how-grid">%s</div>' % "".join('<div class="how-card rv"><span class="idx">%02d</span><h3>%s</h3><p>%s</p></div>' % (i+1, t, esc(d)) for i, (t, d) in enumerate(e["steps"]))
-    body += """<section class="section how"><div class="how-bg" aria-hidden="true"><img src="/img/bg-classroom.jpg" alt="" loading="lazy"></div><div class="wrap">
-  %s%s
-</div></section>""" % (sec_head("02", "How It Works", "Three Steps To<br>A Credentialed Crew"), steps_html)
-    opts = "".join("<option>%s</option>" % esc(h) for h in e["headcounts"])
-    chks = "".join('<label class="chk"><input type="checkbox" name="training" value="%s"><span>%s</span></label>' % (esc(t), esc(t)) for t in e["training_options"])
-    body += """<section class="section alt" id="quote"><div class="wrap split">
-  <div class="rv">
-    %s
-    <p class="lede">Tell us the headcount, the credential and when you need the crew back on the job. The office will call you back during business hours with dates and a total. Prefer the phone? Call <a href="tel:%s" style="color:var(--accent)">%s</a> and ask for group scheduling.</p>
-  </div>
-  <form class="cform rv" name="employer-quote" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thanks.html">
-    <input type="hidden" name="form-name" value="employer-quote">
-    <p class="sr"><label>Don't fill this out: <input name="bot-field"></label></p>
-    <label class="field"><span>Company</span><input type="text" name="company" autocomplete="organization" required></label>
-    <div class="two-up">
-      <label class="field"><span>Your name</span><input type="text" name="contact_name" autocomplete="name" required></label>
-      <label class="field"><span>Phone</span><input type="tel" name="phone" autocomplete="tel" required></label>
-    </div>
-    <label class="field"><span>Email</span><input type="email" name="email" autocomplete="email"></label>
-    <label class="field"><span>How many people?</span><select name="headcount">%s</select></label>
-    <fieldset class="field chkgroup"><legend><span>Training needed</span></legend><div class="chkgroup-in">%s</div></fieldset>
-    <label class="field"><span>Target date or window</span><input type="text" name="target_date" placeholder="e.g. week of Oct 5, before the fall turnaround"></label>
-    <label class="field"><span>Notes</span><textarea name="notes" rows="4" placeholder="Shift, site requirements, credentials expiring…"></textarea></label>
-    <input type="hidden" name="page" value="/employers/">
-    <button class="btn btn-primary btn-block" type="submit">Request a Crew Quote %s</button>
-    <p class="pay-legal">The office answers during business hours, Monday through Friday. Nothing is booked or charged until you confirm dates with the office.</p>
-  </form>
-</div></section>""" % (sec_head("03", "Crew Quote", "Get Dates<br>For Your Crew"), BIZ["phone_raw"], BIZ["phone"], opts, chks, I["arrow"])
-    body += """<section class="section"><div class="wrap">
-  %s%s
-  <p class="center-note rv"><a href="/faq/" class="more">All questions %s</a></p>
-</div></section>""" % (sec_head("04", "Common Questions", "Employer FAQ", center=True), faq_html(e["faq"]), I["arrow"])
-    body += band(h2="Get The Whole Crew<br class=\"mbr\"> Credentialed.", p="One call to the office, one point of contact, and your crew trains and tests in the same building in Portland.",
-                 primary='<a class="btn btn-primary" href="#quote">Request a Crew Quote</a>')
-    schema = [{"@type": "Service", "name": "Crew Training and NCCER Assessments for Employers", "serviceType": "Group craft training and NCCER assessment",
-               "description": e["meta_desc"], "url": BASE + url, "provider": {"@id": BASE + "/#org"},
-               "areaServed": {"@type": "State", "name": "Texas"},
-               "audience": {"@type": "BusinessAudience", "name": "Employers, contractors, refineries and port operators in the Coastal Bend"},
-               "availableChannel": {"@type": "ServiceChannel", "serviceUrl": BASE + url + "#quote", "servicePhone": BIZ["phone_raw"]}},
-              faq_schema(e["faq"])]
-    emit(url, page(url, e["meta_title"], e["meta_desc"], body, crumbs, schema, hero_img="/img/hero-cranes.jpg"), "0.8")
 
 def build_es():
     url = "/es/"
@@ -1544,9 +1468,9 @@ def write_llms():
              "- Signal Person course: $1,000, $200 deposit. Two Fridays 8 AM-3 PM. NCCER Certified Signal Person.",
              "- NCCER assessments: $150 flat per assessment, 36 crafts, Mon-Fri 8 AM-5 PM by appointment. Written and hands-on, credential recorded on the NCCER Registry.",
              "- Payment: card deposit, Klarna and Afterpay (pay in full at checkout), Zelle, in-house financing with no credit check. Deposit non-refundable; one reschedule with 48 hours' notice.",
-             "- Class size: 8 seats. Crew and employer bookings at the Portland center (company bookings up to 8 students, crew assessments); no training at employer sites. No Spanish-language instruction; a Spanish-language summary page exists at /es/.", "",
+             "- Class size: 8 seats. Individual enrollment only: no employer, crew or group training programs and no training at employer sites (an employer may pay for a student's seat). No Spanish-language instruction; a Spanish-language summary page exists at /es/.", "",
              "## Pages", ""]
-    names = {"/": "Home and online booking", "/employers/": "Crew training for employers (company bookings up to 8, crew assessments, quote form)",
+    names = {"/": "Home and online booking",
              "/es/": "Resumen en español (Spanish-language summary of courses, assessments, financing, location)", "/guides/": "Guides (plain-English articles)"}
     names.update(("/guides/%s/" % g["slug"], "Guide: " + g["title"]) for g in GUIDES)
     for u, p in PAGES:
@@ -1599,11 +1523,10 @@ def main():
         "Don't Let It<br>Lapse.",
         ["Your NCCER Advanced Rigger credential is good for five years from the date it was issued. Contractors check the NCCER Registry, and an expired credential reads the same as no credential.",
          "Call the office with your NCCER card number and we'll tell you exactly what you need: a retest in our accredited assessment center, or a refresher class first if it's been a while. Either way you test out in the same building and the renewal is recorded on the Registry."],
-        ["Written and practical retest in our accredited testing room", "Refresher option: the full Advanced Rigger class in day, night or weekend format", "Renewal recorded on the NCCER Registry", "Crews with credentials expiring together can book as a group"],
+        ["Written and practical retest in our accredited testing room", "Refresher option: the full Advanced Rigger class in day, night or weekend format", "Renewal recorded on the NCCER Registry"],
         [("How long is an NCCER Advanced Rigger credential valid?", "Five years from the date it was issued. Check your card or the NCCER Registry for the date."),
          ("Do I have to retake the whole class?", "Not necessarily. Call the office with your card number and we'll tell you whether you can go straight to the retest or should take a refresher first."),
-         ("What does recertification cost?", "It depends on whether you retest or retake the course. Call (361) 413-0160 for a quote; the Advanced Rigger course is $1,000 if you choose the refresher."),
-         ("Can you recertify my whole crew?", "Yes. If several credentials expire together, call and we'll schedule the crew as a group, up to 8 per session.")],
+         ("What does recertification cost?", "It depends on whether you retest or retake the course. Call (361) 413-0160 for a quote; the Advanced Rigger course is $1,000 if you choose the refresher.")],
         book="advanced",
         specs=[("Credential life", "5 years"), ("Retest", "Written + hands-on"), ("Refresher class", "$1,000"), ("Schedule", "Call the office")],
         band_h2="Renew It<br class=\"mbr\"> Before It Lapses.", crumb="Recertification")
@@ -1615,7 +1538,6 @@ def main():
     build_about()
     build_reviews()
     build_faq()
-    build_employers()
     build_es()
     build_guides()
     build_404()

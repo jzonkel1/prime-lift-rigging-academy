@@ -61,7 +61,6 @@ COURSES = [
             ("New hires", "No experience required. The course starts from the ground up and you leave with a credential that gets you through the gate."),
             ("Experienced riggers", "You already know the work. Get the NCCER card that puts it on paper for every contractor and turnaround in the country."),
             ("Recertification", "NCCER rigger credentials are good for five years. Coming due? See our recertification page."),
-            ("Crews", "Companies book seats for up to 8 students per class. Call the office for group scheduling."),
         ],
         "faq": [
             ("How long is the Advanced Rigger course?", "Four days, Monday through Thursday, in either the day class (8:00 AM to 2:00 PM) or the night class (6:00 PM to 11:00 PM). The 3-Day Weekend Express runs Friday through Sunday, 8:00 AM to 5:00 PM."),
@@ -101,7 +100,6 @@ COURSES = [
             ("Riggers adding a credential", "Most Advanced Rigger students add Signal Person so they can fill either role on a crew."),
             ("Crane crews", "Refineries, plants, construction and shipyards all need a qualified signal person on the ground."),
             ("New to the trade", "No experience required. If you can learn the signals, you can earn the card."),
-            ("Crews", "Companies book seats for up to 8 students per class. Call the office for group scheduling."),
         ],
         "faq": [
             ("How long is the Signal Person course?", "Two Fridays, 8:00 AM to 3:00 PM, with the written and practical test at the end."),
@@ -129,7 +127,7 @@ ASSESSMENT = {
         ("What is an NCCER assessment?", "A proctored written assessment of what you know about your craft, with a hands-on performance verification where the craft calls for one. Pass, and your credential is recorded on the NCCER Registry, which contractors use to verify craft skills."),
         ("Do I have to take a class first?", "No. Assessments are for people who already have the field experience. If you want training first, see our Advanced Rigger and Signal Person courses."),
         ("What does it cost?", "$150 per assessment, one flat price across every craft we assess. Paid in full when you book."),
-        ("When can I test?", "Monday through Friday, 8:00 AM to 5:00 PM, by appointment. Book online or call the office. Bringing a crew? Call the office for group scheduling."),
+        ("When can I test?", "Monday through Friday, 8:00 AM to 5:00 PM, by appointment. Book online or call the office."),
         ("What do I bring?", "A government-issued photo ID. NCCER requires it before you can sit for any assessment."),
         ("What if I don't pass?", "Talk to the office about a retest date. Our instructors can also point you to the areas to study."),
     ],
@@ -336,8 +334,6 @@ FAQ = [
      "NCCER rigger credentials are valid for five years from the date they're issued. When yours is coming due, call the office and we'll schedule your recertification."),
     ("What is your deposit and reschedule policy?",
      "A $200 deposit is required to secure your spot. This deposit is non-refundable. However, you are allowed one reschedule as long as at least 48 hours' notice is provided. Rescheduling requests made with less than 48 hours' notice will result in the loss of your deposit."),
-    ("Can you certify my whole crew?",
-     "Yes. We take company bookings for up to 8 students at a time, here at our Portland training center. Call the office at (361) 413-0160 and ask for group scheduling."),
     ("Do you offer training in Spanish?",
      "Not at this time. All classes and assessments are taught and proctored in English."),
     ("Where are you located?",
@@ -350,51 +346,9 @@ FINANCING = [
     ("Klarna or Afterpay", "Split the cost into scheduled payments. Both pay the full $1,000 at checkout and then break it up for you, so choose Klarna or Afterpay on the checkout screen instead of the $200 deposit.", "Instant decision"),
     ("In-House Financing", "Don't qualify for Klarna or Afterpay? Start with as little as $200 down and make payments leading up to your class date. No credit check. Your course begins once the balance is paid in full.", "No credit check"),
     ("Zelle", "Prefer Zelle? Pick In-House on the booking screen and note it, or message us on Facebook or email the office and we'll register you manually.", "primelift26@gmail.com"),
-    ("Employer Paying", "Company covering it? Choose \"My employer is paying\" on the booking form and the office will coordinate the invoice with them. Crews of up to 8 per class.", "Group bookings"),
+    ("Employer Paying", "Company covering it? Choose \"My employer is paying\" on the booking form and the office will coordinate the invoice with them.", "Company pays"),
 ]
 
-
-# ------------------------------------------------------------- employers
-# Crew training page (/employers/). Facts only: everything below is already
-# stated elsewhere on the site (8 seats, 36 crafts, $150, formats, Registry).
-EMPLOYERS = {
-    "kicker": "For Safety Managers & Contractors",
-    "h1": "Crew Training<em>For Employers</em>",
-    "lede": "Train and test your crew at our NCCER accredited center in Portland, TX. Advanced Rigger, Signal Person and craft assessments in 36 crafts, with company bookings for up to 8 students and one point of contact at the office.",
-    "meta_title": "Crew Training for Employers · NCCER Rigging & Assessments",
-    "meta_desc": "Group rigging classes and NCCER assessments for crews in Portland, TX. Company bookings up to 8, day, night or weekend formats, test on site, posted to the NCCER Registry.",
-    "specs": [("Company bookings", "Up to 8 per class"), ("Formats", "Day · Night · Weekend"), ("Assessments", "$150 each"), ("One point of contact", "The office")],
-    "why": [
-        "Test where they train: the written and practical test-out happens in our on-site NCCER accredited assessment center, not at a third-party site weeks later",
-        "36 NCCER craft assessments on site, $150 flat each, for hands who already know the work",
-        "Day, night or 3-day weekend formats, so a crew can certify on the schedule that fits its shift",
-        "Credentials recorded on the NCCER Registry, where your safety department and site owners verify them",
-        "Published prices: Advanced Rigger $1,000, Signal Person $1,000, assessments $150. No quote games",
-        "Recertification available through the same office when credentials come up for renewal",
-    ],
-    "steps": [
-        ("Tell Us The Headcount", "Send the quote form below or call the office with how many people, which credential, and when you need them back on the job."),
-        ("We Confirm The Dates", "The office matches your headcount to open class dates in the format that fits their shift, and confirms it with one point of contact on your side."),
-        ("They Train, Test &amp; Get Posted", "Your crew trains and tests out in the same building in Portland. Passing credentials are recorded on the NCCER Registry."),
-    ],
-    "faq": [
-        ("How many people can you train at once?", "Classes are capped at 8 students. Larger crews are split across sessions, which can run in different formats (day, night, weekend) so the whole crew isn't off the job at the same time. Assessments are scheduled by appointment; call the office for group scheduling."),
-        ("Where does the training happen?", "At our NCCER accredited Training and Assessment Center, 1605 US Highway 181 Frontage Rd, Suite A, Portland, TX 78374, minutes from Corpus Christi, Ingleside and Gregory. Your crew trains and tests out in the same building."),
-        ("How does payment work when the company is paying?", "Send the quote request below, or have each student choose \"My employer is paying\" on the booking form and put your contact in the notes. The office coordinates payment with your company directly. Advanced Rigger and Signal Person are $1,000 per seat and assessments are $150 each."),
-        ("What does the crew need to bring?", "A government-issued photo ID for every person; NCCER requires it before anyone can sit for a test. Work boots for the hands-on portion, and something to write with. Book early and we'll send study material ahead of the class."),
-    ],
-    "training_options": ["Advanced Rigger", "Signal Person", "NCCER Assessments", "Recertification"],
-    "headcounts": ["1-4", "5-8", "9-15", "16+"],
-}
-# Optional proof for the employers page. Rendered only when set; the client
-# has not given us these numbers, so they stay None.
-EMPLOYERS_STATS = {
-    "crews_trained": None,        # e.g. "40+" -> "crews trained"
-    "credentials_issued": None,   # e.g. "300+" -> "credentials posted to the Registry"
-    "employers_served": None,     # e.g. "25" -> "Coastal Bend employers served"
-}
-EMPLOYER_LOGOS = None             # e.g. ["Company A", "Company B"] -> "Crews we've trained" strip
-GROUP_RATE_NOTE = None            # e.g. "Ask about rates for crews of 5 or more" (client has not set any)
 
 # ------------------------------------------------------------------ Spanish
 # /es/ landing page. Usted / impersonal register. Do not add claims about the
@@ -459,7 +413,7 @@ ES = {
         ("Klarna o Afterpay", "Divida el costo en pagos programados. Ambos pagan los $1,000 completos al momento de la compra y después lo dividen en cuotas, así que en la pantalla de pago elija Klarna o Afterpay en lugar del depósito de $200.", "Decisión inmediata"),
         ("Financiamiento interno", "¿No califica para Klarna o Afterpay? Empiece con tan solo $200 de enganche y haga pagos hasta la fecha de su clase. Sin revisión de crédito. El curso comienza cuando el saldo está pagado por completo.", "Sin revisión de crédito"),
         ("Zelle", "¿Prefiere Zelle? En la pantalla de reservación elija la opción de financiamiento interno y anótelo, o escríbanos por Facebook o por correo y lo registramos manualmente.", "primelift26@gmail.com"),
-        ("Paga su empleador", "¿Su empresa cubre el curso? Elija \"My employer is paying\" en el formulario de reservación y la oficina se coordina con ellos. Grupos de hasta 8 por clase.", "Grupos"),
+        ("Paga su empleador", "¿Su empresa cubre el curso? Elija \"My employer is paying\" en el formulario de reservación y la oficina se coordina con ellos.", "Grupos"),
     ],
     "fin_note": "El curso no puede comenzar hasta que el saldo esté pagado por completo. El depósito de $200 no es reembolsable; se permite un cambio de fecha con al menos 48 horas de anticipación.",
     "team_eyebrow": "Sus Instructores",
@@ -568,7 +522,7 @@ GUIDES = [
 <h2>Your NCCER card</h2>
 <p>NCCER issues a wallet card tied to your card number, and transcripts and certificates can be pulled from your Registry record. Keep the card number somewhere safe, on your phone as well as in your wallet. You will need it to register for future assessments, to <a href="/rigger-recertification/">recertify</a>, and to give to an employer who wants to verify you. If you lose the card, the record is still there; the number is what matters.</p>
 <h2>How an employer<br class="mbr"> verifies a credential</h2>
-<p>NCCER offers a credential verification lookup through nccer.org. An employer enters the worker's NCCER card number (with the worker's permission, or as part of the hiring paperwork) and sees what credentials are on record and when they were earned. Safety departments at Coastal Bend industrial sites use this to check contractor riggers, signal persons and craft hands before a turnaround. If you are an employer verifying a crew, use the lookup rather than trusting a photocopy of a card. If you need a whole crew credentialed before a job, see our <a href="/employers/">crew training page</a>.</p>
+<p>NCCER offers a credential verification lookup through nccer.org. An employer enters the worker's NCCER card number (with the worker's permission, or as part of the hiring paperwork) and sees what credentials are on record and when they were earned. Safety departments at Coastal Bend industrial sites use this to check contractor riggers, signal persons and craft hands before a turnaround. If you are an employer verifying a crew, use the lookup rather than trusting a photocopy of a card.</p>
 <h2>Training credentials vs.<br class="mbr"> assessment credentials</h2>
 <p>This is the distinction that trips people up. NCCER records two different kinds of things:</p>
 <ul>
@@ -579,7 +533,7 @@ GUIDES = [
 <h2>How long until it shows up?</h2>
 <p>Results are submitted to NCCER after testing and posted to the Registry by NCCER, not by us, so the timing is not something we control. Ask the office how long posting takes for your credential, and keep your card number handy so you can check the record yourself once it is up.</p>
 <h2>How long it stays valid</h2>
-<p>NCCER rigger credentials are valid for five years from the date they are issued. An expired credential on the Registry reads the same as no credential to a safety department, so note the date and <a href="/rigger-recertification/">recertify</a> before it lapses. Crews whose cards expire together can book recertification as a group.</p>
+<p>NCCER rigger credentials are valid for five years from the date they are issued. An expired credential on the Registry reads the same as no credential to a safety department, so note the date and <a href="/rigger-recertification/">recertify</a> before it lapses.</p>
 <h2>Quick checklist</h2>
 <ul>
 <li>Save your NCCER card number in more than one place.</li>
