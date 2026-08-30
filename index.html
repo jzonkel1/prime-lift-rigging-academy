@@ -1054,11 +1054,38 @@ $("#progGrid").addEventListener("click",e=>{
   pickProgram(b.dataset.prog);
 });
 
+/* phones: the program row swipes; dots follow whichever card is centred */
+const progTrack=$("#progGrid");
+const progDots=document.createElement("div");
+progDots.className="prog-dots"; progDots.setAttribute("aria-hidden","true");
+progDots.innerHTML=CONFIG.programs.map((p,i)=>`<i class="${i?"":"on"}"></i>`).join("");
+progTrack.after(progDots);
+const trackSwipes=()=>progTrack.scrollWidth>progTrack.clientWidth+4;
+const cardX=c=>c.getBoundingClientRect().left-progTrack.getBoundingClientRect().left+progTrack.scrollLeft;
+let dotTick=false;
+progTrack.addEventListener("scroll",()=>{
+  if(dotTick) return; dotTick=true;
+  requestAnimationFrame(()=>{
+    dotTick=false;
+    const cards=$$(".prog",progTrack); if(!cards.length) return;
+    const mid=progTrack.scrollLeft+progTrack.clientWidth/2;
+    let best=0,bd=Infinity;
+    cards.forEach((c,i)=>{ const d=Math.abs(cardX(c)+c.offsetWidth/2-mid); if(d<bd){bd=d;best=i;} });
+    $$("i",progDots).forEach((d,i)=>d.classList.toggle("on",i===best));
+  });
+},{passive:true});
+function showProgCard(id){
+  const c=$(`#progGrid .prog[data-prog="${id}"]`); if(!c||!trackSwipes()) return;
+  const pad=parseFloat(getComputedStyle(progTrack).paddingLeft)||0;
+  progTrack.scrollTo({left:cardX(c)-pad,behavior:"smooth"});
+}
+
 function pickProgram(id){
   $("#deepNote").hidden=true;
   S.prog=CONFIG.programs.find(p=>p.id===id);
   S.fmt=null; S.date=null;
   $$("#progGrid .prog").forEach(o=>o.classList.toggle("sel", o.dataset.prog===id));
+  showProgCard(id);   /* phones: bring the chosen card into view if the user comes back to step 1 */
   $("#fmtSub").textContent=S.prog.name;
   $("#fmtGrid").innerHTML = S.prog.formats.map((f,i)=>`
     <button class="fmt" data-fmt="${f.id}">

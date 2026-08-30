@@ -663,6 +663,26 @@ p:last-child{margin-bottom:0}
   font-family:var(--f-head); font-weight:400; font-size:24px; color:var(--accent); letter-spacing:.01em;
 }
 .prog .prog-price small{font-family:var(--f-body); font-weight:600; font-size:11.5px; color:var(--muted-2); letter-spacing:.08em; text-transform:uppercase; margin-left:8px}
+/* Phones: the three program cards were a ~1,000px stack inside a 1,100px step.
+   Below the 3-column breakpoint they become one swipeable, snap-scrolling row
+   that bleeds to the shell's edges, with the next card peeking in and dots
+   under it. Desktop keeps the grid. */
+.prog-dots{display:none}
+@media(max-width:759px){
+  .sched-body{--sb-pad:clamp(20px,2.6vw,34px)}
+  .prog-grid{
+    display:flex; gap:12px; overflow-x:auto; overscroll-behavior-x:contain;
+    scroll-snap-type:x mandatory; scroll-padding-inline:var(--sb-pad);
+    margin-inline:calc(-1 * var(--sb-pad)); padding:4px var(--sb-pad) 6px;
+    scrollbar-width:none; -webkit-overflow-scrolling:touch;
+  }
+  .prog-grid::-webkit-scrollbar{display:none}
+  .prog{flex:0 0 min(78vw,300px); scroll-snap-align:start}
+  .prog:hover{transform:none}
+  .prog-dots{display:flex; justify-content:center; gap:7px; margin-top:14px}
+  .prog-dots i{width:7px; height:7px; border-radius:50%; background:var(--edge-2); transition:background .2s, transform .2s}
+  .prog-dots i.on{background:var(--accent); transform:scale(1.3)}
+}
 
 /* format rows — hairline editorial list */
 .fmt-list{display:grid; border-top:1px solid var(--edge)}
