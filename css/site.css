@@ -1492,3 +1492,21 @@ p:last-child{margin-bottom:0}
   .hero-photo{width:100%}
   .hero-photo figcaption{text-align:center}
 }
+/* body headlines a notch bigger, more so on phones */
+.h-sec{font-size:clamp(40px,6vw,70px)}
+/* grad-strip captions: the lighter label face at a readable size; Anton crowded at this scale */
+.gw-strip figcaption{
+  font-family:var(--f-display); font-weight:600; font-size:14px; letter-spacing:.08em;
+  line-height:1.15; padding:38px 12px 12px; text-shadow:0 1px 10px rgba(0,0,0,.6);
+}
+.gw-strip figcaption small{font-size:9px; font-weight:700; letter-spacing:.16em; margin-top:5px}
+@media(max-width:759px){
+  .gw-strip figcaption{font-size:15px; letter-spacing:.06em; padding:30px 10px 10px}
+}
+/* four-line offer headline: pull the scale in a touch so the CTAs stay above the fold at 900px */
+@media(min-width:900px){
+  .hero h1{font-size:clamp(44px,5.9vw,80px)}
+  .hero-copy{padding-bottom:clamp(44px,5.4vw,76px)}
+  .hero-sub{margin-top:18px}
+  .plate{margin-top:24px}
+}
