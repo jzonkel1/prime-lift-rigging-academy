@@ -355,12 +355,21 @@ def crumbs_html(crumbs, home="Home"):
     items = ['<a href="/">%s</a>' % esc(home)] + ['<a href="%s">%s</a>' % (u, esc(n)) for n, u in crumbs[:-1]] + ["<span>%s</span>" % esc(crumbs[-1][0])]
     return '<nav class="crumbs" aria-label="Breadcrumb">%s</nav>' % " <i>/</i> ".join(items)
 
+def hero_img_tag(img, alt):
+    """Full-bleed hero <img>. Uses a -1200 phone variant via srcset when one exists
+    on disk, so phones never download the 2400px master."""
+    small = img.replace(".jpg", "-1200.jpg")
+    if os.path.exists(os.path.join(ROOT, small)):
+        return ('<img src="/%s" srcset="/%s 1200w, /%s 2400w" sizes="100vw" alt="%s" fetchpriority="high">'
+                % (img, small, img, esc(alt)))
+    return '<img src="/%s" alt="%s" fetchpriority="high">' % (img, esc(alt))
+
 def phero(img, alt, kicker, h1, lede, crumbs, ctas=None, cls="", home="Home"):
     ctas = ctas if ctas is not None else [
         ('<a class="btn btn-primary" href="/#schedule">Reserve Your Seat — $200 %s</a>' % I["arrow"]),
         ('<a class="btn btn-ghost" href="tel:%s">%s Call %s</a>' % (BIZ["phone_raw"], I["phone"], BIZ["phone"]))]
     return """<section class="phero %s">
-  <div class="phero-bg"><img src="/%s" alt="%s" fetchpriority="high"></div>
+  <div class="phero-bg">%s</div>
   <div class="wrap phero-in">
     %s
     <p class="eyebrow">%s</p>
@@ -368,7 +377,7 @@ def phero(img, alt, kicker, h1, lede, crumbs, ctas=None, cls="", home="Home"):
     <p class="lede">%s</p>
     <div class="hero-cta">%s</div>
   </div>
-</section>""" % (cls, img, esc(alt), crumbs_html(crumbs, home), esc(kicker), h1, esc(lede), "".join(ctas))
+</section>""" % (cls, hero_img_tag(img, alt), crumbs_html(crumbs, home), esc(kicker), h1, esc(lede), "".join(ctas))
 
 def specbar(cells):
     return '<div class="specbar"><div class="wrap specbar-in">%s</div></div>' % "".join(
