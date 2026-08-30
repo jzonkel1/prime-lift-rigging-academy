@@ -347,8 +347,17 @@ def page(url, title, desc, body, crumbs=(), schema=(), og_image="/img/og.jpg", h
 """ % dict(title=esc(title), desc=esc(desc), full=full, lang=lang, alt=hreflang_links(url),
            suffix="" if len(title) > 40 else " | Prime Lift Rigging Academy",
            robots='<meta name="robots" content="noindex, nofollow">' if NOINDEX else '<meta name="robots" content="index, follow, max-image-preview:large">',
-           ogimg=ORIGIN + og_image, fonts=FONTS, pre=pre, ld=ld(graph), nav=nav(), body=body,
-           footer=footer(), callbar=callbar())
+           ogimg=ORIGIN + og_image, fonts=FONTS, pre=pre, ld=ld(graph),
+           nav=es_lang_links(nav()) if lang == "es" else nav(), body=body,
+           footer=es_lang_links(footer()) if lang == "es" else footer(), callbar=callbar())
+
+# On Spanish pages the language links flip to English so visitors can switch back.
+def es_lang_links(html):
+    return (html
+        .replace('<a href="/es/" lang="es" hreflang="es"><b>Español</b><span>Información en español</span></a>',
+                 '<a href="/" hreflang="en"><b>English</b><span>Volver al sitio en inglés</span></a>')
+        .replace('<a class="foot-lang" href="/es/" lang="es" hreflang="es">Español</a>',
+                 '<a class="foot-lang" href="/" hreflang="en">English</a>'))
 
 # ------------------------------------------------------------ components
 def crumbs_html(crumbs, home="Home"):
