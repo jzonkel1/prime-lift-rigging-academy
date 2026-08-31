@@ -326,6 +326,9 @@ img.nccer{width:auto; display:inline-block; vertical-align:-1px}
   transform:scale(1.12); animation:zoomout 34s cubic-bezier(.2,.5,.3,1) forwards;
 }
 @keyframes zoomout{to{transform:scale(1.005)}}
+/* the photo arrives after first paint (data-defer) and fades over the ink + scrim */
+.hero-bg img[data-defer]{opacity:0; transition:opacity .7s ease}
+.hero-bg img[data-defer].in{opacity:1}
 @media(prefers-reduced-motion:reduce){.hero-bg img{animation:none; transform:none}}
 /* phones: the photo is landscape and the hero is a tall portrait stack (copy +
    graduate panel). Covering the whole section scaled the crane down to a sliver

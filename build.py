@@ -120,8 +120,11 @@ def responsive_images(html_text):
         sizes = d.get("data-sizes") or SIZES[role]      # data-sizes="..." on the tag overrides the role rule; plain sizes= is recomputed each build
         fallback = ([o for o in outs if o[0] <= 1200] or outs[:1])[-1][1]
         srcset = ", ".join("%s%s %dw" % (lead, rel, wd) for wd, rel in outs)
-        keep = " ".join(('%s="%s"' % (k, v)) if v is not None else k for k, v in attrs if k not in ("src", "srcset", "sizes", "data-o"))
-        return '<img src="%s%s" srcset="%s" sizes="%s" data-o="%s"%s>' % (lead, fallback, srcset, sizes, orig, (" " + keep) if keep else "")
+        keep = " ".join(('%s="%s"' % (k, v)) if v is not None else k for k, v in attrs if k not in ("src", "srcset", "sizes", "data-o", "data-src", "data-srcset"))
+        # data-defer: emit data-src/data-srcset instead, and a script swaps them in after first paint
+        # (the home hero photo: the headline is the LCP and must never wait on a 200 KB image)
+        pre = "data-" if "data-defer" in d else ""
+        return '<img %ssrc="%s%s" %ssrcset="%s" sizes="%s" data-o="%s"%s>' % (pre, lead, fallback, pre, srcset, sizes, orig, (" " + keep) if keep else "")
     return _IMG_TAG.sub(fix, html_text)
 
 # ----------------------------------------------------------------- icons
