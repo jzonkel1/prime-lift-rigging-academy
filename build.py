@@ -41,7 +41,8 @@ def w(rel, text):
 # srcset/sizes pair chosen from the markup around it. Before this, phones pulled
 # 2400px JPEG masters (up to 1.4 MB) into 350px cards: Lighthouse mobile 64.
 # To swap a photo, edit the src (or data-o once it has been rewritten) and rebuild.
-IMG_SKIP = {"favicon-32.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png", "icon-512-maskable.png",
+IMG_SKIP = {"cur-arrow.png", "cur-arrow@2x.png", "cur-link.png", "cur-link@2x.png",   # CSS cursors, never in <img>
+            "favicon-32.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png", "icon-512-maskable.png",
             "og.jpg", "grunge.png", "optin-consent.png", "chevron.png", "hook.png"}
 IMG_WIDTHS = (320, 480, 800, 1200, 1600, 2400)
 VARIANTS = {}          # "img/x.jpg" -> (orig_width, [(w, "img/x-w.webp"), ...])
@@ -2033,6 +2034,28 @@ a.guide-card:hover{border-color:var(--accent)}
 }
 .bk-done{max-width:720px; margin-inline:auto; border:1px solid var(--edge-2); border-top:2px solid var(--ok); background:var(--steel)}
 .bk-done .co-success h2{font-size:30px; margin-bottom:12px}
+
+/* ---- desktop cursor ----
+   The site's own arrow: the lucide pointer the icon set already comes from, white
+   with an ink edge everywhere, accent blue over anything clickable. SVG serves
+   Firefox and Chrome; the image-set PNGs (1x/2x) cover Safari (no SVG cursors)
+   and keep HiDPI Chrome crisp. Every rule keeps the native cursor as its
+   fallback, and phones/tablets never see any of it. Last in the bundle on
+   purpose: it has to outrank every component's own cursor:pointer. */
+@media (hover:hover) and (pointer:fine){
+  html{cursor:url(/img/cur-arrow.svg) 2 2, auto}
+  html{cursor:-webkit-image-set(url(/img/cur-arrow.png) 1x, url(/img/cur-arrow@2x.png) 2x) 2 2, auto}
+  :is(p, li, dd, dt, td, th, blockquote, figcaption, small, input, textarea){cursor:text}
+  :is(a, button, select, label, summary, [role=button], .btn, .macc-t, .faq-q, .hero-fig, .reel-arw, .consent .chk, .chkgroup .chk, .bk-step.is-done .bk-step-h, .reel-frame.needs-tap, input[type=submit], input[type=button], input[type=checkbox], input[type=radio]):not(:disabled),
+  :is(a, button, label, summary, [role=button], .btn, .macc-t, .faq-q, .hero-fig, .consent .chk, .chkgroup .chk) *{cursor:url(/img/cur-link.svg) 2 2, pointer}
+  :is(a, button, select, label, summary, [role=button], .btn, .macc-t, .faq-q, .hero-fig, .reel-arw, .consent .chk, .chkgroup .chk, .bk-step.is-done .bk-step-h, .reel-frame.needs-tap, input[type=submit], input[type=button], input[type=checkbox], input[type=radio]):not(:disabled),
+  :is(a, button, label, summary, [role=button], .btn, .macc-t, .faq-q, .hero-fig, .consent .chk, .chkgroup .chk) *{cursor:-webkit-image-set(url(/img/cur-link.png) 1x, url(/img/cur-link@2x.png) 2x) 2 2, pointer}
+  /* booking steps that are not finished yet are not clickable: plain arrow */
+  .bk-step:not(.is-done) .bk-step-h, .bk-step:not(.is-done) .bk-step-h *{cursor:inherit}
+  /* gallery tiles are role=button (so the link rule catches them); the native
+     zoom glass says more than a blue arrow does */
+  .gal figure, .gal figure *{cursor:zoom-in !important}
+}
 """
 
 SITE_JS = r"""
@@ -2060,12 +2083,15 @@ SITE_JS = r"""
   if(!home){
     /* no layout reads inside the handler: just scrollY, which is free */
     let ticking=false, navp="";
+    /* COMPARISON SWITCH (temporary, mirrors index.html): ?nav=flat = header never
+       changes; ?nav=scrim = scroll-driven. Remembered per tab. Remove once decided. */
+    const NAVMODE=(()=>{ try{ const q=new URLSearchParams(location.search).get("nav"); if(q) sessionStorage.setItem("navMode",q); return sessionStorage.getItem("navMode")||"scrim"; }catch(e){ return "scrim"; } })();
     function paint(){
       const y=window.scrollY;
-      /* header progress 0..1 over the first 160px, eased out so the glass is
+      /* header progress 0..1 over the first 160px, eased out so the scrim is
          already there by the time the hero text has moved; drives bar height,
-         logo size and the glass opacity in CSS (--navp) */
-      if(nav){ const t=Math.min(1,Math.max(0,y/160)), p=(1-(1-t)*(1-t)).toFixed(3); if(p!==navp){ navp=p; nav.style.setProperty("--navp",p); } }
+         logo size and the scrim opacity in CSS (--navp) */
+      if(nav&&NAVMODE!=="flat"){ const t=Math.min(1,Math.max(0,y/160)), p=(1-(1-t)*(1-t)).toFixed(3); if(p!==navp){ navp=p; nav.style.setProperty("--navp",p); } }
       if(callbar) callbar.classList.toggle("show",y>360);
       ticking=false;
     }

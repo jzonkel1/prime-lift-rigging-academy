@@ -201,22 +201,21 @@ img.nccer{width:auto; display:inline-block; vertical-align:-1px}
 /* The header has no on/off state. --navp is scroll progress (0 at the top, 1
    after ~160px; written by the scroll handlers in index.html and site.js) and
    drives everything at once: the bar compresses 110 -> 88, the logo 84 -> 66,
-   and a sheet of dark glass fades up behind the row. It used to be a class
-   toggle at 40px that tweened a 93% black slab in over .3s: a switch, not a
-   scroll. The glass is a pseudo-element on its own layer (opacity is
-   compositor-only, the blur radius never animates) with a feathered bottom
-   edge instead of a hairline, so the header reads as a veil the page slides
-   under, never as a bar that appeared. */
+   and an ink scrim fades up behind the row. It used to be a class toggle at
+   40px that tweened a 93% black slab in over .3s: a switch, not a scroll. The
+   scrim is a pseudo-element on its own layer (opacity is compositor-only) and
+   is the same device the hero uses to fade its photo into ink: no blur, which
+   appears nowhere else on the site, and no hairline. Its tail runs 76px past
+   the bar on eased stops, so the header reads as a veil the page slides under,
+   never as a bar that appeared. (?nav=flat in the URL = comparison mode where
+   --navp stays 0 and nothing here ever changes.) */
 .nav{position:fixed; inset:0 0 auto 0; z-index:70; --navp:0}
 .nav::before{
-  content:""; position:absolute; inset:0 0 -30px 0; z-index:0; pointer-events:none;
-  background:
-    linear-gradient(to bottom, rgba(255,255,255,.05), rgba(255,255,255,0) 40%),
-    rgba(9,9,11,.68);
-  -webkit-backdrop-filter:blur(22px) saturate(1.4);
-  -webkit-backdrop-filter:blur(22px) saturate(1.4); backdrop-filter:blur(22px) saturate(1.4);
-  -webkit-mask-image:linear-gradient(to bottom, #000 calc(100% - 30px), rgba(0,0,0,0));
-  mask-image:linear-gradient(to bottom, #000 calc(100% - 30px), rgba(0,0,0,0));
+  content:""; position:absolute; inset:0 0 -76px 0; z-index:0; pointer-events:none;
+  background:linear-gradient(to bottom,
+    rgba(10,10,12,.96) 0%, rgba(10,10,12,.93) 30%, rgba(10,10,12,.82) 50%,
+    rgba(10,10,12,.62) 64%, rgba(10,10,12,.38) 77%, rgba(10,10,12,.18) 88%,
+    rgba(10,10,12,.06) 95%, rgba(10,10,12,0) 100%);
   opacity:var(--navp);
 }
 .nav-in{display:flex; align-items:center; gap:26px; height:calc(110px - 22px * var(--navp))}

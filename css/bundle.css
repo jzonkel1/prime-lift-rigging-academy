@@ -210,22 +210,21 @@ img.nccer{width:auto; display:inline-block; vertical-align:-1px}
 /* The header has no on/off state. --navp is scroll progress (0 at the top, 1
    after ~160px; written by the scroll handlers in index.html and site.js) and
    drives everything at once: the bar compresses 110 -> 88, the logo 84 -> 66,
-   and a sheet of dark glass fades up behind the row. It used to be a class
-   toggle at 40px that tweened a 93% black slab in over .3s: a switch, not a
-   scroll. The glass is a pseudo-element on its own layer (opacity is
-   compositor-only, the blur radius never animates) with a feathered bottom
-   edge instead of a hairline, so the header reads as a veil the page slides
-   under, never as a bar that appeared. */
+   and an ink scrim fades up behind the row. It used to be a class toggle at
+   40px that tweened a 93% black slab in over .3s: a switch, not a scroll. The
+   scrim is a pseudo-element on its own layer (opacity is compositor-only) and
+   is the same device the hero uses to fade its photo into ink: no blur, which
+   appears nowhere else on the site, and no hairline. Its tail runs 76px past
+   the bar on eased stops, so the header reads as a veil the page slides under,
+   never as a bar that appeared. (?nav=flat in the URL = comparison mode where
+   --navp stays 0 and nothing here ever changes.) */
 .nav{position:fixed; inset:0 0 auto 0; z-index:70; --navp:0}
 .nav::before{
-  content:""; position:absolute; inset:0 0 -30px 0; z-index:0; pointer-events:none;
-  background:
-    linear-gradient(to bottom, rgba(255,255,255,.05), rgba(255,255,255,0) 40%),
-    rgba(9,9,11,.68);
-  -webkit-backdrop-filter:blur(22px) saturate(1.4);
-  -webkit-backdrop-filter:blur(22px) saturate(1.4); backdrop-filter:blur(22px) saturate(1.4);
-  -webkit-mask-image:linear-gradient(to bottom, #000 calc(100% - 30px), rgba(0,0,0,0));
-  mask-image:linear-gradient(to bottom, #000 calc(100% - 30px), rgba(0,0,0,0));
+  content:""; position:absolute; inset:0 0 -76px 0; z-index:0; pointer-events:none;
+  background:linear-gradient(to bottom,
+    rgba(10,10,12,.96) 0%, rgba(10,10,12,.93) 30%, rgba(10,10,12,.82) 50%,
+    rgba(10,10,12,.62) 64%, rgba(10,10,12,.38) 77%, rgba(10,10,12,.18) 88%,
+    rgba(10,10,12,.06) 95%, rgba(10,10,12,0) 100%);
   opacity:var(--navp);
 }
 .nav-in{display:flex; align-items:center; gap:26px; height:calc(110px - 22px * var(--navp))}
@@ -2069,3 +2068,25 @@ a.guide-card:hover{border-color:var(--accent)}
 }
 .bk-done{max-width:720px; margin-inline:auto; border:1px solid var(--edge-2); border-top:2px solid var(--ok); background:var(--steel)}
 .bk-done .co-success h2{font-size:30px; margin-bottom:12px}
+
+/* ---- desktop cursor ----
+   The site's own arrow: the lucide pointer the icon set already comes from, white
+   with an ink edge everywhere, accent blue over anything clickable. SVG serves
+   Firefox and Chrome; the image-set PNGs (1x/2x) cover Safari (no SVG cursors)
+   and keep HiDPI Chrome crisp. Every rule keeps the native cursor as its
+   fallback, and phones/tablets never see any of it. Last in the bundle on
+   purpose: it has to outrank every component's own cursor:pointer. */
+@media (hover:hover) and (pointer:fine){
+  html{cursor:url(/img/cur-arrow.svg) 2 2, auto}
+  html{cursor:-webkit-image-set(url(/img/cur-arrow.png) 1x, url(/img/cur-arrow@2x.png) 2x) 2 2, auto}
+  :is(p, li, dd, dt, td, th, blockquote, figcaption, small, input, textarea){cursor:text}
+  :is(a, button, select, label, summary, [role=button], .btn, .macc-t, .faq-q, .hero-fig, .reel-arw, .consent .chk, .chkgroup .chk, .bk-step.is-done .bk-step-h, .reel-frame.needs-tap, input[type=submit], input[type=button], input[type=checkbox], input[type=radio]):not(:disabled),
+  :is(a, button, label, summary, [role=button], .btn, .macc-t, .faq-q, .hero-fig, .consent .chk, .chkgroup .chk) *{cursor:url(/img/cur-link.svg) 2 2, pointer}
+  :is(a, button, select, label, summary, [role=button], .btn, .macc-t, .faq-q, .hero-fig, .reel-arw, .consent .chk, .chkgroup .chk, .bk-step.is-done .bk-step-h, .reel-frame.needs-tap, input[type=submit], input[type=button], input[type=checkbox], input[type=radio]):not(:disabled),
+  :is(a, button, label, summary, [role=button], .btn, .macc-t, .faq-q, .hero-fig, .consent .chk, .chkgroup .chk) *{cursor:-webkit-image-set(url(/img/cur-link.png) 1x, url(/img/cur-link@2x.png) 2x) 2 2, pointer}
+  /* booking steps that are not finished yet are not clickable: plain arrow */
+  .bk-step:not(.is-done) .bk-step-h, .bk-step:not(.is-done) .bk-step-h *{cursor:inherit}
+  /* gallery tiles are role=button (so the link rule catches them); the native
+     zoom glass says more than a blue arrow does */
+  .gal figure, .gal figure *{cursor:zoom-in !important}
+}

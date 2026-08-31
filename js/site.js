@@ -22,12 +22,15 @@
   if(!home){
     /* no layout reads inside the handler: just scrollY, which is free */
     let ticking=false, navp="";
+    /* COMPARISON SWITCH (temporary, mirrors index.html): ?nav=flat = header never
+       changes; ?nav=scrim = scroll-driven. Remembered per tab. Remove once decided. */
+    const NAVMODE=(()=>{ try{ const q=new URLSearchParams(location.search).get("nav"); if(q) sessionStorage.setItem("navMode",q); return sessionStorage.getItem("navMode")||"scrim"; }catch(e){ return "scrim"; } })();
     function paint(){
       const y=window.scrollY;
-      /* header progress 0..1 over the first 160px, eased out so the glass is
+      /* header progress 0..1 over the first 160px, eased out so the scrim is
          already there by the time the hero text has moved; drives bar height,
-         logo size and the glass opacity in CSS (--navp) */
-      if(nav){ const t=Math.min(1,Math.max(0,y/160)), p=(1-(1-t)*(1-t)).toFixed(3); if(p!==navp){ navp=p; nav.style.setProperty("--navp",p); } }
+         logo size and the scrim opacity in CSS (--navp) */
+      if(nav&&NAVMODE!=="flat"){ const t=Math.min(1,Math.max(0,y/160)), p=(1-(1-t)*(1-t)).toFixed(3); if(p!==navp){ navp=p; nav.style.setProperty("--navp",p); } }
       if(callbar) callbar.classList.toggle("show",y>360);
       ticking=false;
     }
