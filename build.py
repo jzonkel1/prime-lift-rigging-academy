@@ -21,7 +21,7 @@ from content import (BIZ, COURSES, ASSESSMENT, CRAFT_GROUPS, CRAFTS, PEOPLE,
                      REVIEWS, FAQ, FINANCING, ES, GUIDES, RETEST_POLICY, CREDENTIAL_POSTING_TIME, WHY)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-BASE = "https://primeliftrigging-academy.com"
+BASE = "https://primeliftriggingtx.com"   # launch domain per Jeffrey 8/31/26 (NOT primeliftrigging-academy.com; 301 that one here at launch)
 PREVIEW = "https://prime-lift-rigging-academy.netlify.app"
 NOINDEX = True                       # <- flip to False at launch
 ORIGIN = PREVIEW if NOINDEX else BASE
@@ -1628,7 +1628,7 @@ def rewrite_index():
     s = between(s, "/* SCHED:START */", "/* SCHED:END */", "/* SCHED:START */ const SCHED=%s; " % sched_json())
     # head: robots + canonical + og origin + schema
     s = re.sub(r'<meta name="robots"[^>]*>', '<meta name="robots" content="noindex, nofollow">' if NOINDEX else '<meta name="robots" content="index, follow, max-image-preview:large">', s)
-    s = re.sub(r'https://(?:jzonkel1\.github\.io/prime-lift-rigging-academy|prime-lift-rigging-academy\.netlify\.app|primeliftrigging-academy\.com)/', ORIGIN + "/", s)
+    s = re.sub(r'https://(?:jzonkel1\.github\.io/prime-lift-rigging-academy|prime-lift-rigging-academy\.netlify\.app|primeliftrigging-academy\.com|primeliftriggingtx\.com)/', ORIGIN + "/", s)
     s = re.sub(r'<link rel="canonical"[^>]*>\n?', "", s)
     s = re.sub(r'<link rel="alternate" hreflang=[^>]*>\n?', "", s)
     s = s.replace('<link rel="icon" href="/favicon.ico" sizes="32x32">', '<link rel="canonical" href="%s/">\n%s<link rel="icon" href="/favicon.ico" sizes="32x32">' % (ORIGIN, hreflang_links("/")), 1)
