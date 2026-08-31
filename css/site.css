@@ -207,9 +207,10 @@ img.nccer{width:auto; display:inline-block; vertical-align:-1px}
 .nav-in{display:flex; align-items:center; gap:26px; height:110px; transition:height .3s ease}
 .nav.stuck .nav-in{height:88px}
 .brand{display:flex; align-items:center; gap:18px; flex:none}
-.brand img{height:84px; width:auto; transition:height .3s ease}
-.nav.stuck .brand img{height:66px}
-@media(max-width:620px){.brand img{height:62px}}
+/* direct child only: the NCCER mark inside .brand-txt must not inherit the logo's sizes */
+.brand>img{height:84px; width:auto; transition:height .3s ease}
+.nav.stuck .brand>img{height:66px}
+@media(max-width:620px){.brand>img{height:62px}}
 /* The logo already says the company name — the nav only adds what it doesn't. */
 .brand-txt{display:none}
 @media(min-width:1000px){
