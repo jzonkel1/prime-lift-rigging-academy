@@ -16,7 +16,7 @@ Launch switch: set NOINDEX = False. That drops the noindex meta on every page,
 and moves canonical / og / sitemap URLs from the Netlify preview origin to the
 real domain in one build.
 """
-import io, os, re, json, html, datetime
+import io, os, re, json, html, datetime, urllib.parse
 from content import (BIZ, COURSES, ASSESSMENT, CRAFT_GROUPS, CRAFTS, PEOPLE,
                      REVIEWS, FAQ, FINANCING, ES, GUIDES, RETEST_POLICY, CREDENTIAL_POSTING_TIME, WHY)
 
@@ -627,6 +627,7 @@ def build_craft(c):
     crumbs = [("NCCER Assessments", "/nccer-assessments/"), (short, url)]
     title = "NCCER %s Assessment · Portland, TX" % short
     desc = "Test out of the NCCER %s assessment near Corpus Christi: proctored written and hands-on, $150 flat, credential on the NCCER Registry." % short
+    book = "/book/?book=assessment&amp;craft=%s" % urllib.parse.quote(short)   # /book/ prefills the craft select from ?craft=
     siblings = [x for x in CRAFTS if x[2] == gid and x[0] != slug]
     sib = "".join('<li><a href="/nccer-assessments/%s/">%s%s</a></li>' % (s, I["arrow"], esc(craft_short(n))) for s, n, g, b, cv in siblings)
     faq = [
@@ -638,7 +639,7 @@ def build_craft(c):
     body = phero("img/testing-room.jpg", "Candidates taking a proctored NCCER assessment in the on-site testing room",
                  gname, "%s<em>NCCER Assessment</em>" % esc(short),
                  "Proctored written and hands-on assessment in Portland, TX. One flat $150, credential to the NCCER Registry. Monday through Friday by appointment.", crumbs,
-                 ctas=['<a class="btn btn-primary" href="/book/?book=assessment">Request a Test Date %s</a>' % I["arrow"],
+                 ctas=['<a class="btn btn-primary" href="%s">Request a Test Date %s</a>' % (book, I["arrow"]),
                        '<a class="btn btn-ghost" href="tel:%s">%s Call %s</a>' % (BIZ["phone_raw"], I["phone"], BIZ["phone"])], cls="phero-craft")
     body += specbar([("Assessment fee", "$150"), ("Format", "Written + hands-on"), ("When", "Mon – Fri · 8 AM – 5 PM"), ("Credential", "NCCER Registry")])
     body += """<section class="section"><div class="wrap split">
@@ -656,7 +657,7 @@ def build_craft(c):
                                "Hands whose credential is coming due for renewal",
                                "Hands whose contractor needs the credential verified before a turnaround",
                                "Anyone hired on the condition of getting the card"]),
-                       cta_box("%s · $150" % short, ["Written and hands-on, proctored on-site.", "Monday through Friday, 8 AM to 5 PM, by appointment."], price="$150", href="/book/?book=assessment", label="Request a Test Date"))
+                       cta_box("%s · $150" % short, ["Written and hands-on, proctored on-site.", "Monday through Friday, 8 AM to 5 PM, by appointment."], price="$150", href=book, label="Request a Test Date"))
     body += """<section class="section how"><div class="how-bg" aria-hidden="true"><img src="/img/bg-classroom.jpg" alt="" loading="lazy"></div><div class="wrap">
   %s
   <div class="how-grid">
@@ -670,7 +671,7 @@ def build_craft(c):
   <div class="rv"><h3 class="h-sub">Other crafts in %s</h3><ul class="craft-list">%s</ul><p style="margin-top:18px"><a class="more" href="/nccer-assessments/#crafts">All 36 crafts %s</a></p></div>
 </div></section>""" % (sec_head("03", "Common Questions", "%s FAQ" % esc(short)), faq_html(faq), esc(gname), sib, I["arrow"])
     body += band(h2="Already Know<br class=\"mbr\"> The Work?", p="Book your %s assessment, bring your ID, and leave with a credential the whole industry recognizes." % short,
-                 primary='<a class="btn btn-primary" href="/book/?book=assessment">Request a Test Date</a>')
+                 primary='<a class="btn btn-primary" href="%s">Request a Test Date</a>' % book)
     emit(url, page(url, title, desc, body, crumbs,
                    [service_schema("NCCER %s Assessment" % name, desc, url), faq_schema(faq)], hero_img="/img/testing-room.jpg"), "0.6")
 
@@ -1155,7 +1156,7 @@ def build_book():
         <section class="bk-step is-locked" data-step="3">
           <button class="bk-step-h" type="button" disabled><span class="idx">03</span><span><b>Start Date</b><span class="bk-pick"></span></span><span class="bk-change">Change</span></button>
           <div class="bk-step-b">
-            <p class="bk-q">Pick a start date <span id="dateSub"></span></p>
+            <p class="bk-q"><span id="dateQt">Pick a start date</span> <span id="dateSub"></span></p>
             <div class="bd-grid" id="bdGrid"></div>
             <p class="bk-note">Every class is capped at 8 seats, and booking closes the day before it starts. Need a date you don't see? <a href="tel:__TEL__">Call the office</a>.</p>
           </div>
@@ -1201,7 +1202,7 @@ def build_book():
               <button class="paytab" data-pay="afterpay" role="tab" type="button">Afterpay</button>
               <button class="paytab" data-pay="inhouse" role="tab" type="button">In-House</button>
             </div>
-            <div class="payform on" data-form="card"><div class="alt-pay"><b>Pay the deposit by card</b><p>You'll enter your card on Stripe's secure checkout page. Your seat is held the moment the payment goes through, and a receipt is emailed to you.</p><ul><li>Visa, Mastercard, Amex, Discover</li><li>Apple Pay and Google Pay on your phone</li><li>Balance can be paid online any time before class</li></ul></div></div>
+            <div class="payform on" data-form="card"><div class="alt-pay"><b id="cardH">Pay the deposit by card</b><p>You'll enter your card on Stripe's secure checkout page. Your seat is held the moment the payment goes through, and a receipt is emailed to you.</p><ul><li>Visa, Mastercard, Amex, Discover</li><li>Apple Pay and Google Pay on your phone</li><li id="cardBal">Balance can be paid online any time before class</li></ul></div></div>
             <div class="payform" data-form="klarna"><div class="alt-pay"><b>Pay with Klarna</b><p>Klarna covers your course in full and then splits it into scheduled payments for you, so this option charges the <strong style="color:#fff">full course price</strong>, not the $200 deposit.</p><ul><li>Choose your payment plan on Klarna</li><li>Instant decision</li><li>Your seat is confirmed the moment Klarna approves</li></ul></div></div>
             <div class="payform" data-form="afterpay"><div class="alt-pay"><b>Pay with Afterpay</b><p>Same as Klarna: Afterpay pays the course in full and breaks it into installments for you, so this option charges the <strong style="color:#fff">full course price</strong> rather than the deposit.</p><ul><li>Instant decision</li><li>Installments handled by Afterpay</li><li>Seat confirmed on approval</li></ul></div></div>
             <div class="payform" data-form="inhouse"><div class="alt-pay"><b>In-House Financing, No Credit Check</b><p>Didn't qualify for Klarna or Afterpay? We'll set you up directly. Start with as little as $200 down and make payments leading up to your class date.</p><ul><li>No credit check</li><li>Payments scheduled before your start date</li><li>Course begins once the balance is paid in full</li></ul><p style="margin-top:13px">Prefer Zelle? Choose this and note it below; the office will send details and register you manually.</p></div>
@@ -1303,8 +1304,13 @@ def build_book():
       $("#fmtList").innerHTML=S.prog.formats.map((f,i)=>'<button class="fmt" type="button" data-fmt="'+f.id+'"><span class="idx">'+pad2(i+1)+'</span><span><b>'+f.name+'</b><span>'+f.time+' &nbsp;<em>· '+f.note+'</em></span></span>'+ARROW+'</button>').join("");
     }
     if(same&&S.fmt){ show(S.date?4:3,scroll); return; }
-    if(S.prog.formats.length===1) pickFormat(S.prog.formats[0].id,scroll);
-    else show(2,scroll);
+    /* Always stop on the schedule step, even when the program has a single format
+       (assessments, Signal Person). Auto-picking it used to drop students on the
+       date step with a schedule they never chose. Now they tap it and see the times. */
+    const assess=S.prog.id==="assessment";
+    $(".bk-step-h b",step(3)).textContent=assess?"Test Date":"Start Date";
+    $("#dateQt").textContent=assess?"Pick a test date":"Pick a start date";
+    show(2,scroll);
   }
 
   /* 02 schedule */
@@ -1372,11 +1378,19 @@ def build_book():
     return dep===S.prog.price?"Pay "+money(dep):"Pay "+money(dep)+" Deposit";
   }
   function renderPay(){
+    const p=S.prog, assess=p.id==="assessment";
+    /* a $150 assessment has no balance to finance: no in-house tab, and the card copy drops the deposit language */
+    const inh=$('.paytab[data-pay="inhouse"]'); inh.style.display=assess?"none":""; if(assess&&S.method==="inhouse") S.method="card";
+    const bnpl=(S.method==="klarna"||S.method==="afterpay"), bal=p.price-depositFor(p,S.method);
     $("#bkSummary").innerHTML=summaryRows(S.method);
     $("#payBtn").textContent=payLabel(S.method);
-    $("#coLegal").textContent=(S.method==="klarna"||S.method==="afterpay")
+    $("#cardH").textContent=bal>0?"Pay the deposit by card":"Pay by card";
+    $("#cardBal").style.display=bal>0?"":"none";
+    $("#coLegal").textContent=bnpl
       ?"Klarna and Afterpay pay your course in full, then split it into installments for you. Your seat is confirmed as soon as they approve."
-      :"Balance must be paid in full before your class begins. Seats are released if the deposit isn't received.";
+      :bal>0?"Balance must be paid in full before your class begins. Seats are released if the deposit isn't received."
+      :assess?"The assessment fee is paid in full today. Your test date is held the moment the payment goes through."
+      :"Paid in full today. Your seat is held the moment the payment goes through.";
     $$(".paytab").forEach(t=>t.classList.toggle("on",t.dataset.pay===S.method));
     $$(".payform").forEach(f=>f.classList.toggle("on",f.dataset.form===S.method));
   }
@@ -1470,6 +1484,8 @@ def build_book():
       pickProgram(id,false);
       const f=q.get("fmt"); if(f&&S.prog.formats.some(x=>x.id===f)) pickFormat(f,false);
       const d=q.get("date"); if(S.fmt&&d&&S.fmt.dates.includes(d)&&!isFull(d,key())) pickDate(d,false);
+      /* craft pages pass their craft (?craft=Plumber): prefill the step-4 select, still changeable */
+      const c=q.get("craft"); if(c&&S.prog.id==="assessment"&&CRAFTS.includes(c)) $("#fCraft").value=c;
     }
     if(location.search) history.replaceState(null,"",location.pathname);
     renderSide();

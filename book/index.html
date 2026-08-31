@@ -183,7 +183,7 @@
         <section class="bk-step is-locked" data-step="3">
           <button class="bk-step-h" type="button" disabled><span class="idx">03</span><span><b>Start Date</b><span class="bk-pick"></span></span><span class="bk-change">Change</span></button>
           <div class="bk-step-b">
-            <p class="bk-q">Pick a start date <span id="dateSub"></span></p>
+            <p class="bk-q"><span id="dateQt">Pick a start date</span> <span id="dateSub"></span></p>
             <div class="bd-grid" id="bdGrid"></div>
             <p class="bk-note">Every class is capped at 8 seats, and booking closes the day before it starts. Need a date you don't see? <a href="tel:+13614130160">Call the office</a>.</p>
           </div>
@@ -229,7 +229,7 @@
               <button class="paytab" data-pay="afterpay" role="tab" type="button">Afterpay</button>
               <button class="paytab" data-pay="inhouse" role="tab" type="button">In-House</button>
             </div>
-            <div class="payform on" data-form="card"><div class="alt-pay"><b>Pay the deposit by card</b><p>You'll enter your card on Stripe's secure checkout page. Your seat is held the moment the payment goes through, and a receipt is emailed to you.</p><ul><li>Visa, Mastercard, Amex, Discover</li><li>Apple Pay and Google Pay on your phone</li><li>Balance can be paid online any time before class</li></ul></div></div>
+            <div class="payform on" data-form="card"><div class="alt-pay"><b id="cardH">Pay the deposit by card</b><p>You'll enter your card on Stripe's secure checkout page. Your seat is held the moment the payment goes through, and a receipt is emailed to you.</p><ul><li>Visa, Mastercard, Amex, Discover</li><li>Apple Pay and Google Pay on your phone</li><li id="cardBal">Balance can be paid online any time before class</li></ul></div></div>
             <div class="payform" data-form="klarna"><div class="alt-pay"><b>Pay with Klarna</b><p>Klarna covers your course in full and then splits it into scheduled payments for you, so this option charges the <strong style="color:#fff">full course price</strong>, not the $200 deposit.</p><ul><li>Choose your payment plan on Klarna</li><li>Instant decision</li><li>Your seat is confirmed the moment Klarna approves</li></ul></div></div>
             <div class="payform" data-form="afterpay"><div class="alt-pay"><b>Pay with Afterpay</b><p>Same as Klarna: Afterpay pays the course in full and breaks it into installments for you, so this option charges the <strong style="color:#fff">full course price</strong> rather than the deposit.</p><ul><li>Instant decision</li><li>Installments handled by Afterpay</li><li>Seat confirmed on approval</li></ul></div></div>
             <div class="payform" data-form="inhouse"><div class="alt-pay"><b>In-House Financing, No Credit Check</b><p>Didn't qualify for Klarna or Afterpay? We'll set you up directly. Start with as little as $200 down and make payments leading up to your class date.</p><ul><li>No credit check</li><li>Payments scheduled before your start date</li><li>Course begins once the balance is paid in full</li></ul><p style="margin-top:13px">Prefer Zelle? Choose this and note it below; the office will send details and register you manually.</p></div>
@@ -331,8 +331,13 @@
       $("#fmtList").innerHTML=S.prog.formats.map((f,i)=>'<button class="fmt" type="button" data-fmt="'+f.id+'"><span class="idx">'+pad2(i+1)+'</span><span><b>'+f.name+'</b><span>'+f.time+' &nbsp;<em>· '+f.note+'</em></span></span>'+ARROW+'</button>').join("");
     }
     if(same&&S.fmt){ show(S.date?4:3,scroll); return; }
-    if(S.prog.formats.length===1) pickFormat(S.prog.formats[0].id,scroll);
-    else show(2,scroll);
+    /* Always stop on the schedule step, even when the program has a single format
+       (assessments, Signal Person). Auto-picking it used to drop students on the
+       date step with a schedule they never chose. Now they tap it and see the times. */
+    const assess=S.prog.id==="assessment";
+    $(".bk-step-h b",step(3)).textContent=assess?"Test Date":"Start Date";
+    $("#dateQt").textContent=assess?"Pick a test date":"Pick a start date";
+    show(2,scroll);
   }
 
   /* 02 schedule */
@@ -400,11 +405,19 @@
     return dep===S.prog.price?"Pay "+money(dep):"Pay "+money(dep)+" Deposit";
   }
   function renderPay(){
+    const p=S.prog, assess=p.id==="assessment";
+    /* a $150 assessment has no balance to finance: no in-house tab, and the card copy drops the deposit language */
+    const inh=$('.paytab[data-pay="inhouse"]'); inh.style.display=assess?"none":""; if(assess&&S.method==="inhouse") S.method="card";
+    const bnpl=(S.method==="klarna"||S.method==="afterpay"), bal=p.price-depositFor(p,S.method);
     $("#bkSummary").innerHTML=summaryRows(S.method);
     $("#payBtn").textContent=payLabel(S.method);
-    $("#coLegal").textContent=(S.method==="klarna"||S.method==="afterpay")
+    $("#cardH").textContent=bal>0?"Pay the deposit by card":"Pay by card";
+    $("#cardBal").style.display=bal>0?"":"none";
+    $("#coLegal").textContent=bnpl
       ?"Klarna and Afterpay pay your course in full, then split it into installments for you. Your seat is confirmed as soon as they approve."
-      :"Balance must be paid in full before your class begins. Seats are released if the deposit isn't received.";
+      :bal>0?"Balance must be paid in full before your class begins. Seats are released if the deposit isn't received."
+      :assess?"The assessment fee is paid in full today. Your test date is held the moment the payment goes through."
+      :"Paid in full today. Your seat is held the moment the payment goes through.";
     $$(".paytab").forEach(t=>t.classList.toggle("on",t.dataset.pay===S.method));
     $$(".payform").forEach(f=>f.classList.toggle("on",f.dataset.form===S.method));
   }
@@ -498,6 +511,8 @@
       pickProgram(id,false);
       const f=q.get("fmt"); if(f&&S.prog.formats.some(x=>x.id===f)) pickFormat(f,false);
       const d=q.get("date"); if(S.fmt&&d&&S.fmt.dates.includes(d)&&!isFull(d,key())) pickDate(d,false);
+      /* craft pages pass their craft (?craft=Plumber): prefill the step-4 select, still changeable */
+      const c=q.get("craft"); if(c&&S.prog.id==="assessment"&&CRAFTS.includes(c)) $("#fCraft").value=c;
     }
     if(location.search) history.replaceState(null,"",location.pathname);
     renderSide();
