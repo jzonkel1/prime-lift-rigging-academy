@@ -133,6 +133,14 @@ p:last-child{margin-bottom:0}
 .eyebrow::after{background-position:0 0, 0 6px}
 /* phones: the wings give way before the label breaks into three lines */
 @media(max-width:560px){.eyebrow{gap:10px; font-size:10.5px; letter-spacing:.18em}}
+/* The real NCCER wordmark (official SVG, brand orange) stands in for the word
+   wherever accreditation is the claim: nav tagline and the hero eyebrow. Sized
+   to the cap height of the text beside it so it reads as one line. */
+img.nccer{width:auto; display:inline-block; vertical-align:-1px}
+.eyebrow .nccer-lock{display:inline-flex; align-items:center; gap:9px; white-space:nowrap}
+.eyebrow .nccer{height:12px}
+@media(max-width:560px){.eyebrow .nccer{height:11px} .eyebrow .nccer-lock{gap:8px}}
+.brand-txt .nccer{height:12px; margin-right:4px}
 @media(min-width:900px){
   .eyebrow{justify-content:flex-start; text-align:left}
   .eyebrow:not(.is-center)::before{display:none}
@@ -287,7 +295,7 @@ p:last-child{margin-bottom:0}
 }
 .nav-phone svg{width:16px;height:16px;color:var(--accent)}
 @media(min-width:640px){.nav-phone{display:inline-flex}}
-.nav .btn{padding:14px 19px; font-size:12px}
+.nav .btn{padding:15px 22px; font-size:14.5px}
 /* Between the 1000px nav breakpoint and ~1215px the row needs more width than
    it has, and body{overflow-x:hidden} silently clips the Enroll button off the
    right edge. Tighten the row instead: the descriptor goes first (the logo
