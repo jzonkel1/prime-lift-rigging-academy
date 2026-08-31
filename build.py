@@ -258,7 +258,7 @@ def footer(home=False):
     </div>
     <div class="foot-base">
       <span>© <span id="yr">%(yr)s</span> Prime Lift Rigging Academy LLC · Portland, Texas · Locally &amp; Latino-owned</span>
-      <span><a href="/privacy.html" style="color:var(--muted)">Privacy</a> &middot; <a href="/terms.html" style="color:var(--muted)">Terms</a> &middot; Site by <a href="https://zonkelmedia.com" target="_blank" rel="noopener" style="color:var(--muted)">Zonkel Media</a></span>
+      <span><a href="/privacy.html" style="color:var(--muted)">Privacy</a> &middot; <a href="/terms.html" style="color:var(--muted)">Terms</a> &middot; <a href="/accessibility.html" style="color:var(--muted)">Accessibility</a> &middot; Site by <a href="https://zonkelmedia.com" target="_blank" rel="noopener" style="color:var(--muted)">Zonkel Media</a></span>
     </div>
   </div>
 </footer>
@@ -504,7 +504,7 @@ def people_grid(only=None):
       <a class="person rv" href="/instructors/%s/">
         <div class="person-img"><img src="/%s" alt="%s" loading="lazy"></div>
         <div class="person-body"><span class="person-role">%s</span><h3>%s</h3><p>%s</p><span class="person-more">Read more %s</span></div>
-      </a>""" % (p["slug"], p["img"], esc(p["alt"]), esc(p["role"]), esc(p["name"]), esc(p["bio"][0]), I["arrow"]) for p in ps)
+      </a>""" % (p["slug"], p.get("card", p["img"]), esc(p["alt"]), esc(p["role"]), esc(p["name"]), esc(p["bio"][0]), I["arrow"]) for p in ps)
 
 def craft_short(name):
     if name.startswith("Heavy Equipment Operator: "):
@@ -812,7 +812,7 @@ def build_person(p):
 def build_contact():
     url = "/contact/"
     crumbs = [("Contact", url)]
-    body = phero("img/storefront-door.jpg", "Prime Lift Rigging Academy Training and Assessment Center entrance in Portland, TX", "Find Us",
+    body = phero("img/storefront-front.jpg", "Prime Lift Rigging Academy storefront at 1605 US Highway 181 Frontage Rd, Suite A, Portland, TX", "Find Us",
                  "Portland,<em>Texas</em>",
                  "Right off US-181, minutes from Corpus Christi, Ingleside and Gregory. Walk in during office hours, call, or send a message and the office will get back to you.", crumbs,
                  ctas=['<a class="btn btn-primary" href="tel:%s">%s Call %s</a>' % (BIZ["phone_raw"], I["phone"], BIZ["phone"]),
@@ -860,7 +860,7 @@ def build_contact():
   </form>
 </div></section>""" % (sec_head("01", "Send A Message", "Talk To<br>The Office"), I["arrow"], BIZ["phone"])
     body += band(h2="Or Just<br class=\"mbr\"> Book It.", p="No phone tag. Pick your class, pick a start date, and hold your seat with $200 in about two minutes.")
-    emit(url, page(url, "Contact · Prime Lift Rigging Academy, Portland, TX", "Call (361) 413-0160, email primelift26@gmail.com, or visit 1605 US Hwy 181 Frontage Rd, Suite A, Portland, TX 78374. Mon–Fri 7 AM to 5 PM.", body, crumbs, hero_img="/img/storefront-door.jpg"), "0.7")
+    emit(url, page(url, "Contact · Prime Lift Rigging Academy, Portland, TX", "Call (361) 413-0160, email primelift26@gmail.com, or visit 1605 US Hwy 181 Frontage Rd, Suite A, Portland, TX 78374. Mon–Fri 7 AM to 5 PM.", body, crumbs, hero_img="/img/storefront-front.jpg"), "0.7")
 
 def build_about():
     url = "/about/"
@@ -998,7 +998,7 @@ def build_es():
       <a class="person rv" href="/instructors/%s/" hreflang="en">
         <div class="person-img"><img src="/%s" alt="%s" loading="lazy"></div>
         <div class="person-body"><span class="person-role">%s</span><h3>%s</h3><span class="person-more">Ver perfil (en inglés) %s</span></div>
-      </a>""" % (p["slug"], p["img"], esc(p["alt"]), esc(s["roles"][p["slug"]]), esc(p["name"]), I["arrow"]) for p in PEOPLE)
+      </a>""" % (p["slug"], p.get("card", p["img"]), esc(p["alt"]), esc(s["roles"][p["slug"]]), esc(p["name"]), I["arrow"]) for p in PEOPLE)
     body += """<section class="section alt" id="instructores"><div class="wrap">%s<div class="team-grid">%s</div></div></section>""" % (
         sec_head("04", s["team_eyebrow"], s["team_h2"], center=True), team)
     body += """<section class="section" id="ubicacion"><div class="wrap">
@@ -2156,7 +2156,7 @@ def write_llms():
     names.update(("/guides/%s/" % g["slug"], "Guide: " + g["title"]) for g in GUIDES)
     for u, p in PAGES:
         lines.append("- [%s](%s%s)" % (names.get(u, u.strip("/").replace("-", " ").replace("/", " / ").title()), BASE, u))
-    lines += ["", "## Policies", "- [Privacy Policy](%s/privacy.html)" % BASE, "- [Terms & Enrollment Policy](%s/terms.html)" % BASE, ""]
+    lines += ["", "## Policies", "- [Privacy Policy](%s/privacy.html)" % BASE, "- [Terms & Enrollment Policy](%s/terms.html)" % BASE, "- [Accessibility Statement](%s/accessibility.html)" % BASE, ""]
     w("llms.txt", "\n".join(lines))
 
 # ---------------------------------------------------------------- main

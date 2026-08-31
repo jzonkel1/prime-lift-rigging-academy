@@ -264,6 +264,7 @@ PEOPLE = [
         "role": "Co-Founder · NCCER Practical Examiner",
         "short": "Director / Manager",
         "img": "img/team-andres.jpg",
+        "card": "img/team-andres-card.jpg",   # face-centered 4:5 crop for grids; "img" stays the full shot for his page + schema
         "alt": "Andres Herrera working from a personnel platform on a refinery lift",
         "teaches": ["advanced-rigger", "signal-person", "nccer-assessments"],
         "bio": [
@@ -277,6 +278,7 @@ PEOPLE = [
         "role": "Director",
         "short": "Director / Manager",
         "img": "img/team-juan.jpg",
+        "card": "img/team-juan-card.jpg",
         "alt": "Juan Meza on the tracks of a Liebherr crawler crane at a jobsite",
         "teaches": ["advanced-rigger", "nccer-assessments"],
         "bio": [
