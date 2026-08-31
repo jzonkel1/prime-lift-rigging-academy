@@ -84,10 +84,14 @@ def variant_src(path, want=800):
 _IMG_TAG = re.compile(r"<img\b[^>]*>", re.I)
 _ATTR = re.compile(r'([^\s=/>]+)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+)))?')
 _FULL = {"hero-bg", "phero-bg", "band-bg", "how-bg"}                  # full-bleed, object-fit:cover
-_GRID = {"person-img", "course-shot", "prog-shot", "rv-panel", "gw-strip", "hero-photo", "storefront",
-         "person-portrait", "gal", "team-grid", "rev3", "fin-photo"}  # a column of a grid
+_GRID = {"person-img", "course-shot", "prog-shot", "rv-panel", "hero-photo", "storefront",
+         "person-portrait", "team-grid", "rev3", "fin-photo"}          # a column of a 2-3 column grid
+_STRIP = {"gw-strip"}                                                  # graduate wall: 6-up desktop, 3-up phones
+_GAL = {"gal"}                                                         # photo gallery: 4-up desktop, 2-up phones
 SIZES = {"full": "(max-width:900px) 200vw, 100vw",   # a tall phone box covered by a landscape photo needs > 100vw (200vw x 2 DPR = the 1600 rung)
          "grid": "(min-width:1040px) 34vw, (min-width:640px) 50vw, 100vw",
+         "strip": "(min-width:760px) 16vw, 33vw",
+         "gal": "(min-width:780px) 25vw, 50vw",
          "logo": "120px", "page": "100vw"}
 
 def responsive_images(html_text):
@@ -109,6 +113,8 @@ def responsive_images(html_text):
             for cm in reversed(list(re.finditer(r'class="([^"]*)"', ctx))):
                 toks = set(cm.group(1).split())
                 if toks & _FULL: role = "full"; break
+                if toks & _STRIP: role = "strip"; break
+                if toks & _GAL: role = "gal"; break
                 if toks & _GRID: role = "grid"; break
                 if "brand" in toks: role = "logo"; break
         sizes = d.get("data-sizes") or SIZES[role]      # data-sizes="..." on the tag overrides the role rule; plain sizes= is recomputed each build
@@ -2232,6 +2238,11 @@ def write_assets():
     w("js/site.js", SITE_JS.lstrip("\n").replace("__SCHED__", sched_json()))
     # one stylesheet request instead of three (fonts + site + pages); URL carries a content hash
     bundle = "\n".join(io.open(os.path.join(ROOT, "css", f), encoding="utf-8").read() for f in ("fonts.css", "site.css", "pages.css"))
+    # the headline grunge mask (7 KB png) rides inside the CSS: a masked element can't paint until its
+    # mask arrives, and as a separate request it sat behind the stylesheet on the LCP path
+    import base64
+    g = base64.b64encode(open(os.path.join(ROOT, "img", "grunge.png"), "rb").read()).decode("ascii")
+    bundle = bundle.replace("url(/img/grunge.png)", "url(data:image/png;base64,%s)" % g)
     CSS_VER = hashlib.md5(bundle.encode("utf-8")).hexdigest()[:8]
     w("css/bundle.css", bundle)
 
