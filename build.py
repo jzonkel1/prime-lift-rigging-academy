@@ -1972,18 +1972,28 @@ SITE_JS = r"""
     lift();
   }
   /* On phones the sticky call bar owns the bottom 60px; keep the bubble above it.
-     The widget's bubble lives in an open shadow root with inline bottom:20px. */
+     The widget's bubble lives in an open shadow root with inline bottom:20px, and
+     the widget REWRITES that inline style every time the chat window closes, so
+     setting it once is not enough (the bubble dropped back onto the Book button).
+     A stylesheet inside the shadow root with !important beats the inline value
+     for good; the offset rides on a CSS variable on the host element. */
   function lift(){
     var tries = 0;
     var cb = document.getElementById("callbar");
+    var CSS = "#lc_text-widget,#lc_text-widget--btn{bottom:var(--pl-bottom,20px)!important}";
     function place(){
       var host = document.querySelector("chat-widget"), sr = host && host.shadowRoot;
       var box = sr && sr.getElementById("lc_text-widget"), btn = sr && sr.getElementById("lc_text-widget--btn");
       if (!box || !btn) { if (tries++ < 60) setTimeout(place, 500); return; }
+      if (!sr.getElementById("pl-lift")) { var st = document.createElement("style"); st.id = "pl-lift"; st.textContent = CSS; sr.appendChild(st); }
       var mobile = window.innerWidth <= 900, up = mobile && cb && cb.classList.contains("show");
       host.style.visibility = (mobile && !up) ? "hidden" : "visible";
-      var b = up ? "78px" : "20px";
-      box.style.bottom = b; btn.style.bottom = b;
+      host.style.setProperty("--pl-bottom", up ? "78px" : "20px");
+      if (!host.__plObs) {
+        /* if the widget ever rebuilds its shadow tree, put the stylesheet back */
+        host.__plObs = new MutationObserver(function(){ if (!sr.getElementById("pl-lift")) place(); });
+        host.__plObs.observe(sr, {childList:true});
+      }
     }
     place();
     if (cb) new MutationObserver(place).observe(cb, {attributes:true, attributeFilter:["class"]});
