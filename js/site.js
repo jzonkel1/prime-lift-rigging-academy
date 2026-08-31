@@ -162,3 +162,47 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
 })();
+
+/* DESKTOP INERTIA SCROLL. On fine-pointer screens 1000px and up, /js/lenis.min.js
+   (vendored, MIT, v1.3.26) eases wheel scrolling and same-page anchor jumps, the
+   glide people know from agency sites. Phones, tablets and reduced-motion users
+   never download it and keep native scroll-behavior:smooth from site.css.
+   The prevent hook keeps native behaviour wherever hijacking would break things:
+   any overflowing nested scroller under the pointer (chat log, tables, strips)
+   and any body scroll lock (gallery lightbox, mobile menu). Lenis honours each
+   target's scroll-margin-top, so anchors land where they do today. */
+(function(){
+  var mm = window.matchMedia;
+  if (!mm || !mm("(pointer:fine)").matches || mm("(prefers-reduced-motion:reduce)").matches || window.innerWidth < 1000) return;
+  var s = document.createElement("script");
+  s.src = "/js/lenis.min.js"; s.defer = true;
+  s.onload = function(){
+    if (!window.Lenis) return;
+    var lenis = window.__lenis = new Lenis({
+      lerp: 0.1, wheelMultiplier: 1, smoothWheel: true, syncTouch: false, anchors: false, autoRaf: true,
+      prevent: function(node){
+        if (node === document.body) return document.body.style.overflow === "hidden" || document.body.classList.contains("mnav-open");
+        if (node.nodeType !== 1 || node === document.documentElement) return false;
+        if (node.scrollHeight <= node.clientHeight + 1) return false;
+        var o = getComputedStyle(node).overflowY;
+        return o === "auto" || o === "scroll";
+      }
+    });
+    /* Same-page anchors: Lenis's own `anchors` option never cancels the browser's
+       hash jump, so a click flashed to the target, snapped back and then glided.
+       Cancel the jump here and let Lenis ease from where the page is; the hash
+       still lands in the URL. Bubble phase, so a link's own handler (FAQ, reel
+       arrows, "#" hooks) that preventDefaults keeps winning. */
+    document.addEventListener("click", function(e){
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var a = e.target.closest && e.target.closest("a[href]"); if (!a) return;
+      var u; try { u = new URL(a.href); } catch (_) { return; }
+      if (u.host !== location.host || u.pathname !== location.pathname || u.hash.length < 2) return;
+      var el = document.getElementById(decodeURIComponent(u.hash.slice(1))); if (!el) return;
+      e.preventDefault();
+      if (location.hash !== u.hash) history.pushState(null, "", u.hash);
+      lenis.scrollTo(el);
+    });
+  };
+  document.head.appendChild(s);
+})();
