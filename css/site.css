@@ -301,7 +301,17 @@ p:last-child{margin-bottom:0}
 }
 @keyframes zoomout{to{transform:scale(1.005)}}
 @media(prefers-reduced-motion:reduce){.hero-bg img{animation:none; transform:none}}
-@media(max-width:900px){.hero-bg img{object-position:62% 40%}}
+/* phones: the photo is landscape and the hero is a tall portrait stack (copy +
+   graduate panel). Covering the whole section scaled the crane down to a sliver
+   at the very bottom, under the fold, and left flat sky behind the headline.
+   Pin the photo to the first screen instead, let the scrim run to ink at its
+   bottom edge, and frame the boom + hook behind the headline. The rest of the
+   hero below sits on plain ink, which is where the fade already ended. */
+@media(max-width:899px){
+  .hero{background:var(--ink)}
+  .hero-bg{bottom:auto; height:100svh; min-height:640px; overflow:hidden}
+  .hero-bg img{object-position:48% 50%}
+}
 /* --- cool grade -------------------------------------------------
    The photograph runs a hue ramp: violet (264deg) at the top of the
    sky, magenta (309deg) through the middle, rose (341deg) at the
