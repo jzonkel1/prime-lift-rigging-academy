@@ -16,7 +16,7 @@ Launch switch: set NOINDEX = False. That drops the noindex meta on every page,
 and moves canonical / og / sitemap URLs from the Netlify preview origin to the
 real domain in one build.
 """
-import io, os, re, json, html, datetime, urllib.parse
+import io, os, re, json, html, datetime, urllib.parse, hashlib
 from content import (BIZ, COURSES, ASSESSMENT, CRAFT_GROUPS, CRAFTS, PEOPLE,
                      REVIEWS, FAQ, FINANCING, ES, GUIDES, RETEST_POLICY, CREDENTIAL_POSTING_TIME, WHY)
 
@@ -34,6 +34,89 @@ def w(rel, text):
     p = os.path.join(ROOT, rel.replace("/", os.sep))
     os.makedirs(os.path.dirname(p), exist_ok=True)
     io.open(p, "w", encoding="utf-8", newline="\n").write(text)
+
+# ------------------------------------------------------ responsive images
+# Every <img src="img/*.jpg|png"> in the output (generated pages AND index.html)
+# gets WebP variants, made on demand into img/ and cached by mtime, plus a
+# srcset/sizes pair chosen from the markup around it. Before this, phones pulled
+# 2400px JPEG masters (up to 1.4 MB) into 350px cards: Lighthouse mobile 64.
+# To swap a photo, edit the src (or data-o once it has been rewritten) and rebuild.
+IMG_SKIP = {"favicon-32.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png", "icon-512-maskable.png",
+            "og.jpg", "grunge.png", "optin-consent.png", "chevron.png", "hook.png"}
+IMG_WIDTHS = (320, 480, 800, 1200, 1600, 2400)
+VARIANTS = {}          # "img/x.jpg" -> (orig_width, [(w, "img/x-w.webp"), ...])
+CSS_VER = "dev"        # content hash of css/bundle.css, set by write_assets()
+
+def make_variants():
+    from PIL import Image
+    d = os.path.join(ROOT, "img")
+    for name in sorted(os.listdir(d)):
+        base, ext = os.path.splitext(name)
+        if ext.lower() not in (".jpg", ".jpeg", ".png") or name in IMG_SKIP or base.endswith("-1200"):
+            continue
+        src = os.path.join(d, name)
+        with Image.open(src) as im0:
+            ow, oh = im0.size
+        widths = [x for x in IMG_WIDTHS if x <= ow] or [ow]
+        if ow > widths[-1] * 1.15: widths.append(ow)     # e.g. a 2000px master keeps a 2000w rung above 1600
+        outs, im = [], None
+        for wd in widths:
+            rel = "img/%s-%d.webp" % (base, wd)
+            out = os.path.join(ROOT, rel)
+            if not os.path.exists(out) or os.path.getmtime(out) < os.path.getmtime(src):
+                im = im or Image.open(src)
+                r = im if wd == ow else im.resize((wd, max(1, round(oh * wd / ow))), Image.LANCZOS)
+                if r.mode not in ("RGB", "RGBA"):
+                    r = r.convert("RGBA" if ext.lower() == ".png" else "RGB")
+                r.save(out, "WEBP", quality=90 if ext.lower() == ".png" else 80, method=4)
+            outs.append((wd, rel))
+        if im: im.close()
+        VARIANTS["img/" + name] = (ow, outs)
+
+def variant_src(path, want=800):
+    """'/img/x.jpg' -> '/img/x-800.webp' (largest variant <= want). For markup built by JS."""
+    key = path.lstrip("/")
+    if key not in VARIANTS: return path
+    outs = VARIANTS[key][1]
+    pick = [o for o in outs if o[0] <= want] or outs[:1]
+    return ("/" if path.startswith("/") else "") + pick[-1][1]
+
+_IMG_TAG = re.compile(r"<img\b[^>]*>", re.I)
+_ATTR = re.compile(r'([^\s=/>]+)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+)))?')
+_FULL = {"hero-bg", "phero-bg", "band-bg", "how-bg"}                  # full-bleed, object-fit:cover
+_GRID = {"person-img", "course-shot", "prog-shot", "rv-panel", "gw-strip", "hero-photo", "storefront",
+         "person-portrait", "gal", "team-grid", "rev3", "fin-photo"}  # a column of a grid
+SIZES = {"full": "(max-width:900px) 200vw, 100vw",   # a tall phone box covered by a landscape photo needs > 100vw (200vw x 2 DPR = the 1600 rung)
+         "grid": "(min-width:1040px) 34vw, (min-width:640px) 50vw, 100vw",
+         "logo": "120px", "page": "100vw"}
+
+def responsive_images(html_text):
+    def fix(m):
+        tag = m.group(0)
+        attrs = [(a.group(1), a.group(2) if a.group(2) is not None else a.group(3) if a.group(3) is not None else a.group(4))
+                 for a in _ATTR.finditer(tag[4:-1].rstrip("/"))]
+        d = dict(attrs)
+        if "data-nors" in d: return tag
+        orig = d.get("data-o") or d.get("src") or ""
+        key = orig.lstrip("/")
+        if key not in VARIANTS: return tag
+        lead = "/" if orig.startswith("/") else ""
+        ow, outs = VARIANTS[key]
+        role = "page"
+        if "fl" in (d.get("class") or "").split(): role = "logo"
+        else:
+            ctx = html_text[max(0, m.start() - 600):m.start()]
+            for cm in reversed(list(re.finditer(r'class="([^"]*)"', ctx))):
+                toks = set(cm.group(1).split())
+                if toks & _FULL: role = "full"; break
+                if toks & _GRID: role = "grid"; break
+                if "brand" in toks: role = "logo"; break
+        sizes = d.get("data-sizes") or SIZES[role]      # data-sizes="..." on the tag overrides the role rule; plain sizes= is recomputed each build
+        fallback = ([o for o in outs if o[0] <= 1200] or outs[:1])[-1][1]
+        srcset = ", ".join("%s%s %dw" % (lead, rel, wd) for wd, rel in outs)
+        keep = " ".join(('%s="%s"' % (k, v)) if v is not None else k for k, v in attrs if k not in ("src", "srcset", "sizes", "data-o"))
+        return '<img src="%s%s" srcset="%s" sizes="%s" data-o="%s"%s>' % (lead, fallback, srcset, sizes, orig, (" " + keep) if keep else "")
+    return _IMG_TAG.sub(fix, html_text)
 
 # ----------------------------------------------------------------- icons
 I = {
@@ -327,7 +410,10 @@ def ld(graph):
         {"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False, separators=(",", ":"))
 
 # ---------------------------------------------------------------- shell
-FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">'
+# Fonts are self-hosted (css/fonts.css, /fonts/*.woff2): no Google Fonts round trips
+# on the critical path. The two faces above the fold are preloaded.
+FONTS = ('<link rel="preload" as="font" type="font/woff2" href="/fonts/anton-400.woff2" crossorigin>\n'
+         '<link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans.woff2" crossorigin>')
 
 def hreflang_links(url):
     """en/es alternates, only for the two pages that have a translation."""
@@ -342,8 +428,8 @@ def page(url, title, desc, body, crumbs=(), schema=(), og_image="/img/og.jpg", h
     graph += list(schema)
     graph.append({"@type": "WebPage", "@id": BASE + url, "url": BASE + url, "name": title,
                   "description": desc, "isPartOf": {"@id": BASE + "/#website"}, "about": {"@id": BASE + "/#org"}})
-    pre = '<link rel="preload" as="image" href="%s" fetchpriority="high">' % hero_img if hero_img else ""
-    return """<!DOCTYPE html>
+    pre = "<!--PRE-->" if hero_img else ""
+    out = """<!DOCTYPE html>
 <html lang="%(lang)s">
 <head>
 <meta charset="utf-8">
@@ -371,8 +457,7 @@ def page(url, title, desc, body, crumbs=(), schema=(), og_image="/img/og.jpg", h
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#111828">
 %(pre)s
-<link rel="stylesheet" href="/css/site.css">
-<link rel="stylesheet" href="/css/pages.css">
+<link rel="stylesheet" href="/css/bundle.css?v=%(cssv)s">
 %(ld)s
 </head>
 <body class="sub">
@@ -388,9 +473,21 @@ def page(url, title, desc, body, crumbs=(), schema=(), og_image="/img/og.jpg", h
 """ % dict(title=esc(title), desc=esc(desc), full=full, lang=lang, alt=hreflang_links(url),
            suffix="" if len(title) > 40 else " | Prime Lift Rigging Academy",
            robots='<meta name="robots" content="noindex, nofollow">' if NOINDEX else '<meta name="robots" content="index, follow, max-image-preview:large">',
-           ogimg=ORIGIN + og_image, fonts=FONTS, pre=pre, ld=ld(graph),
+           ogimg=ORIGIN + og_image, fonts=FONTS, pre=pre, ld=ld(graph), cssv=CSS_VER,
            nav=es_lang_links(nav()) if lang == "es" else nav(), body=body,
            footer=es_lang_links(footer()) if lang == "es" else footer(), callbar=callbar())
+    out = responsive_images(out)
+    if hero_img:
+        # preload exactly what the hero <img> will pick (same srcset + sizes), or the file itself
+        mm = re.search(r'<img [^>]*data-o="%s"[^>]*>' % re.escape(hero_img), out)
+        if mm:
+            ss = re.search(r'srcset="([^"]*)"', mm.group(0)).group(1)
+            sz = re.search(r'sizes="([^"]*)"', mm.group(0)).group(1)
+            link = '<link rel="preload" as="image" imagesrcset="%s" imagesizes="%s" fetchpriority="high">' % (ss, sz)
+        else:
+            link = '<link rel="preload" as="image" href="%s" fetchpriority="high">' % hero_img
+        out = out.replace("<!--PRE-->", link, 1)
+    return out
 
 # On Spanish pages the language links flip to English so visitors can switch back.
 def es_lang_links(html):
@@ -406,12 +503,7 @@ def crumbs_html(crumbs, home="Home"):
     return '<nav class="crumbs" aria-label="Breadcrumb">%s</nav>' % " <i>/</i> ".join(items)
 
 def hero_img_tag(img, alt):
-    """Full-bleed hero <img>. Uses a -1200 phone variant via srcset when one exists
-    on disk, so phones never download the 2400px master."""
-    small = img.replace(".jpg", "-1200.jpg")
-    if os.path.exists(os.path.join(ROOT, small)):
-        return ('<img src="/%s" srcset="/%s 1200w, /%s 2400w" sizes="100vw" alt="%s" fetchpriority="high">'
-                % (img, small, img, esc(alt)))
+    """Full-bleed hero <img>. responsive_images() adds the WebP srcset (full-bleed sizes)."""
     return '<img src="/%s" alt="%s" fetchpriority="high">' % (img, esc(alt))
 
 def phero(img, alt, kicker, h1, lede, crumbs, ctas=None, cls="", home="Home"):
@@ -1113,9 +1205,9 @@ def book_programs():
     for r in SCHEDULE_RULES:
         fmts.setdefault(r["id"], []).append({"id": r["fmt"], "name": r["label"], "time": r["time"], "note": r["note"], "wd": r["wd"]})
     out = [{"id": c["id"], "name": c["name"], "price": c["price"], "was": c["was"], "deposit": c["deposit"],
-            "shot": "/" + c["img"], "blurb": BOOK_BLURBS[c["id"]], "formats": fmts[c["id"]]} for c in COURSES]
+            "shot": variant_src("/" + c["img"], 800), "blurb": BOOK_BLURBS[c["id"]], "formats": fmts[c["id"]]} for c in COURSES]
     out.append({"id": "assessment", "name": "NCCER Assessment", "price": ASSESSMENT["price"], "was": None, "deposit": ASSESSMENT["price"],
-                "shot": "/" + ASSESSMENT["img"], "blurb": BOOK_BLURBS["assessment"], "formats": fmts["assessment"]})
+                "shot": variant_src("/" + ASSESSMENT["img"], 800), "blurb": BOOK_BLURBS["assessment"], "formats": fmts["assessment"]})
     return out
 
 def build_book():
@@ -1213,7 +1305,7 @@ def build_book():
         </section>
       </div>
       <aside class="bk-side" id="bkSide" aria-live="polite">
-        <div class="bk-side-shot"><img id="sideImg" src="/img/bg-classroom.jpg" alt="" width="640" height="360"><b id="sideName">Your Seat</b></div>
+        <div class="bk-side-shot"><img id="sideImg" data-nors src="__SIDEIMG__" alt="" width="640" height="360"><b id="sideName">Your Seat</b></div>
         <dl class="summary" id="sideSummary"></dl>
         <p class="bk-side-call">Rather book by phone? <a href="tel:__TEL__">__PHONE__</a><br>Mon – Fri · 7 AM – 5 PM</p>
       </aside>
@@ -1495,6 +1587,7 @@ def build_book():
     body = (body.replace("__CRUMBS__", crumbs_html(crumbs)).replace("__CHECK__", I["check"]).replace("__ARROW__", I["arrow"])
                 .replace("__TEL__", BIZ["phone_raw"]).replace("__PHONE__", esc(BIZ["phone"])).replace("__EMAIL__", BIZ["email"])
                 .replace("__PROGS__", json.dumps(book_programs(), separators=(",", ":")))
+                .replace("__SIDEIMG__", variant_src("/img/bg-classroom.jpg", 800))
                 .replace("__SCHED__", sched_json()).replace("__LEAD__", str(LEAD_DAYS))
                 .replace("__CRAFTS__", json.dumps([craft_short(n) for s, n, g, b, cov in CRAFTS], separators=(",", ":"))))
     emit(url, page(url, "Book a Class · Advanced Rigger, Signal Person & NCCER Assessments in Portland, TX",
@@ -1542,6 +1635,9 @@ def rewrite_index():
         s = between(s, "<!-- SCHEMA:START -->", "<!-- SCHEMA:END -->", block[:-len("<!-- SCHEMA:END -->")])
     else:
         s = s.replace("</head>", block + "\n</head>", 1)
+    # css bundle version + WebP srcsets (idempotent: rewritten tags carry data-o)
+    s = re.sub(r'/css/bundle\.css(\?v=[^"]*)?', "/css/bundle.css?v=" + CSS_VER, s)
+    s = responsive_images(s)
     io.open(p, "w", encoding="utf-8", newline="\n").write(s)
     PAGES.insert(0, ("/", "1.0"))
 
@@ -2036,7 +2132,7 @@ SITE_JS = r"""
     window.addEventListener("resize", place, {passive:true});
   }
   ["scroll","pointerdown","touchstart","keydown"].forEach(function(e){ window.addEventListener(e, load, {passive:true, once:true}); });
-  setTimeout(load, 6000);
+  setTimeout(load, 12000);   /* idle fallback; anyone who scrolls or taps gets it immediately */
 })();
 
 /* LIVE SEATS. /.netlify/functions/seats counts open cards in the office's own
@@ -2130,8 +2226,14 @@ SITE_JS = r"""
 """
 
 def write_assets():
+    global CSS_VER
+    make_variants()
     w("css/pages.css", PAGES_CSS.lstrip("\n"))
     w("js/site.js", SITE_JS.lstrip("\n").replace("__SCHED__", sched_json()))
+    # one stylesheet request instead of three (fonts + site + pages); URL carries a content hash
+    bundle = "\n".join(io.open(os.path.join(ROOT, "css", f), encoding="utf-8").read() for f in ("fonts.css", "site.css", "pages.css"))
+    CSS_VER = hashlib.md5(bundle.encode("utf-8")).hexdigest()[:8]
+    w("css/bundle.css", bundle)
 
 def write_sitemap():
     items = "".join("  <url><loc>%s%s</loc><lastmod>%s</lastmod><priority>%s</priority></url>\n" % (ORIGIN, u, TODAY, p) for u, p in PAGES)

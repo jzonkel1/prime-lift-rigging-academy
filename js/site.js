@@ -115,7 +115,7 @@
     window.addEventListener("resize", place, {passive:true});
   }
   ["scroll","pointerdown","touchstart","keydown"].forEach(function(e){ window.addEventListener(e, load, {passive:true, once:true}); });
-  setTimeout(load, 6000);
+  setTimeout(load, 12000);   /* idle fallback; anyone who scrolls or taps gets it immediately */
 })();
 
 /* LIVE SEATS. /.netlify/functions/seats counts open cards in the office's own
