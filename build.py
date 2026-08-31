@@ -418,8 +418,7 @@ def ld(graph):
 # ---------------------------------------------------------------- shell
 # Fonts are self-hosted (css/fonts.css, /fonts/*.woff2): no Google Fonts round trips
 # on the critical path. The two faces above the fold are preloaded.
-FONTS = ('<link rel="preload" as="font" type="font/woff2" href="/fonts/anton-400.woff2" crossorigin>\n'
-         '<link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans.woff2" crossorigin>')
+FONTS = '<link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans.woff2" crossorigin>'   # Anton rides inside bundle.css
 
 def hreflang_links(url):
     """en/es alternates, only for the two pages that have a translation."""
@@ -2243,6 +2242,11 @@ def write_assets():
     import base64
     g = base64.b64encode(open(os.path.join(ROOT, "img", "grunge.png"), "rb").read()).decode("ascii")
     bundle = bundle.replace("url(/img/grunge.png)", "url(data:image/png;base64,%s)" % g)
+    # Anton (18 KB) is the headline face and the LCP text: shipping it inside the stylesheet means the
+    # headline paints in Anton on the first frame instead of fallback-then-swap (the swap re-paint is
+    # what Lighthouse was timing as LCP). The other faces stay as files with font-display:swap.
+    an = base64.b64encode(open(os.path.join(ROOT, "fonts", "anton-400.woff2"), "rb").read()).decode("ascii")
+    bundle = bundle.replace("url(/fonts/anton-400.woff2)", "url(data:font/woff2;base64,%s)" % an)
     CSS_VER = hashlib.md5(bundle.encode("utf-8")).hexdigest()[:8]
     w("css/bundle.css", bundle)
 
