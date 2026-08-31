@@ -10,8 +10,8 @@ counts) that the client has not stated.
 BIZ = {
     "name": "Prime Lift Rigging Academy",
     "legal": "Prime Lift Rigging Academy LLC",
-    "phone": "(361) 413-0160",
-    "phone_raw": "+13614130160",
+    "phone": "(361) 213-9690",
+    "phone_raw": "+13612139690",
     "email": "primelift26@gmail.com",
     "street": "1605 US Highway 181 Frontage Rd, Suite A",
     "city": "Portland",

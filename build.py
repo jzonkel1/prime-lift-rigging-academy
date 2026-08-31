@@ -961,7 +961,7 @@ def build_contact():
   </form>
 </div></section>""" % (sec_head("01", "Send A Message", "Talk To<br>The Office"), I["arrow"], BIZ["phone"])
     body += band(h2="Or Just<br class=\"mbr\"> Book It.", p="No phone tag. Pick your class, pick a start date, and hold your seat with $200 in about two minutes.")
-    emit(url, page(url, "Contact · Prime Lift Rigging Academy, Portland, TX", "Call (361) 413-0160, email primelift26@gmail.com, or visit 1605 US Hwy 181 Frontage Rd, Suite A, Portland, TX 78374. Mon–Fri 7 AM to 5 PM.", body, crumbs, hero_img="/img/storefront-front.jpg"), "0.7")
+    emit(url, page(url, "Contact · Prime Lift Rigging Academy, Portland, TX", "Call (361) 213-9690, email primelift26@gmail.com, or visit 1605 US Hwy 181 Frontage Rd, Suite A, Portland, TX 78374. Mon–Fri 7 AM to 5 PM.", body, crumbs, hero_img="/img/storefront-front.jpg"), "0.7")
 
 def build_about():
     url = "/about/"
@@ -2370,7 +2370,7 @@ def main():
         ["Written and practical retest in our accredited testing room", "Refresher option: the full Advanced Rigger class in day, night or weekend format", "Renewal recorded on the NCCER Registry"],
         [("How long is an NCCER Advanced Rigger credential valid?", "Five years from the date it was issued. Check your card or the NCCER Registry for the date."),
          ("Do I have to retake the whole class?", "Not necessarily. Call the office with your card number and we'll tell you whether you can go straight to the retest or should take a refresher first."),
-         ("What does recertification cost?", "It depends on whether you retest or retake the course. Call (361) 413-0160 for a quote; the Advanced Rigger course is $1,000 if you choose the refresher.")],
+         ("What does recertification cost?", "It depends on whether you retest or retake the course. Call (361) 213-9690 for a quote; the Advanced Rigger course is $1,000 if you choose the refresher.")],
         book="advanced",
         specs=[("Credential life", "5 years"), ("Retest", "Written + hands-on"), ("Refresher class", "$1,000"), ("Schedule", "Call the office")],
         band_h2="Renew It<br class=\"mbr\"> Before It Lapses.", crumb="Recertification")
