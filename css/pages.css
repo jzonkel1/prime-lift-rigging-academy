@@ -22,15 +22,19 @@ body.mnav-open .nav-burger span:nth-child(3){transform:translateY(-7px) rotate(-
    exactly below the bar (whichever height the bar is in) and slides down 12px. */
 .mnav{
   position:fixed; inset:0; z-index:1; display:none; overflow:auto;
-  background:var(--ink);
-  padding-top:calc(110px + 6px); -webkit-overflow-scrolling:touch;
+  /* ink sheet + a 1px hairline exactly where the bar ends (the bar height is
+     scroll-driven via --navp, inherited from .nav); a background layer on the
+     scroll container stays put while the menu content scrolls */
+  background:
+    linear-gradient(var(--edge),var(--edge)) 0 calc(110px - 22px * var(--navp)) / 100% 1px no-repeat,
+    var(--ink);
+  padding-top:calc(110px - 22px * var(--navp) + 6px); -webkit-overflow-scrolling:touch;
 }
-.nav.stuck .mnav{padding-top:calc(88px + 6px)}
 @keyframes mnavIn{from{opacity:0; transform:translateY(-12px)}to{opacity:1; transform:none}}
 body.mnav-open .mnav{display:block; animation:mnavIn .28s cubic-bezier(.2,.7,.2,1) both}
 @media(prefers-reduced-motion:reduce){body.mnav-open .mnav{animation:none}}
 body.mnav-open{overflow:hidden}
-body.mnav-open .nav{background:var(--ink); border-bottom-color:var(--edge); backdrop-filter:none; transition:none; z-index:80}
+body.mnav-open .nav{z-index:80}   /* the sheet (z-index:1) already covers the glass (z-index:0) */
 .mnav-in{padding:0 var(--pad) 40px; max-width:560px; margin-inline:auto}
 /* rows: top-level links, the two accordion triggers (Courses / Academy) and the links inside them */
 .mnav-in>a,.macc-t,.macc-p a{display:grid; grid-template-columns:1fr auto; align-items:center; gap:2px 12px; padding:14px 4px; border-bottom:1px solid var(--edge); color:inherit}
