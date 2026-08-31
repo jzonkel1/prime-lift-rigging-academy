@@ -17,6 +17,8 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#111828">
+<!-- Legacy deep links (/?book=…#schedule, Stripe returns) now live on /book/ -->
+<script>if(/[?&](book|booked|canceled)=/.test(location.search))location.replace("/book/"+location.search);</script>
 
 <!-- Link preview card. This URL gets TEXTED to students and to the owners,
      and a link with no card reads like spam in iMessage.
@@ -121,7 +123,7 @@
     </nav>
     <div class="nav-cta">
       <a class="nav-phone" href="tel:+13614130160" aria-label="Call (361) 413-0160"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg> (361) 413-0160</a>
-      <a class="btn btn-primary" href="#schedule">Enroll Now</a>
+      <a class="btn btn-primary" href="/book/">Book a Class</a>
       <button class="nav-burger" id="navBurger" aria-label="Open menu" aria-expanded="false" aria-controls="mnav"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -153,7 +155,7 @@
       <a href="/contact/"><b>Contact</b></a>
       <a href="/es/" lang="es" hreflang="es"><b>Español</b><span>Información en español</span></a>
       <div class="mnav-cta">
-        <a class="btn btn-primary btn-block" href="#schedule">Reserve Your Seat — $200</a>
+        <a class="btn btn-primary btn-block" href="/book/">Book a Class</a>
         <a class="btn btn-ghost btn-block" href="tel:+13614130160"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg> Call (361) 413-0160</a>
       </div>
     </div>
@@ -179,8 +181,8 @@
         <span class="plate-s">$200 holds your seat<b id="nextClassLabel">Next class starts Monday, Aug 31</b><i id="nextClassSub">Advanced Rigger · 8 seats per class</i></span>
       </div>
       <div class="hero-cta">
-        <a class="btn btn-primary" href="#schedule">
-          Reserve Your Seat — $200
+        <a class="btn btn-primary" href="/book/">
+          Book a Class
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </a>
         <a class="btn btn-ghost" href="tel:+13614130160">
@@ -278,7 +280,7 @@
             <span class="price-was">$1,700</span>
             <span class="price-note">August promotion · $200 secures your seat, $800 due before class starts</span>
           </div>
-          <button class="btn btn-primary btn-block" data-book="advanced">Pick a Start Date</button>
+          <a class="btn btn-primary btn-block" href="/book/?book=advanced">Pick a Start Date</a>
         </div>
       </article>
 
@@ -304,7 +306,7 @@
             <span class="price">$1,000</span>
             <span class="price-note">$200 deposit secures your spot · classes run every Friday</span>
           </div>
-          <button class="btn btn-ghost btn-block" data-book="signal">Pick a Start Date</button>
+          <a class="btn btn-ghost btn-block" href="/book/?book=signal">Pick a Start Date</a>
         </div>
       </article>
 
@@ -329,7 +331,7 @@
             <span class="price">$150</span>
             <span class="price-note">Per assessment · boilermaker, pipefitter, HVAC, plumber, heavy equipment operator and more</span>
           </div>
-          <button class="btn btn-ghost btn-block" data-book="assessment">Request a Test Date</button>
+          <a class="btn btn-ghost btn-block" href="/book/?book=assessment">Request a Test Date</a>
         </div>
       </article>
     </div>
@@ -355,81 +357,20 @@
 </section>
 
 <!-- ================= SCHEDULER ================= -->
+<!-- The booking flow lives on its own page, /book/ (built by build.py). This band
+     lists every upcoming start date; each one deep-links into /book/ with that
+     class, format and date preselected. Old /#schedule links still land here. -->
 <section class="section sched diag-t rev" id="schedule">
   <div class="wrap">
     <div class="sec-head is-center rv">
       <p class="eyebrow">Book Online</p>
       <h2 class="h-sec">Pick Your Class.<br>Hold Your Seat.</h2>
-      <p class="lede">No phone tag, no waiting for office hours. Choose your certification, pick a start date that fits your schedule, and lock it in with $200.</p>
+      <p class="lede">Every start date for the next few weeks. Tap one and it's already picked for you on the booking page. $200 holds a seat in any course; assessments are $150.</p>
     </div>
-
-    <div class="sched-shell rv">
-      <div class="rail" id="rail">
-        <button class="rail-step on" data-step="1"><span class="idx">01</span><em>Program</em></button>
-        <button class="rail-step" data-step="2"><span class="idx">02</span><em>Format</em></button>
-        <button class="rail-step" data-step="3"><span class="idx">03</span><em>Date</em></button>
-        <button class="rail-step" data-step="4"><span class="idx">04</span><em>Details</em></button>
-      </div>
-
-      <div class="sched-body">
-        <!-- Step 1 -->
-        <div class="pane on" data-pane="1">
-          <p class="pane-h"><b>Which certification are you after?</b><span>Choose one</span></p>
-          <div class="prog-grid" id="progGrid"></div>
-        </div>
-
-        <!-- Step 2 -->
-        <div class="pane" data-pane="2">
-          <p class="pane-h"><b>How do you want to take it?</b><span id="fmtSub"></span></p>
-          <div class="fmt-list" id="fmtGrid"></div>
-          <div class="pane-nav"><button class="link-back" data-goto="1">&larr; Back to programs</button></div>
-        </div>
-
-        <!-- Step 3 -->
-        <div class="pane" data-pane="3">
-          <p class="pane-h"><b>Choose a start date</b><span id="dateSub"></span></p>
-          <div class="date-grid" id="dateGrid"></div>
-          <div class="pane-nav"><button class="link-back" data-goto="2">&larr; Back</button></div>
-        </div>
-
-        <!-- Step 4 -->
-        <div class="pane" data-pane="4">
-          <p class="pane-h"><b>Almost done</b><span>Takes about a minute</span></p>
-          <p class="deep-note" id="deepNote" hidden>You picked <b id="deepPick"></b>.<button type="button" data-goto="1">Not right? Change it</button></p>
-          <div class="review-box">
-            <div>
-              <div class="two-up">
-                <label class="field"><span>First name</span><input type="text" id="fFirst" placeholder="Miguel" autocomplete="given-name"></label>
-                <label class="field"><span>Last name</span><input type="text" id="fLast" placeholder="Reyes" autocomplete="family-name"></label>
-              </div>
-              <label class="field"><span>Mobile number</span><input type="tel" id="fPhone" placeholder="(361) 555-0134" autocomplete="tel"></label>
-              <label class="field"><span>Email</span><input type="email" id="fEmail" placeholder="you@email.com" autocomplete="email"></label>
-              <label class="field"><span>Who's paying?</span>
-                <select id="fPayer">
-                  <option>I'm paying for myself</option>
-                  <option>My employer is paying</option>
-                  <option>I want to use financing</option>
-                </select>
-              </label>
-              <label class="field"><span>Anything we should know? (optional)</span><textarea id="fNotes" rows="2" placeholder="Night shift, need the evening class…"></textarea></label>
-              <div class="consent" id="smsConsent">
-                <label class="chk"><input type="checkbox" id="cNon"><span><b>Text me about my enrollment.</b> I agree to receive enrollment confirmations, class reminders and schedule updates by SMS from Prime Lift Rigging Academy at the mobile number above. Msg frequency varies. Msg &amp; data rates may apply. Reply HELP for help, STOP to opt out.</span></label>
-                <label class="chk"><input type="checkbox" id="cMkt"><span><b>Text me about future classes.</b> I agree to receive occasional class openings, recertification reminders and review requests by SMS from Prime Lift Rigging Academy. Msg frequency varies. Msg &amp; data rates may apply. Reply HELP for help, STOP to opt out.</span></label>
-                <p class="consent-note">Consent is not a condition of enrollment. We never share or sell your mobile number or opt-in information with third parties. <a href="privacy.html">Privacy Policy</a> &middot; <a href="terms.html">Terms &amp; Enrollment Policy</a></p>
-              </div>
-            </div>
-            <div>
-              <dl class="summary" id="summary"></dl>
-              <button class="btn btn-primary btn-block" id="toCheckout" style="margin-top:15px">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                Continue to Secure Payment
-              </button>
-              <p style="font-size:12.5px;color:var(--muted-2);margin-top:13px;line-height:1.55" id="depositNote"></p>
-            </div>
-          </div>
-          <div class="pane-nav"><button class="link-back" data-goto="3">&larr; Back to dates</button></div>
-        </div>
-      </div>
+    <div class="launch rv" id="launch"></div>
+    <div class="hero-cta rv" style="justify-content:center; margin-top:34px">
+      <a class="btn btn-primary" href="/book/">Book a Class <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+      <a class="btn btn-ghost" href="tel:+13614130160">Call (361) 413-0160</a>
     </div>
   </div>
 </section>
@@ -471,7 +412,7 @@
         <li><div><b>Test out. Get your card.</b><span>Written and practical, right here in our accredited testing room. Pass, and your credential goes on the NCCER Registry.</span></div></li>
       </ol>
       <div class="hero-cta" style="margin-top:30px">
-        <a class="btn btn-primary" href="#schedule">Pick Your Start Date</a>
+        <a class="btn btn-primary" href="/book/">Pick Your Start Date</a>
         <a class="btn btn-ghost" href="tel:+13614130160">Call (361) 413-0160</a>
       </div>
     </div>
@@ -624,7 +565,7 @@
             <div><b>Email</b><a href="mailto:primelift26@gmail.com">primelift26@gmail.com</a></div>
           </li>
         </ul>
-        <a class="btn btn-primary" href="#schedule">Book a Class Online</a>
+        <a class="btn btn-primary" href="/book/">Book a Class Online</a>
         <div class="storefront">
           <img src="img/storefront-door.jpg" alt="Prime Lift Rigging Academy Training and Assessment Center entrance in Portland, TX" loading="lazy">
         </div>
@@ -647,7 +588,7 @@
     <h2>Let's Grow<span class="mk">Together.</span></h2>
     <p>Spots are limited and classes fill. Lock your seat in now, start studying early, and come ready to pass.</p>
     <div class="band-cta">
-      <a class="btn btn-primary" href="#schedule">Reserve Your Seat — $200</a>
+      <a class="btn btn-primary" href="/book/">Book a Class</a>
       <a class="btn btn-ghost" href="tel:+13614130160">Call (361) 413-0160</a>
     </div>
   </div>
@@ -716,95 +657,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg>
     Call Now
   </a>
-  <a href="#schedule">
+  <a href="/book/">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
     Book a Class
   </a>
-</div>
-
-<!-- ================= CHECKOUT MODAL ================= -->
-<div class="modal" id="checkout" role="dialog" aria-modal="true" aria-labelledby="coTitle">
-  <div class="sheet">
-    <div class="sheet-top">
-      <b id="coTitle">Secure Checkout</b>
-      <span class="lockrow">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Encrypted
-      </span>
-      <button class="x" data-close aria-label="Close checkout">&times;</button>
-    </div>
-
-    <div id="coBody">
-      <div class="sheet-grid">
-        <div class="sheet-left">
-          <p class="sl-course" id="coCourse">Advanced Rigger</p>
-          <p class="sl-sub" id="coDates">Monday, Aug 24 · Day class</p>
-          <dl class="summary" id="coSummary"></dl>
-          <p class="pay-legal" id="coLegal">Balance must be paid in full before your class begins. Seats are released if the deposit isn't received.</p>
-        </div>
-        <div class="sheet-right">
-          <div class="paytabs" role="tablist">
-            <button class="paytab on" data-pay="card" role="tab">Card</button>
-            <button class="paytab" data-pay="klarna" role="tab">Klarna</button>
-            <button class="paytab" data-pay="afterpay" role="tab">Afterpay</button>
-            <button class="paytab" data-pay="inhouse" role="tab">In-House</button>
-          </div>
-
-          <div class="payform on" data-form="card">
-            <div class="alt-pay">
-              <b>Pay the deposit by card</b>
-              <p>You'll enter your card on Stripe's secure checkout page. Your seat is held the moment the payment goes through, and a receipt is emailed to you.</p>
-              <ul><li>Visa, Mastercard, Amex, Discover</li><li>Apple Pay and Google Pay on your phone</li><li>Balance can be paid online any time before class</li></ul>
-            </div>
-          </div>
-
-          <div class="payform" data-form="klarna">
-            <div class="alt-pay">
-              <b>Pay with Klarna</b>
-              <p>Klarna covers your course in full and then splits it into scheduled payments for you — so this option charges the <strong style="color:#fff">full course price</strong>, not the $200 deposit.</p>
-              <ul><li>Choose your payment plan on Klarna</li><li>Instant decision</li><li>Your seat is confirmed the moment Klarna approves</li></ul>
-            </div>
-          </div>
-
-          <div class="payform" data-form="afterpay">
-            <div class="alt-pay">
-              <b>Pay with Afterpay</b>
-              <p>Same as Klarna — Afterpay pays the course in full and breaks it into installments for you, so this option charges the <strong style="color:#fff">full course price</strong> rather than the deposit.</p>
-              <ul><li>Instant decision</li><li>Installments handled by Afterpay</li><li>Seat confirmed on approval</li></ul>
-            </div>
-          </div>
-
-          <div class="payform" data-form="inhouse">
-            <div class="alt-pay">
-              <b>In-House Financing — No Credit Check</b>
-              <p>Didn't qualify for Klarna or Afterpay? We'll set you up directly. Start with as little as $200 down and make payments leading up to your class date.</p>
-              <ul><li>No credit check</li><li>Payments scheduled before your start date</li><li>Course begins once the balance is paid in full</li></ul>
-              <p style="margin-top:13px">Prefer Zelle? Choose this and note it below — the office will send details and register you manually.</p>
-            </div>
-            <label class="field" style="margin-top:12px"><span>Anything we should know (optional)</span><input type="text" id="fNote" placeholder="Paying by Zelle, employer is covering it, etc." autocomplete="off"></label>
-          </div>
-
-          <button class="btn btn-primary btn-block" id="payBtn" style="margin-top:19px">Pay $200 Deposit</button>
-          <p class="pay-legal">By continuing you agree to Prime Lift Rigging Academy's enrollment terms. Deposits hold your seat and are applied to your course total.</p>
-        </div>
-      </div>
-    </div>
-
-    <div id="coDone" style="display:none">
-      <div class="co-success">
-        <div class="co-success-ico">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-        </div>
-        <h3>Seat Reserved</h3>
-        <p id="doneMsg">You're booked. A confirmation text and your study material are on the way, and we'll see you in Portland.</p>
-        <div class="co-success-box" id="doneBox">
-          <b>Questions before class?</b>
-          <p>Call the office at <a href="tel:+13614130160" style="color:var(--accent);font-weight:700">(361) 413-0160</a> or email <a href="mailto:primelift26@gmail.com" style="color:var(--accent);font-weight:700">primelift26@gmail.com</a>.</p>
-        </div>
-        <button class="btn btn-ghost" data-close style="margin-top:26px">Close</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- Enrollment requests that don't go through Stripe (in-house financing, Zelle,
@@ -910,9 +766,9 @@ const CONFIG = {
       shot:"img/card-rigger.jpg",
       blurb:"Lift planning, load math, slings, hardware and hands-on practical.",
       formats:[
-        {id:"day",     name:"Weekday · Day",         time:"8:00 AM – 2:00 PM", note:"Monday–Thursday · 4 days",  dates:every(MONDAY)},
-        {id:"night",   name:"Weekday · Night",       time:"6:00 PM – 11:00 PM", note:"Monday–Thursday · built for day-shift crews", dates:every(MONDAY)},
-        {id:"weekend", name:"3-Day Weekend Express", time:"Fri–Sun 8:00 AM – 5:00 PM", note:"Done in one weekend", dates:every(FRIDAY)}
+        {id:"day",     name:"Weekday Day Class",     time:"Mon – Thu · 8:00 AM – 2:00 PM",  note:"Four days, starts every Monday", dates:every(MONDAY)},
+        {id:"night",   name:"Weekday Night Class",   time:"Mon – Thu · 6:00 PM – 11:00 PM", note:"Four nights, built for day-shift crews", dates:every(MONDAY)},
+        {id:"weekend", name:"3-Day Weekend Express", time:"Fri – Sun · 8:00 AM – 5:00 PM",  note:"Done in one weekend, starts every Friday", dates:every(FRIDAY)}
       ]
     },
     {
@@ -920,7 +776,7 @@ const CONFIG = {
       shot:"img/card-signal.jpg",
       blurb:"Standard hand signals, jobsite communication, written and practical test.",
       formats:[
-        {id:"friday", name:"Two Fridays", time:"8:00 AM – 3:00 PM", note:"Fridays · 2 days of training", dates:every(FRIDAY)}
+        {id:"friday", name:"Two Fridays", time:"Fridays · 8:00 AM – 3:00 PM", note:"Two Fridays of class and hands-on", dates:every(FRIDAY)}
       ]
     },
     {
@@ -928,7 +784,7 @@ const CONFIG = {
       shot:"img/card-assessment.jpg",
       blurb:"Test out of a craft you already work in. One flat price across all 36 crafts.",
       formats:[
-        {id:"assess", name:"Assessment Session", time:"8:00 AM – 5:00 PM", note:"Monday–Friday · Rebar · Concrete · Carpenter · Pipefitter · Forklift · Boilermaker · HVAC and more", dates:everyWeekday()}
+        {id:"assess", name:"Any Weekday", time:"Mon – Fri · 8:00 AM – 5:00 PM", note:"By appointment, 36 crafts", dates:everyWeekday()}
       ]
     }
   ],
@@ -962,6 +818,7 @@ const DOWFULL = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Sa
 const pad2 = n => String(n).padStart(2,"0");
 function dparts(iso){ const [y,m,d]=iso.split("-").map(Number); return new Date(y,m-1,d); }
 function fmtLong(iso){ const d=dparts(iso); return `${DOWFULL[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}`; }
+function fmtShort(iso){ const d=dparts(iso); return `${DOW[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}`; }
 function money(n){ return "$"+n.toLocaleString("en-US"); }
 /* Seat counts are the real class cap (8), NOT a fabricated countdown.
    The old version hashed the date string into a number between 2 and 8,
@@ -1006,310 +863,21 @@ $$(".rv").forEach(el=>io.observe(el));
 })();
 
 /* ============================================================
-   SCHEDULER
+   BOOK-ONLINE BAND — the next start dates per format, each a deep link into
+   /book/ with that class preselected. The booking flow itself (steps, form,
+   payment) lives on /book/, generated by build.py.
    ============================================================ */
-const S={prog:null,fmt:null,date:null,step:1};
-
-function setStep(n){
-  S.step=n;
-  $$(".pane").forEach(p=>p.classList.toggle("on", +p.dataset.pane===n));
-  $$(".rail-step").forEach(s=>{
-    const i=+s.dataset.step;
-    s.classList.toggle("on", i===n);
-    s.classList.toggle("done", i<n);
-  });
-  if(n===4) renderSummary();
-}
-function goSched(n){
-  setStep(n);
-  const y=$("#schedule").getBoundingClientRect().top+window.scrollY-70;
-  window.scrollTo({top:y,behavior:"smooth"});
-}
-// the rail is clickable backwards
-$("#rail").addEventListener("click",e=>{
-  const b=e.target.closest(".rail-step"); if(!b) return;
-  const n=+b.dataset.step;
-  if(n<S.step) setStep(n);
-});
-
-/* step 1 — programs, each with a real photo */
-$("#progGrid").innerHTML = CONFIG.programs.map((p,i)=>`
-  <button class="prog" data-prog="${p.id}">
-    <span class="prog-shot"><img src="${p.shot}" alt="" loading="lazy"></span>
-    <span class="prog-body">
-      <b>${p.name}</b>
-      <span>${p.blurb}</span>
-      <span class="prog-price">${money(p.price)}${p.id==="assessment"?'<small>per craft</small>':'<small>per course</small>'}</span>
-    </span>
-  </button>`).join("");
-
-$("#progGrid").addEventListener("click",e=>{
-  const b=e.target.closest("[data-prog]"); if(!b) return;
-  pickProgram(b.dataset.prog);
-});
-
-/* phones: the program row swipes; dots follow whichever card is centred */
-const progTrack=$("#progGrid");
-const progDots=document.createElement("div");
-progDots.className="prog-dots"; progDots.setAttribute("aria-hidden","true");
-progDots.innerHTML=CONFIG.programs.map((p,i)=>`<i class="${i?"":"on"}"></i>`).join("");
-progTrack.after(progDots);
-const trackSwipes=()=>progTrack.scrollWidth>progTrack.clientWidth+4;
-const cardX=c=>c.getBoundingClientRect().left-progTrack.getBoundingClientRect().left+progTrack.scrollLeft;
-let dotTick=false;
-progTrack.addEventListener("scroll",()=>{
-  if(dotTick) return; dotTick=true;
-  requestAnimationFrame(()=>{
-    dotTick=false;
-    const cards=$$(".prog",progTrack); if(!cards.length) return;
-    const mid=progTrack.scrollLeft+progTrack.clientWidth/2;
-    let best=0,bd=Infinity;
-    cards.forEach((c,i)=>{ const d=Math.abs(cardX(c)+c.offsetWidth/2-mid); if(d<bd){bd=d;best=i;} });
-    $$("i",progDots).forEach((d,i)=>d.classList.toggle("on",i===best));
-  });
-},{passive:true});
-function showProgCard(id){
-  const c=$(`#progGrid .prog[data-prog="${id}"]`); if(!c||!trackSwipes()) return;
-  const pad=parseFloat(getComputedStyle(progTrack).paddingLeft)||0;
-  progTrack.scrollTo({left:cardX(c)-pad,behavior:"smooth"});
-}
-
-function pickProgram(id){
-  $("#deepNote").hidden=true;
-  S.prog=CONFIG.programs.find(p=>p.id===id);
-  S.fmt=null; S.date=null;
-  $$("#progGrid .prog").forEach(o=>o.classList.toggle("sel", o.dataset.prog===id));
-  showProgCard(id);   /* phones: bring the chosen card into view if the user comes back to step 1 */
-  $("#fmtSub").textContent=S.prog.name;
-  $("#fmtGrid").innerHTML = S.prog.formats.map((f,i)=>`
-    <button class="fmt" data-fmt="${f.id}">
-      <span class="idx">${pad2(i+1)}</span>
-      <span>
-        <b>${f.name}</b>
-        <span>${f.time} &nbsp;<em>· ${f.note}</em></span>
-      </span>
-      <svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-    </button>`).join("");
-  if(S.prog.formats.length===1){ pickFormat(S.prog.formats[0].id); }
-  else setStep(2);
-}
-
-$("#fmtGrid").addEventListener("click",e=>{
-  const b=e.target.closest("[data-fmt]"); if(!b) return;
-  pickFormat(b.dataset.fmt);
-});
-
-function pickFormat(id){
-  S.fmt=S.prog.formats.find(f=>f.id===id);
-  S.date=null;
-  $$("#fmtGrid .fmt").forEach(o=>o.classList.toggle("sel", o.dataset.fmt===id));
-  $("#dateSub").textContent = `${S.prog.name} · ${S.fmt.name}`;
+(function(){
+  const host=$("#launch"); if(!host) return;
   const today=new Date(); today.setHours(0,0,0,0);
-  $("#dateGrid").innerHTML = S.fmt.dates.map(iso=>{
-    const d=dparts(iso), past=d<today, full=isFull(iso,S.prog.id,S.fmt.id), off=past||full;
-    return `
-    <button class="date" data-date="${iso}" ${off?"disabled":""}>
-      <span class="date-cal"><em>${MON[d.getMonth()]}</em><b>${d.getDate()}</b></span>
-      <span class="date-info"><b>${DOWFULL[d.getDay()]}</b><span>${S.fmt.time}</span></span>
-      <span class="seats"><b>${off?"—":SEATS}</b><span>${past?"closed":full?"full":"seats/class"}</span></span>
-    </button>`;
-  }).join("");
-  setStep(3);
-}
-
-$("#dateGrid").addEventListener("click",e=>{
-  const b=e.target.closest("[data-date]"); if(!b||b.disabled) return;
-  S.date=b.dataset.date;
-  $$("#dateGrid .date").forEach(o=>o.classList.toggle("sel", o.dataset.date===S.date));
-  setTimeout(()=>setStep(4),160);
-});
-
-$$("[data-goto]").forEach(b=>b.addEventListener("click",()=>setStep(+b.dataset.goto)));
-
-/* what a student actually pays today — never more than the price */
-function depositFor(p, method){
-  // Klarna/Afterpay cover the course in full, then split it for the student.
-  if(method==="klarna"||method==="afterpay") return p.price;
-  return Math.min(p.deposit||CONFIG.deposit, p.price);
-}
-
-function summaryRows(method){
-  const p=S.prog,f=S.fmt,d=S.date;
-  const rows=[
-    ["Certification", p.name],
-    ["Schedule", f.name],
-    ["Class times", f.time],
-    ["Start date", d?fmtLong(d):"—"]
-  ];
-  let html=rows.map(r=>`<div class="summary-row"><dt>${r[0]}</dt><dd>${r[1]}</dd></div>`).join("");
-  const dep=depositFor(p,method), bal=p.price-dep;
-  html+=`<div class="summary-row total"><dt>${p.id==="assessment"?"Assessment fee":"Course total"}</dt><dd>${money(p.price)}</dd></div>`;
-  html+=`<div class="summary-row due"><dt>Due today</dt><dd>${money(dep)}</dd></div>`;
-  if(bal>0) html+=`<div class="summary-row"><dt>Balance before class</dt><dd>${money(bal)}</dd></div>`;
-  return html;
-}
-function renderSummary(){
-  $("#summary").innerHTML=summaryRows("card");
-  const p=S.prog, dep=depositFor(p,"card"), bal=p.price-dep;
-  $("#depositNote").innerHTML = bal>0
-    ? `You'll only be charged the <strong style="color:var(--accent)">${money(dep)} deposit</strong> today. The balance is due before your class begins — pay it online, in the office, or set up a payment plan.`
-    : `Your <strong style="color:var(--accent)">${money(dep)}</strong> assessment fee is paid in full today — nothing else is owed on the day you test.`;
-}
-
-$$("[data-book]").forEach(b=>b.addEventListener("click",()=>{
-  pickProgram(b.dataset.book);
-  goSched(S.prog.formats.length===1?3:2);
-}));
-
-/* Inner pages deep-link into the booking form: /?book=advanced&fmt=night&date=2026-09-14#schedule */
-(function(){
-  const q=new URLSearchParams(location.search), id=q.get("book");
-  if(!id||!CONFIG.programs.some(p=>p.id===id)) return;
-  pickProgram(id);
-  const f=q.get("fmt");
-  if(f&&S.prog.formats.some(x=>x.id===f)) pickFormat(f);
-  const d=q.get("date");
-  if(S.fmt&&d&&S.fmt.dates.includes(d)&&!isFull(d,S.prog.id,S.fmt.id)){
-    S.date=d;
-    $$("#dateGrid .date").forEach(o=>o.classList.toggle("sel", o.dataset.date===d));
-    setStep(4);
-    // arrived from the dates page or a course strip: say what got picked, with a way out
-    $("#deepPick").textContent=`${S.prog.name} · ${S.fmt.name} starting ${fmtLong(d)}`;
-    $("#deepNote").hidden=false;
-  }
-  history.replaceState(null,"",location.pathname+"#schedule");
-  requestAnimationFrame(()=>goSched(S.step));
-})();
-
-/* ============================================================
-   CHECKOUT
-   ============================================================ */
-const modal=$("#checkout");
-
-function payLabel(method){
-  if(method==="inhouse") return "Request My Payment Plan";
-  const dep=S.prog?depositFor(S.prog,method):CONFIG.deposit;
-  if(method==="klarna") return `Continue to Klarna — ${money(dep)}`;
-  if(method==="afterpay") return `Continue to Afterpay — ${money(dep)}`;
-  return S.prog && dep===S.prog.price ? `Pay ${money(dep)}` : `Pay ${money(dep)} Deposit`;
-}
-function applyMethod(method){
-  $("#coSummary").innerHTML=summaryRows(method);
-  $("#payBtn").textContent=payLabel(method);
-  $("#coLegal").textContent = (method==="klarna"||method==="afterpay")
-    ? "Klarna and Afterpay pay your course in full, then split it into installments for you. Your seat is confirmed as soon as they approve."
-    : "Balance must be paid in full before your class begins. Seats are released if the deposit isn't received.";
-}
-function openCheckout(){
-  if(!S.prog||!S.date){ goSched(1); return; }
-  $("#coCourse").textContent=S.prog.name;
-  $("#coDates").textContent=`${fmtLong(S.date)} · ${S.fmt.name}`;
-  $$(".paytab").forEach(x=>x.classList.toggle("on", x.dataset.pay==="card"));
-  $$(".payform").forEach(f=>f.classList.toggle("on", f.dataset.form==="card"));
-  applyMethod("card");
-  $("#coBody").style.display="";
-  $("#coDone").style.display="none";
-  modal.classList.add("open");
-  document.body.style.overflow="hidden";
-}
-function closeCheckout(){ modal.classList.remove("open"); document.body.style.overflow=""; }
-$("#toCheckout").addEventListener("click",openCheckout);
-$$("[data-close]").forEach(b=>b.addEventListener("click",closeCheckout));
-modal.addEventListener("click",e=>{ if(e.target===modal) closeCheckout(); });
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&modal.classList.contains("open")) closeCheckout(); });
-
-$$(".paytab").forEach(t=>t.addEventListener("click",()=>{
-  $$(".paytab").forEach(x=>x.classList.remove("on")); t.classList.add("on");
-  $$(".payform").forEach(f=>f.classList.toggle("on", f.dataset.form===t.dataset.pay));
-  applyMethod(t.dataset.pay);
-}));
-
-/* ============================================================
-   PAYMENT + ENROLLMENT SUBMISSION
-   Card / Klarna / Afterpay -> Netlify Function creates a Stripe Checkout
-   Session and we redirect to it. In-house / Zelle -> Netlify Form.
-   If Stripe isn't configured yet (no STRIPE_SECRET_KEY on the site), the
-   function answers 503 and the booking falls back to the form so no
-   student is ever dropped.
-   ============================================================ */
-function bookingPayload(method){
-  const dep=depositFor(S.prog,method);
-  return {
-    first_name:($("#fFirst").value||"").trim(),
-    last_name:($("#fLast").value||"").trim(),
-    phone:($("#fPhone").value||"").trim(),
-    email:($("#fEmail").value||"").trim(),
-    program:S.prog.name, program_id:S.prog.id,
-    format:S.fmt.name, format_id:S.fmt.id, class_times:S.fmt.time,
-    start_date:S.date, start_date_label:fmtLong(S.date),
-    payment_method:method, amount_due_today:dep, course_total:S.prog.price,
-    note:(($("#fNote")||{}).value||"").trim(),
-    payer:(($("#fPayer")||{}).value||""),
-    notes:(($("#fNotes")||{}).value||"").trim(),
-    sms_consent_nonmarketing: $("#cNon").checked ? "yes" : "no",
-    sms_consent_marketing:    $("#cMkt").checked ? "yes" : "no",
-    page:location.href
-  };
-}
-async function submitEnrollmentForm(p){
-  const body=new URLSearchParams({"form-name":"enrollment-request"});
-  // start_date goes out human-readable ("Monday, Sep 14, 2026"): it lands verbatim in the
-  // office notification, the opportunity name and the student's confirmation email.
-  const q=Object.assign({},p,{start_date:p.start_date?fmtLong(p.start_date)+", "+p.start_date.slice(0,4):""});
-  ["first_name","last_name","phone","email","program","format","start_date","payment_method","amount_due_today","note","page","payer","notes","sms_consent_nonmarketing","sms_consent_marketing"]
-    .forEach(k=>body.append(k,String(q[k]==null?"":q[k])));
-  const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:body.toString()});
-  if(!r.ok) throw new Error("form "+r.status);
-}
-function showDone(msg){
-  $("#doneMsg").textContent=msg;
-  $("#coBody").style.display="none";
-  $("#coDone").style.display="";
-  $(".sheet").scrollTop=0;
-}
-$("#payBtn").addEventListener("click",async()=>{
-  const btn=$("#payBtn"), label=btn.textContent;
-  const method=$(".paytab.on").dataset.pay;
-  const p=bookingPayload(method);
-  const who=p.first_name?p.first_name+", you're":"You're";
-  if(!p.phone && !p.email){ alert("Add a mobile number or email on the previous step so we can confirm your seat."); return; }
-  btn.innerHTML='<span class="spin"></span> Processing…'; btn.disabled=true;
-  const reset=()=>{ btn.disabled=false; btn.textContent=label; };
-  try{
-    if(method==="inhouse"){
-      await submitEnrollmentForm(p);
-      reset();
-      showDone(`${who} on the list for ${p.start_date_label}. The office will call you to set up your payment schedule and hold your seat.`);
-      return;
-    }
-    const r=await fetch("/.netlify/functions/create-checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
-    if(r.status===503){
-      // Payments not switched on yet: capture the booking so the office can take the deposit by phone.
-      p.payment_method=method+" (online payments pending, take by phone)";
-      await submitEnrollmentForm(p);
-      reset();
-      showDone(`${who} on the list for ${p.program} starting ${p.start_date_label}. The office will call you to take the deposit and confirm your seat.`);
-      return;
-    }
-    const data=await r.json().catch(()=>({}));
-    if(!r.ok||!data.url) throw new Error(data.error||"checkout "+r.status);
-    location.href=data.url;
-  }catch(err){
-    console.error(err);
-    reset();
-    alert("Something went wrong on our end. Call the office at "+CONFIG.phone+" and we'll hold your seat by phone.");
-  }
-});
-
-/* Returning from Stripe: /?booked=1&program=...&date=... */
-(function(){
-  const q=new URLSearchParams(location.search);
-  if(q.get("booked")!=="1") return;
-  const prog=q.get("program")||"your course", date=q.get("date")||"";
-  history.replaceState(null,"",location.pathname);
-  $("#coCourse").textContent=prog; $("#coDates").textContent=date;
-  modal.classList.add("open"); document.body.style.overflow="hidden";
-  showDone(`Your deposit went through and your seat in ${prog}${date?" starting "+date:""} is reserved. A receipt is in your email, and the office will reach out with your study material.`);
+  host.innerHTML=CONFIG.programs.map(p=>`
+    <div class="ln-group">
+      <div class="ln-gh"><b>${p.name}</b><em>${money(p.price)}</em><a href="/book/?book=${p.id}">Book<span>${p.id==="assessment"?" a test date":" this course"}</span> &rsaquo;</a></div>
+      ${p.formats.map(f=>{
+        const dates=f.dates.filter(iso=>dparts(iso)>=today&&!isFull(iso,p.id,f.id)).slice(0,4);
+        return `<div class="ln-row"><div><b>${f.name}</b><small>${f.time} · ${f.note}</small></div><div class="ln-dates">${dates.map(iso=>`<a class="ln-date" href="/book/?book=${p.id}&amp;fmt=${f.id}&amp;date=${iso}">${fmtShort(iso)}</a>`).join("")}</div></div>`;
+      }).join("")}
+    </div>`).join("");
 })();
 
 /* ============================================================

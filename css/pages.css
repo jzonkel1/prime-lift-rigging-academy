@@ -270,3 +270,95 @@ a.guide-card:hover{border-color:var(--accent)}
 .guide-card b{font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:21px; line-height:1.05; letter-spacing:.012em}
 .guide-card p{font-size:14.5px; color:var(--muted); margin:0; line-height:1.6}
 .guide-card .person-more{margin-top:auto; padding-top:8px}
+
+/* ---- /book/: the booking page. Steps stack; the finished ones collapse to a
+   one-line summary with a Change link, the current one is open, later ones wait. ---- */
+.bk-head{padding:124px 0 30px; background:var(--steel); border-bottom:1px solid var(--edge)}
+@media(min-width:900px){.bk-head{padding:160px 0 40px}}
+.bk-head .crumbs,.bk-head .eyebrow{justify-content:flex-start}
+.bk-head .eyebrow::before{display:none}
+.bk-head h1{font-size:clamp(42px,9vw,76px); line-height:.94; max-width:none}
+.bk-head h1 em{font-style:normal; color:var(--accent); display:block}
+.bk-head .lede{margin:18px 0 0; max-width:58ch}
+.bk-marks{display:flex; flex-wrap:wrap; gap:8px 22px; margin:22px 0 0; padding:0; list-style:none; font-family:var(--f-display); font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.bk-marks li{display:flex; align-items:center; gap:8px}
+.bk-marks svg{width:14px; height:14px; color:var(--accent); flex:none}
+.bk-main{padding:clamp(26px,4vw,52px) 0 var(--sec)}
+.bk-flash{margin:0 0 18px; padding:13px 16px; border-left:3px solid var(--accent); background:rgba(41,182,232,.08); font-size:14.5px; line-height:1.55; color:#D8D6D2}
+.bk-flash a{color:var(--accent); font-weight:600}
+.bk-grid{display:grid; gap:var(--gut); grid-template-columns:minmax(0,1fr); align-items:start}
+@media(min-width:1000px){.bk-grid{grid-template-columns:minmax(0,1fr) 336px}}
+.bk-steps{display:grid; gap:10px}
+.bk-step{border:1px solid var(--edge); background:var(--steel)}
+.bk-step-h{display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:14px; width:100%; padding:17px 20px; text-align:left; cursor:default}
+.bk-step.is-done .bk-step-h{cursor:pointer}
+.bk-step.is-done .bk-step-h:hover{background:rgba(255,255,255,.02)}
+.bk-step-h .idx{font-size:15px}
+.bk-step-h b{display:block; font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:clamp(19px,2.2vw,23px); letter-spacing:.012em; line-height:1.05}
+.bk-pick{display:none; font-size:13.5px; color:#fff; line-height:1.4; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.bk-change{display:none; font-family:var(--f-display); font-size:10.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); white-space:nowrap}
+.bk-step.is-done .bk-pick,.bk-step.is-done .bk-change{display:block}
+.bk-step.is-done .idx{color:var(--ok)}
+.bk-step.is-locked{opacity:.4}
+.bk-step.is-open{border-color:var(--edge-2)}
+.bk-step-b{display:none; padding:2px 20px 24px; border-top:1px solid var(--edge); animation:fade .3s ease}
+.bk-step.is-open .bk-step-b{display:block}
+.bk-q{margin:20px 0 16px; font-family:var(--f-display); font-weight:700; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted-2)}
+.bk-q span{color:var(--accent); margin-left:8px}
+.bk-step .field input,.bk-step .field select,.bk-step .field textarea,.bk-step .summary{background:var(--ink)}
+.bk-step .consent{margin-top:6px}
+.bk-step .paytabs{margin-bottom:14px}
+.bk-step #coLegal{margin:10px 0 0}
+@media(max-width:560px){.bk-step-h{padding:14px 14px; gap:12px} .bk-step-b{padding:2px 14px 20px}}
+/* certification cards: photo left on phones, photo on top from tablet up */
+.bp-grid{display:grid; gap:10px; grid-template-columns:1fr}
+@media(min-width:760px){.bp-grid{grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}}
+.bp{display:grid; grid-template-columns:110px minmax(0,1fr); text-align:left; border:1px solid var(--edge); background:var(--ink); overflow:hidden; transition:border-color .18s; padding:0}
+@media(min-width:760px){.bp{grid-template-columns:1fr; grid-template-rows:auto 1fr}}
+.bp:hover{border-color:rgba(41,182,232,.5)}
+.bp.sel{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.bp-shot{position:relative; overflow:hidden; background:var(--steel-3); min-height:112px}
+@media(min-width:760px){.bp-shot{aspect-ratio:16/9; min-height:0}}
+.bp-shot img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+.bp-shot::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 50%,rgba(10,10,12,.55))}
+.bp-body{display:flex; flex-direction:column; min-width:0; padding:13px 15px 14px}
+.bp b{font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:19px; letter-spacing:.01em; line-height:1.05}
+.bp-blurb{display:block; margin-top:5px; font-size:13px; line-height:1.45; color:var(--muted)}
+.bp-price{display:flex; flex-wrap:wrap; align-items:baseline; gap:3px 8px; margin-top:auto; padding-top:10px; font-family:var(--f-fig); font-stretch:125%; font-weight:700; font-size:18px; color:var(--accent); line-height:1}
+.bp-price .was{margin-left:0}
+.bp-price small{font-family:var(--f-display); font-stretch:100%; font-weight:600; font-size:10px; color:var(--muted-2); letter-spacing:.08em; text-transform:uppercase}
+@media(max-width:400px){.bp{grid-template-columns:92px minmax(0,1fr)} .bp-shot{min-height:100px} .bp-blurb{display:none} .bp-body{padding:12px 13px}}
+/* start dates: a calendar tile per date */
+.bd-grid{display:grid; gap:8px; grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(min-width:480px){.bd-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:700px){.bd-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(min-width:1000px){.bd-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:1180px){.bd-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.bd{display:flex; flex-direction:column; align-items:center; padding:12px 4px; border:1px solid var(--edge); background:var(--ink); text-align:center; transition:.16s}
+.bd:hover:not(:disabled){border-color:rgba(41,182,232,.5); transform:translateY(-2px)}
+.bd.sel{border-color:var(--accent); background:rgba(41,182,232,.09)}
+.bd:disabled{opacity:.32; cursor:not-allowed}
+.bd em{font-style:normal; font-family:var(--f-display); font-weight:700; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted)}
+.bd.sel em{color:var(--accent)}
+.bd b{font-family:var(--f-fig); font-stretch:125%; font-weight:700; font-variant-numeric:tabular-nums; font-size:26px; line-height:1; margin:6px 0 3px; color:#fff}
+.bd span{font-family:var(--f-display); font-size:11px; font-weight:600; color:var(--muted)}
+.bd i{font-style:normal; margin-top:6px; font-family:var(--f-display); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted-2); font-weight:700}
+.bk-note{margin:16px 0 0; font-size:13px; color:var(--muted-2); line-height:1.55}
+.bk-note a{color:var(--accent)}
+.bk-err{margin:0 0 12px; padding:11px 14px; border-left:3px solid #E86A5A; background:rgba(232,106,90,.09); font-size:14px; color:#F1D7D2}
+/* desktop: the running order sticks beside the steps */
+.bk-side{display:none}
+@media(min-width:1000px){
+  .bk-side{display:block; position:sticky; top:96px; border:1px solid var(--edge-2); border-top:2px solid var(--accent); background:var(--steel)}
+  .bk-side-shot{position:relative; aspect-ratio:16/9; background:var(--steel-3); overflow:hidden}
+  .bk-side-shot img{width:100%; height:100%; object-fit:cover}
+  .bk-side-shot::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 30%,rgba(10,10,12,.88))}
+  .bk-side-shot b{position:absolute; left:18px; right:18px; bottom:14px; z-index:1; font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:24px; letter-spacing:.012em; line-height:1.05}
+  .bk-side .summary{border:0; background:none; margin:0}
+  .bk-side .summary-row{padding:12px 18px}
+  .bk-side .summary-row.total{background:var(--steel-3)}
+  .bk-side-call{padding:14px 18px; border-top:1px solid var(--edge); font-size:13px; line-height:1.55; color:var(--muted); margin:0}
+  .bk-side-call a{color:#fff; font-weight:600; white-space:nowrap}
+}
+.bk-done{max-width:720px; margin-inline:auto; border:1px solid var(--edge-2); border-top:2px solid var(--ok); background:var(--steel)}
+.bk-done .co-success h2{font-size:30px; margin-bottom:12px}

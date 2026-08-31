@@ -61,11 +61,11 @@ FULL_ADDR = "%s, %s, %s %s" % (BIZ["street"], BIZ["city"], BIZ["state"], BIZ["zi
 LEAD_DAYS = 1
 MON, FRI = 1, 5                      # JS getDay() numbering (Sun=0)
 SCHEDULE_RULES = [
-    {"id": "advanced", "fmt": "day", "name": "Advanced Rigger", "label": "Weekday Day Class", "time": "Mon – Thu · 8:00 AM – 2:00 PM", "wd": MON, "n": 6},
-    {"id": "advanced", "fmt": "night", "name": "Advanced Rigger", "label": "Weekday Night Class", "time": "Mon – Thu · 6:00 PM – 11:00 PM", "wd": MON, "n": 6},
-    {"id": "advanced", "fmt": "weekend", "name": "Advanced Rigger", "label": "3-Day Weekend Express", "time": "Fri – Sun · 8:00 AM – 5:00 PM", "wd": FRI, "n": 6},
-    {"id": "signal", "fmt": "friday", "name": "Signal Person", "label": "Two Fridays", "time": "Fridays · 8:00 AM – 3:00 PM", "wd": FRI, "n": 6},
-    {"id": "assessment", "fmt": "assess", "name": "NCCER Assessments", "label": "Any Weekday", "time": "Mon – Fri · 8:00 AM – 5:00 PM", "wd": "weekday", "n": 10},
+    {"id": "advanced", "fmt": "day", "name": "Advanced Rigger", "label": "Weekday Day Class", "time": "Mon – Thu · 8:00 AM – 2:00 PM", "note": "Four days, starts every Monday", "wd": MON, "n": 6},
+    {"id": "advanced", "fmt": "night", "name": "Advanced Rigger", "label": "Weekday Night Class", "time": "Mon – Thu · 6:00 PM – 11:00 PM", "note": "Four nights, built for day-shift crews", "wd": MON, "n": 6},
+    {"id": "advanced", "fmt": "weekend", "name": "Advanced Rigger", "label": "3-Day Weekend Express", "time": "Fri – Sun · 8:00 AM – 5:00 PM", "note": "Done in one weekend, starts every Friday", "wd": FRI, "n": 6},
+    {"id": "signal", "fmt": "friday", "name": "Signal Person", "label": "Two Fridays", "time": "Fridays · 8:00 AM – 3:00 PM", "note": "Two Fridays of class and hands-on", "wd": FRI, "n": 6},
+    {"id": "assessment", "fmt": "assess", "name": "NCCER Assessments", "label": "Any Weekday", "time": "Mon – Fri · 8:00 AM – 5:00 PM", "note": "By appointment, 36 crafts", "wd": "weekday", "n": 10},
 ]
 # Office exceptions. Edit here, run build.py, deploy (two minutes, see SOP in
 # the project memory). CLOSED dates vanish from every list on the site
@@ -163,7 +163,7 @@ def nav(home=False):
     </nav>
     <div class="nav-cta">
       <a class="nav-phone" href="tel:%(tel)s" aria-label="Call %(phone)s">%(phone_i)s %(phone)s</a>
-      <a class="btn btn-primary" href="%(h)s#schedule">Enroll Now</a>
+      <a class="btn btn-primary" href="/book/">Book a Class</a>
       <button class="nav-burger" id="navBurger" aria-label="Open menu" aria-expanded="false" aria-controls="mnav"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -195,7 +195,7 @@ def nav(home=False):
       <a href="/contact/"><b>Contact</b></a>
       <a href="/es/" lang="es" hreflang="es"><b>Español</b><span>Información en español</span></a>
       <div class="mnav-cta">
-        <a class="btn btn-primary btn-block" href="%(h)s#schedule">Reserve Your Seat — $200</a>
+        <a class="btn btn-primary btn-block" href="/book/">Book a Class</a>
         <a class="btn btn-ghost btn-block" href="tel:%(tel)s">%(phone_i)s Call %(phone)s</a>
       </div>
     </div>
@@ -269,7 +269,7 @@ def footer(home=False):
 def callbar():
     return """<div class="callbar" id="callbar">
   <a class="pri" href="tel:%s">%s Call Now</a>
-  <a href="/#schedule">%s Book a Class</a>
+  <a href="/book/">%s Book a Class</a>
 </div>""" % (BIZ["phone_raw"], I["phone"], I["cal"])
 
 # --------------------------------------------------------------- schema
@@ -416,7 +416,7 @@ def hero_img_tag(img, alt):
 
 def phero(img, alt, kicker, h1, lede, crumbs, ctas=None, cls="", home="Home"):
     ctas = ctas if ctas is not None else [
-        ('<a class="btn btn-primary" href="/#schedule">Reserve Your Seat — $200 %s</a>' % I["arrow"]),
+        ('<a class="btn btn-primary" href="/book/">Book a Class %s</a>' % I["arrow"]),
         ('<a class="btn btn-ghost" href="tel:%s">%s Call %s</a>' % (BIZ["phone_raw"], I["phone"], BIZ["phone"]))]
     return """<section class="phero %s">
   <div class="phero-bg">%s</div>
@@ -449,7 +449,7 @@ def faq_html(faq, start=1):
   </div>""" % (i, i, esc(q), i, esc(a)) for i, (q, a) in enumerate(faq, start))
 
 def band(h2="Building Skills.<br class=\"mbr\"> Bettering Futures.", p="Spots are limited and classes fill. Lock your seat in now, start studying early, and come ready to pass.", primary=None, eyebrow="Your Future Starts Here", call="Call"):
-    primary = primary or '<a class="btn btn-primary" href="/#schedule">Reserve Your Seat — $200</a>'
+    primary = primary or '<a class="btn btn-primary" href="/book/">Book a Class</a>'
     return """<section class="band">
   <div class="band-bg" aria-hidden="true"><img src="/img/bg-crane-golden.jpg" alt="" loading="lazy"></div>
   <div class="wrap band-in rv">
@@ -483,7 +483,7 @@ def review_card(r):
 def rev_grid(revs):
     return '<div class="rev-grid" data-orphan="%d">%s</div>' % (len(revs) % 3, "".join(review_card(r) for r in revs))
 
-def cta_box(title, lines, price=None, href="/#schedule", label="Pick a Start Date"):
+def cta_box(title, lines, price=None, href="/book/", label="Pick a Start Date"):
     return """<aside class="cta-box rv">
   %s<b>%s</b>%s
   <a class="btn btn-primary btn-block" href="%s">%s</a>
@@ -544,7 +544,7 @@ def build_course(c):
     who = "".join('<div class="who-card rv"><b>%s</b><p>%s</p></div>' % (esc(t), esc(d)) for t, d in c["who"])
     teachers = [p["slug"] for p in PEOPLE if c["slug"] in p["teaches"]]
     body = phero(c["hero"], c["hero_alt"], c["kicker"], c["h1"], c["lede"], crumbs,
-                 ctas=['<a class="btn btn-primary" href="/?book=%s#schedule">Pick a Start Date %s</a>' % (c["id"], I["arrow"]),
+                 ctas=['<a class="btn btn-primary" href="/book/?book=%s">Pick a Start Date %s</a>' % (c["id"], I["arrow"]),
                        '<a class="btn btn-ghost" href="tel:%s">%s Call %s</a>' % (BIZ["phone_raw"], I["phone"], BIZ["phone"])])
     body += specbar([("Course price", price_line), ("Holds your seat", money(c["deposit"])),
                      ("Length", "4 days" if c["id"] == "advanced" else "2 Fridays"),
@@ -561,7 +561,7 @@ def build_course(c):
 </div></section>""" % (sec_head("01", "The Course", "What The<br>Course Covers"), esc(c["summary"]), checks(c["learn"]),
                        cta_box("%s · %s" % (c["name"], money(c["price"])),
                                ["$%d holds your seat. Balance due before class." % c["deposit"], "Klarna, Afterpay, Zelle or in-house financing with no credit check."],
-                               price=price_line, href="/?book=%s#schedule" % c["id"]))
+                               price=price_line, href="/book/?book=%s" % c["id"]))
     body += """<section class="section alt" id="formats"><div class="wrap">
   %s
   <div class="fmt-grid">%s</div>
@@ -581,7 +581,7 @@ def build_course(c):
   %s%s
   <p class="center-note rv"><a href="/faq/" class="more">All questions %s</a></p>
 </div></section>""" % (sec_head("06", "Common Questions", "%s FAQ" % esc(c["name"]), center=True), faq_html(c["faq"]), I["arrow"])
-    body += band(primary='<a class="btn btn-primary" href="/?book=%s#schedule">Pick a Start Date</a>' % c["id"])
+    body += band(primary='<a class="btn btn-primary" href="/book/?book=%s">Pick a Start Date</a>' % c["id"])
     emit(url, page(url, c["meta_title"], c["meta_desc"], body, crumbs,
                    [course_schema(c, url), faq_schema(c["faq"])], hero_img="/" + c["hero"]), "0.9")
 
@@ -590,7 +590,7 @@ def build_assessments():
     a = ASSESSMENT
     crumbs = [("Courses", "/#courses"), ("NCCER Assessments", url)]
     body = phero(a["hero"], a["hero_alt"], a["kicker"], a["h1"], a["lede"], crumbs,
-                 ctas=['<a class="btn btn-primary" href="/?book=assessment#schedule">Request a Test Date %s</a>' % I["arrow"],
+                 ctas=['<a class="btn btn-primary" href="/book/?book=assessment">Request a Test Date %s</a>' % I["arrow"],
                        '<a class="btn btn-ghost" href="tel:%s">%s Call %s</a>' % (BIZ["phone_raw"], I["phone"], BIZ["phone"])])
     body += specbar([("Per assessment", "$150"), ("Crafts", "36"), ("When", "Mon – Fri · 8 AM – 5 PM"), ("Credential", "NCCER Registry")])
     body += """<section class="section"><div class="wrap split">
@@ -607,7 +607,7 @@ def build_assessments():
                                "Written assessment, then the hands-on performance verification where the craft calls for one.",
                                "Pass and your credential goes on the NCCER Registry.",
                                "One flat $150 per assessment, paid in full when you book."]),
-                       cta_box("NCCER Assessment · $150", ["Monday through Friday, 8 AM to 5 PM, by appointment."], price="$150", href="/?book=assessment#schedule", label="Request a Test Date"))
+                       cta_box("NCCER Assessment · $150", ["Monday through Friday, 8 AM to 5 PM, by appointment."], price="$150", href="/book/?book=assessment", label="Request a Test Date"))
     body += """<section class="section alt" id="crafts"><div class="wrap">
   %s%s
 </div></section>""" % (sec_head("02", "36 Crafts", "Crafts We Assess", "Pick your craft for what the assessment covers and who it's for. Don't see yours? Call the office; more crafts are available on request.", center=True), craft_groups_html())
@@ -615,7 +615,7 @@ def build_assessments():
   %s%s
 </div></section>""" % (sec_head("03", "Common Questions", "Assessment FAQ", center=True), faq_html(a["faq"]))
     body += band(h2="Already Know<br class=\"mbr\"> The Work?", p="Book your assessment date, bring your ID, and leave with a credential the whole industry recognizes.",
-                 primary='<a class="btn btn-primary" href="/?book=assessment#schedule">Request a Test Date</a>')
+                 primary='<a class="btn btn-primary" href="/book/?book=assessment">Request a Test Date</a>')
     emit(url, page(url, a["meta_title"], a["meta_desc"], body, crumbs,
                    [service_schema("NCCER Craft Assessments", a["meta_desc"], url), faq_schema(a["faq"])], hero_img="/" + a["hero"]), "0.9")
 
@@ -638,7 +638,7 @@ def build_craft(c):
     body = phero("img/testing-room.jpg", "Candidates taking a proctored NCCER assessment in the on-site testing room",
                  gname, "%s<em>NCCER Assessment</em>" % esc(short),
                  "Proctored written and hands-on assessment in Portland, TX. One flat $150, credential to the NCCER Registry. Monday through Friday by appointment.", crumbs,
-                 ctas=['<a class="btn btn-primary" href="/?book=assessment#schedule">Request a Test Date %s</a>' % I["arrow"],
+                 ctas=['<a class="btn btn-primary" href="/book/?book=assessment">Request a Test Date %s</a>' % I["arrow"],
                        '<a class="btn btn-ghost" href="tel:%s">%s Call %s</a>' % (BIZ["phone_raw"], I["phone"], BIZ["phone"])], cls="phero-craft")
     body += specbar([("Assessment fee", "$150"), ("Format", "Written + hands-on"), ("When", "Mon – Fri · 8 AM – 5 PM"), ("Credential", "NCCER Registry")])
     body += """<section class="section"><div class="wrap split">
@@ -656,7 +656,7 @@ def build_craft(c):
                                "Hands whose credential is coming due for renewal",
                                "Hands whose contractor needs the credential verified before a turnaround",
                                "Anyone hired on the condition of getting the card"]),
-                       cta_box("%s · $150" % short, ["Written and hands-on, proctored on-site.", "Monday through Friday, 8 AM to 5 PM, by appointment."], price="$150", href="/?book=assessment#schedule", label="Request a Test Date"))
+                       cta_box("%s · $150" % short, ["Written and hands-on, proctored on-site.", "Monday through Friday, 8 AM to 5 PM, by appointment."], price="$150", href="/book/?book=assessment", label="Request a Test Date"))
     body += """<section class="section how"><div class="how-bg" aria-hidden="true"><img src="/img/bg-classroom.jpg" alt="" loading="lazy"></div><div class="wrap">
   %s
   <div class="how-grid">
@@ -670,24 +670,24 @@ def build_craft(c):
   <div class="rv"><h3 class="h-sub">Other crafts in %s</h3><ul class="craft-list">%s</ul><p style="margin-top:18px"><a class="more" href="/nccer-assessments/#crafts">All 36 crafts %s</a></p></div>
 </div></section>""" % (sec_head("03", "Common Questions", "%s FAQ" % esc(short)), faq_html(faq), esc(gname), sib, I["arrow"])
     body += band(h2="Already Know<br class=\"mbr\"> The Work?", p="Book your %s assessment, bring your ID, and leave with a credential the whole industry recognizes." % short,
-                 primary='<a class="btn btn-primary" href="/?book=assessment#schedule">Request a Test Date</a>')
+                 primary='<a class="btn btn-primary" href="/book/?book=assessment">Request a Test Date</a>')
     emit(url, page(url, title, desc, body, crumbs,
                    [service_schema("NCCER %s Assessment" % name, desc, url), faq_schema(faq)], hero_img="/img/testing-room.jpg"), "0.6")
 
 def build_format_page(url, title, desc, hero, alt, kicker, h1, lede, idx_title, paras, checks_list, faq, book="advanced", specs=None, band_h2=None, crumb=None):
     crumbs = [("Advanced Rigger", "/advanced-rigger/"), (crumb or title.split(" (")[0].split(" in ")[0], url)]
     body = phero(hero, alt, kicker, h1, lede, crumbs,
-                 ctas=['<a class="btn btn-primary" href="/?book=%s#schedule">Pick a Start Date %s</a>' % (book, I["arrow"]),
+                 ctas=['<a class="btn btn-primary" href="/book/?book=%s">Pick a Start Date %s</a>' % (book, I["arrow"]),
                        '<a class="btn btn-ghost" href="tel:%s">%s Call %s</a>' % (BIZ["phone_raw"], I["phone"], BIZ["phone"])])
     if specs: body += specbar(specs)
     body += """<section class="section"><div class="wrap split">
   <div class="prose rv">%s%s<h3 class="h-sub">What's included</h3>%s</div>
   %s
 </div></section>""" % (sec_head("01", "The Format", idx_title), "".join('<p class="lede">%s</p>' % esc(p) for p in paras), checks(checks_list),
-                       cta_box("Advanced Rigger · $1,000", ["$200 holds your seat. Balance due before class.", "Klarna, Afterpay, Zelle or in-house financing."], price='$1,000 <s class="was">$1,700</s>', href="/?book=%s#schedule" % book))
+                       cta_box("Advanced Rigger · $1,000", ["$200 holds your seat. Balance due before class.", "Klarna, Afterpay, Zelle or in-house financing."], price='$1,000 <s class="was">$1,700</s>', href="/book/?book=%s" % book))
     body += """<section class="section alt"><div class="wrap">%s%s</div></section>""" % (sec_head("02", "Common Questions", "Before You Enroll", center=True), faq_html(faq))
     body += """<section class="section"><div class="wrap">%s%s</div></section>""" % (sec_head("03", "Who's Teaching You", "Your Instructors"), people_grid(["andres-herrera", "frank-torres"]))
-    body += band(h2=band_h2 or "Building Skills. Bettering Futures.", primary='<a class="btn btn-primary" href="/?book=%s#schedule">Pick a Start Date</a>' % book)
+    body += band(h2=band_h2 or "Building Skills. Bettering Futures.", primary='<a class="btn btn-primary" href="/book/?book=%s">Pick a Start Date</a>' % book)
     emit(url, page(url, title, desc, body, crumbs, [faq_schema(faq)], hero_img="/" + hero), "0.8")
 
 def build_dates():
@@ -719,7 +719,7 @@ def build_dates():
     <div class="sched-block rv">
       <div class="sched-head"><span class="idx">${String(i+1).padStart(2,"0")}</span><div><b>${p.name}</b><span>${p.label} · ${p.time}</span></div></div>
       <div class="date-grid">${p.dates.map(d=>{ const isFull=full(d,p.id+":"+p.fmt); return `
-        <a class="date${isFull?" is-full":""}" href="${isFull?"#":`/?book=${p.id}&fmt=${p.fmt}&date=${iso(d)}#schedule`}"${isFull?' aria-disabled="true" tabindex="-1"':""}>
+        <a class="date${isFull?" is-full":""}" href="${isFull?"#":`/book/?book=${p.id}&fmt=${p.fmt}&date=${iso(d)}`}"${isFull?' aria-disabled="true" tabindex="-1"':""}>
           <span class="date-cal"><em>${MONS[d.getMonth()]}</em><b>${d.getDate()}</b></span>
           <span class="date-info"><b>${DOW[d.getDay()]}</b><span>${p.name} · ${SHORT[p.fmt]||p.label}</span></span>
           <span class="seats"><b>${isFull?"—":SEATS}</b><span>${isFull?"full":"seats/class"}</span></span>
@@ -728,7 +728,7 @@ def build_dates():
   document.querySelectorAll("#schedList .rv").forEach(el=>el.classList.add("in"));
 })();
 </script>""" % (sec_head("01", "Pick A Date", "Next Classes<br>In Portland, TX", "Dates roll forward every week. Tap one to hold it.", center=True), BIZ["phone_raw"], BIZ["phone"])).replace("__RULES__", rules_json()).replace("__SCHED__", sched_json())
-    body += band(primary='<a class="btn btn-primary" href="/#schedule">Reserve Your Seat — $200</a>')
+    body += band(primary='<a class="btn btn-primary" href="/book/">Book a Class</a>')
     emit(url, page(url, "Class Dates & Schedules · Rigging Classes in Portland, TX", "Upcoming Advanced Rigger and Signal Person class dates in Portland, TX: weekday day and night classes, 3-day weekend express, assessment dates. $200 holds a seat.", body, crumbs, hero_img="/img/bg-classroom.jpg"), "0.8")
 
 def build_financing():
@@ -763,7 +763,7 @@ def build_financing():
                        checks(["Pick \"My employer is paying\" on the booking form and add their contact",
                                "The office coordinates payment with your company",
                                "You train and test out here like any other student; the credential posts to the NCCER Registry under your name"]),
-                       cta_box("Company Paying?", ["Choose \"My employer is paying\" when you book and put your supervisor's contact in the notes.", "The office coordinates the invoice with them directly."], href="/#schedule", label="Reserve Your Seat"))
+                       cta_box("Company Paying?", ["Choose \"My employer is paying\" when you book and put your supervisor's contact in the notes.", "The office coordinates the invoice with them directly."], href="/book/", label="Reserve Your Seat"))
     body += """<section class="section"><div class="wrap">%s%s</div></section>""" % (sec_head("03", "Common Questions", "Financing FAQ", center=True), faq_html(faq))
     body += band(h2="Your Goals<br class=\"mbr\"> Are Worth It.", p="Reserve your seat with $200 and we'll walk you through the rest on the phone if you'd rather talk it through.")
     emit(url, page(url, "Financing & Payment Plans · No Credit Check", "Pay for NCCER rigger certification your way: $200 deposit, Klarna, Afterpay, Zelle, or in-house financing with no credit check. Portland, TX.", body, crumbs, [faq_schema(faq)], hero_img="/img/bg-crane-golden.jpg"), "0.8")
@@ -797,7 +797,7 @@ def build_person(p):
       <h3 class="h-sub">Teaches</h3>
       <ul class="craft-list">%s</ul>
       <div class="hero-cta">
-        <a class="btn btn-primary" href="/#schedule">Reserve Your Seat — $200 %s</a>
+        <a class="btn btn-primary" href="/book/">Book a Class %s</a>
         <a class="btn btn-ghost" href="tel:%s">%s Call %s</a>
       </div>
     </div>
@@ -836,7 +836,7 @@ def build_contact():
     body += """<section class="section alt" id="message"><div class="wrap split">
   <div class="rv">
     %s
-    <p class="lede">Questions about a class, an assessment craft you don't see listed, or paying by Zelle? Send it here and the office will call or email you back during business hours. Ready to book? <a href="/#schedule" style="color:var(--accent)">Reserve online</a> and skip the wait.</p>
+    <p class="lede">Questions about a class, an assessment craft you don't see listed, or paying by Zelle? Send it here and the office will call or email you back during business hours. Ready to book? <a href="/book/" style="color:var(--accent)">Reserve online</a> and skip the wait.</p>
   </div>
   <form class="cform rv" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thanks.html">
     <input type="hidden" name="form-name" value="contact">
@@ -896,7 +896,7 @@ def build_reviews():
                  "Certified.<em>Confident. Hired.</em>",
                  "Every review here is from a real student, on Google or Facebook, in their own words.", crumbs,
                  ctas=['<a class="btn btn-primary" href="%s" target="_blank" rel="noopener">%s Read Them On Google</a>' % (BIZ["gmaps"], I["google"]),
-                       '<a class="btn btn-ghost" href="/#schedule">Reserve Your Seat %s</a>' % I["arrow"]])
+                       '<a class="btn btn-ghost" href="/book/">Reserve Your Seat %s</a>' % I["arrow"]])
     body += """<section class="section"><div class="wrap">%s%s
   <div class="gal rv">
     <figure><img src="/img/grad-johnny.jpg" alt="Prime Lift graduate holding an NCCER Certified Advanced Rigger certificate" loading="lazy"><figcaption>Certified Advanced Rigger</figcaption></figure>
@@ -914,7 +914,7 @@ def build_faq():
     body = phero("img/bg-classroom.jpg", "Students in the Prime Lift Rigging Academy classroom", "Common Questions",
                  "Before<em>You Enroll</em>",
                  "Straight answers on cost, schedules, financing, credentials and testing out. Don't see yours? Call the office or send a message.", crumbs,
-                 ctas=['<a class="btn btn-primary" href="/#schedule">Reserve Your Seat — $200 %s</a>' % I["arrow"],
+                 ctas=['<a class="btn btn-primary" href="/book/">Book a Class %s</a>' % I["arrow"],
                        '<a class="btn btn-ghost" href="/contact/#message">Ask A Question</a>'])
     body += """<section class="section"><div class="wrap">%s</div></section>""" % faq_html(FAQ)
     body += band()
@@ -926,7 +926,7 @@ def next_dates_strip(cid):
     rows = []
     for r in SCHEDULE_RULES:
         if r["id"] != cid: continue
-        links = "".join('<a class="nd-date" href="/?book=%s&amp;fmt=%s&amp;date=%s#schedule">%s</a>' % (
+        links = "".join('<a class="nd-date" href="/book/?book=%s&amp;fmt=%s&amp;date=%s">%s</a>' % (
             r["id"], r["fmt"], d.isoformat(), d.strftime("%a, %b ") + str(d.day)) for d in next_dates(r["wd"], 3, r["id"] + ":" + r["fmt"]))
         rows.append('<div class="nd-row" data-wd="%s" data-lead="%d" data-book="%s" data-fmt="%s"><b>%s</b><div class="nd-dates">%s</div></div>' % (
             r["wd"], LEAD_DAYS, r["id"], r["fmt"], esc(r["label"]), links))
@@ -938,7 +938,7 @@ def build_es():
     crumbs = [("Español", url)]
     L = s["labels"]
     body = phero(COURSES[0]["hero"], "Instructor demostrando un enganche de eslinga durante la clase de Advanced Rigger", s["kicker"], s["h1"], s["lede"], crumbs,
-                 ctas=['<a class="btn btn-primary" href="/?book=advanced#schedule">%s %s</a>' % (esc(s["enroll"]), I["arrow"]),
+                 ctas=['<a class="btn btn-primary" href="/book/?book=advanced">%s %s</a>' % (esc(s["enroll"]), I["arrow"]),
                        '<a class="btn btn-ghost" href="tel:%s">%s %s %s</a>' % (BIZ["phone_raw"], I["phone"], esc(s["call"]), BIZ["phone"])], home="Inicio")
     body += specbar(s["specs"])
     def fmt_cards(fmts):
@@ -967,7 +967,7 @@ def build_es():
     <span class="cta-price">$1,000 <s class="was">$1,700</s></span><b>Advanced Rigger</b>
     <p>$200 aparta su lugar. El saldo se paga antes de la clase.</p>
     <p>Klarna, Afterpay, Zelle o financiamiento interno sin revisión de crédito.</p>
-    <a class="btn btn-primary btn-block" href="/?book=advanced#schedule">%s</a>
+    <a class="btn btn-primary btn-block" href="/book/?book=advanced">%s</a>
     <a class="btn btn-ghost btn-block" href="tel:%s">%s %s %s</a>
     <a class="more" href="/class-dates/">%s %s</a>
   </aside>
@@ -985,7 +985,7 @@ def build_es():
     body += """<section class="section alt" id="evaluaciones"><div class="wrap">
   %s
   <div class="cgroups">%s</div>
-  <p class="center-note rv"><a class="btn btn-primary" href="/?book=assessment#schedule">Solicitar fecha de evaluación</a></p>
+  <p class="center-note rv"><a class="btn btn-primary" href="/book/?book=assessment">Solicitar fecha de evaluación</a></p>
 </div></section>""" % (sec_head("02", s["assess_eyebrow"], s["assess_h2"], s["assess_lede"], center=True), "".join(groups))
     cards = "".join('<div class="fin-card rv"><span class="idx">%02d</span><b>%s</b><span>%s</span><em class="fin-tag">%s</em></div>' % (i+1, esc(t), esc(d), esc(tag)) for i, (t, d, tag) in enumerate(s["financing"]))
     body += """<section class="section" id="pagos"><div class="wrap">
@@ -1012,7 +1012,7 @@ def build_es():
     </ul>
     <div class="contact-links">
       <a class="btn btn-ghost" href="%s" target="_blank" rel="noopener">%s %s</a>
-      <a class="btn btn-primary" href="/?book=advanced#schedule">%s</a>
+      <a class="btn btn-primary" href="/book/?book=advanced">%s</a>
     </div>
   </div>
   <div class="map rv"><iframe title="Mapa a Prime Lift Rigging Academy, %s" src="%s" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>
@@ -1023,7 +1023,7 @@ def build_es():
                        I["phone"], esc(L["phone"]), BIZ["phone_raw"], BIZ["phone"],
                        I["mail"], esc(L["email"]), BIZ["email"], BIZ["email"],
                        BIZ["gmaps"], I["pin"], esc(L["directions"]), esc(L["book"]), esc(FULL_ADDR), BIZ["map_embed"])
-    body += band(h2=s["band_h2"], p=s["band_p"], primary='<a class="btn btn-primary" href="/?book=advanced#schedule">%s</a>' % esc(s["enroll"]),
+    body += band(h2=s["band_h2"], p=s["band_p"], primary='<a class="btn btn-primary" href="/book/?book=advanced">%s</a>' % esc(s["enroll"]),
                  eyebrow=s["band_eyebrow"], call=s["call"])
     emit(url, page(url, s["title"], s["desc"], body, crumbs, hero_img="/" + COURSES[0]["hero"], lang="es"), "0.8")
 
@@ -1049,7 +1049,7 @@ def build_guides():
     body = phero("img/bg-classroom.jpg", "Students in the Prime Lift Rigging Academy classroom", "Straight Answers",
                  "Rigging<em>Guides</em>",
                  "Plain-English answers for Coastal Bend workers deciding on training: which rigger credential you need, what the test is like, and how credentials get verified.", crumbs,
-                 ctas=['<a class="btn btn-primary" href="/#schedule">Reserve Your Seat — $200 %s</a>' % I["arrow"],
+                 ctas=['<a class="btn btn-primary" href="/book/">Book a Class %s</a>' % I["arrow"],
                        '<a class="btn btn-ghost" href="/faq/">Read The FAQ</a>'])
     body += """<section class="section"><div class="wrap">%s<div class="guide-grid">%s</div></div></section>""" % (
         sec_head("01", "Guides", "Before You<br>Spend A Dime", "Written by the school, checked against what we actually do here in Portland. No pass-rate hype, no fluff.", center=True), cards)
@@ -1066,7 +1066,7 @@ def build_guide(g):
     # in-article CTA: dropped in before the third h2 so it sits mid-read
     parts = g["body"].split("<h2>")
     cta = """<aside class="guide-cta rv"><b>Train And Test In Portland</b><p>Advanced Rigger $1,000, Signal Person $1,000, NCCER assessments $150. Day, night or one weekend, test-out on site, $200 holds a seat.</p>
-<div class="hero-cta"><a class="btn btn-primary" href="/#schedule">Pick a Start Date</a><a class="btn btn-ghost" href="tel:%s">%s Call %s</a></div></aside>
+<div class="hero-cta"><a class="btn btn-primary" href="/book/">Pick a Start Date</a><a class="btn btn-ghost" href="tel:%s">%s Call %s</a></div></aside>
 """ % (BIZ["phone_raw"], I["phone"], BIZ["phone"])
     cut = min(3, len(parts) - 1)
     body_html = "<h2>".join(parts[:cut]) + cta + "<h2>" + "<h2>".join(parts[cut:])
@@ -1094,6 +1094,381 @@ def build_guide(g):
                "author": {"@type": "Organization", "@id": BASE + "/#org", "name": BIZ["name"]}, "publisher": {"@id": BASE + "/#org"},
                "image": BASE + "/img/og.jpg", "inLanguage": "en-US", "wordCount": words, "articleSection": "Guides"}]
     emit(url, page(url, g["meta_title"], g["meta_desc"], body, crumbs, schema), "0.6")
+
+# ------------------------------------------------------------------ /book/
+# The booking page. Steps stack down the page; each finished step collapses to a
+# one-line summary with a Change link, the current one is open, later ones wait.
+# Program / format / date data come from COURSES + SCHEDULE_RULES, the same source
+# as the class-dates page and the course-page date strips, so they can't disagree.
+# The home page's #schedule band and every "Pick a Start Date" button deep-link
+# here: /book/?book=advanced&fmt=night&date=2026-09-14
+BOOK_BLURBS = {
+    "advanced":   "Lift planning, load math, slings, hardware and a hands-on practical. Four days, or one weekend.",
+    "signal":     "Crane hand signals, radio and voice procedure, written and practical test. Two Fridays.",
+    "assessment": "Already do the work? Test out: written and hands-on, proctored on-site. One flat price, 36 crafts.",
+}
+def book_programs():
+    fmts = {}
+    for r in SCHEDULE_RULES:
+        fmts.setdefault(r["id"], []).append({"id": r["fmt"], "name": r["label"], "time": r["time"], "note": r["note"], "wd": r["wd"]})
+    out = [{"id": c["id"], "name": c["name"], "price": c["price"], "was": c["was"], "deposit": c["deposit"],
+            "shot": "/" + c["img"], "blurb": BOOK_BLURBS[c["id"]], "formats": fmts[c["id"]]} for c in COURSES]
+    out.append({"id": "assessment", "name": "NCCER Assessment", "price": ASSESSMENT["price"], "was": None, "deposit": ASSESSMENT["price"],
+                "shot": "/" + ASSESSMENT["img"], "blurb": BOOK_BLURBS["assessment"], "formats": fmts["assessment"]})
+    return out
+
+def build_book():
+    url = "/book/"
+    crumbs = [("Book a Class", url)]
+    body = r"""<section class="bk-head">
+  <div class="wrap">
+    __CRUMBS__
+    <p class="eyebrow">Book Online</p>
+    <h1>Pick Your Class.<em>Hold Your Seat.</em></h1>
+    <p class="lede">Choose a certification, a schedule and a start date. $200 holds a seat in any course; assessments are $150, paid in full. About two minutes.</p>
+    <ul class="bk-marks">
+      <li>__CHECK__ 8 seats per class</li>
+      <li>__CHECK__ Book up to the day before</li>
+      <li>__CHECK__ Card, Klarna, Afterpay, Zelle or in-house financing</li>
+    </ul>
+  </div>
+</section>
+<section class="bk-main">
+  <div class="wrap">
+    <p class="bk-flash" id="bkCanceled" hidden>No payment was taken and your seat isn't held yet. Pick your class again below, or call <a href="tel:__TEL__">__PHONE__</a> and we'll hold it by phone.</p>
+    <div class="bk-grid" id="bkGrid">
+      <div class="bk-steps">
+        <section class="bk-step is-open" data-step="1">
+          <button class="bk-step-h" type="button" disabled><span class="idx">01</span><span><b>Certification</b><span class="bk-pick"></span></span><span class="bk-change">Change</span></button>
+          <div class="bk-step-b">
+            <p class="bk-q">Which credential are you after?</p>
+            <div class="bp-grid" id="bpGrid"></div>
+          </div>
+        </section>
+        <section class="bk-step is-locked" data-step="2">
+          <button class="bk-step-h" type="button" disabled><span class="idx">02</span><span><b>Schedule</b><span class="bk-pick"></span></span><span class="bk-change">Change</span></button>
+          <div class="bk-step-b">
+            <p class="bk-q">How do you want to take it?</p>
+            <div class="fmt-list" id="fmtList"></div>
+          </div>
+        </section>
+        <section class="bk-step is-locked" data-step="3">
+          <button class="bk-step-h" type="button" disabled><span class="idx">03</span><span><b>Start Date</b><span class="bk-pick"></span></span><span class="bk-change">Change</span></button>
+          <div class="bk-step-b">
+            <p class="bk-q">Pick a start date <span id="dateSub"></span></p>
+            <div class="bd-grid" id="bdGrid"></div>
+            <p class="bk-note">Every class is capped at 8 seats, and booking closes the day before it starts. Need a date you don't see? <a href="tel:__TEL__">Call the office</a>.</p>
+          </div>
+        </section>
+        <section class="bk-step is-locked" data-step="4">
+          <button class="bk-step-h" type="button" disabled><span class="idx">04</span><span><b>Your Details</b><span class="bk-pick"></span></span><span class="bk-change">Change</span></button>
+          <div class="bk-step-b">
+            <p class="bk-q">Who is the seat for?</p>
+            <div class="two-up">
+              <label class="field"><span>First name</span><input type="text" id="fFirst" placeholder="Miguel" autocomplete="given-name"></label>
+              <label class="field"><span>Last name</span><input type="text" id="fLast" placeholder="Reyes" autocomplete="family-name"></label>
+            </div>
+            <label class="field"><span>Mobile number</span><input type="tel" id="fPhone" placeholder="(361) 555-0134" autocomplete="tel"></label>
+            <label class="field"><span>Email</span><input type="email" id="fEmail" placeholder="you@email.com" autocomplete="email"></label>
+            <label class="field" id="craftField" hidden><span>Which craft are you testing in?</span><select id="fCraft"></select></label>
+            <label class="field"><span>Who's paying?</span>
+              <select id="fPayer">
+                <option>I'm paying for myself</option>
+                <option>My employer is paying</option>
+                <option>I want to use financing</option>
+              </select>
+            </label>
+            <label class="field"><span>Anything we should know? (optional)</span><textarea id="fNotes" rows="2" placeholder="Night shift, need the evening class…"></textarea></label>
+            <div class="consent" id="smsConsent">
+              <label class="chk"><input type="checkbox" id="cNon"><span><b>Text me about my enrollment.</b> I agree to receive enrollment confirmations, class reminders and schedule updates by SMS from Prime Lift Rigging Academy at the mobile number above. Msg frequency varies. Msg &amp; data rates may apply. Reply HELP for help, STOP to opt out.</span></label>
+              <label class="chk"><input type="checkbox" id="cMkt"><span><b>Text me about future classes.</b> I agree to receive occasional class openings, recertification reminders and review requests by SMS from Prime Lift Rigging Academy. Msg frequency varies. Msg &amp; data rates may apply. Reply HELP for help, STOP to opt out.</span></label>
+              <p class="consent-note">Consent is not a condition of enrollment. We never share or sell your mobile number or opt-in information with third parties. <a href="/privacy.html">Privacy Policy</a> &middot; <a href="/terms.html">Terms &amp; Enrollment Policy</a></p>
+            </div>
+            <p class="bk-err" id="bkErr" hidden></p>
+            <button class="btn btn-primary btn-block" id="toPay" type="button">Continue to Payment __ARROW__</button>
+          </div>
+        </section>
+        <section class="bk-step is-locked" data-step="5">
+          <button class="bk-step-h" type="button" disabled><span class="idx">05</span><span><b>Hold Your Seat</b><span class="bk-pick"></span></span><span class="bk-change">Change</span></button>
+          <div class="bk-step-b">
+            <p class="bk-q">Your order</p>
+            <dl class="summary" id="bkSummary"></dl>
+            <p class="pay-legal" id="coLegal"></p>
+            <p class="bk-q">How do you want to pay?</p>
+            <div class="paytabs" role="tablist">
+              <button class="paytab on" data-pay="card" role="tab" type="button">Card</button>
+              <button class="paytab" data-pay="klarna" role="tab" type="button">Klarna</button>
+              <button class="paytab" data-pay="afterpay" role="tab" type="button">Afterpay</button>
+              <button class="paytab" data-pay="inhouse" role="tab" type="button">In-House</button>
+            </div>
+            <div class="payform on" data-form="card"><div class="alt-pay"><b>Pay the deposit by card</b><p>You'll enter your card on Stripe's secure checkout page. Your seat is held the moment the payment goes through, and a receipt is emailed to you.</p><ul><li>Visa, Mastercard, Amex, Discover</li><li>Apple Pay and Google Pay on your phone</li><li>Balance can be paid online any time before class</li></ul></div></div>
+            <div class="payform" data-form="klarna"><div class="alt-pay"><b>Pay with Klarna</b><p>Klarna covers your course in full and then splits it into scheduled payments for you, so this option charges the <strong style="color:#fff">full course price</strong>, not the $200 deposit.</p><ul><li>Choose your payment plan on Klarna</li><li>Instant decision</li><li>Your seat is confirmed the moment Klarna approves</li></ul></div></div>
+            <div class="payform" data-form="afterpay"><div class="alt-pay"><b>Pay with Afterpay</b><p>Same as Klarna: Afterpay pays the course in full and breaks it into installments for you, so this option charges the <strong style="color:#fff">full course price</strong> rather than the deposit.</p><ul><li>Instant decision</li><li>Installments handled by Afterpay</li><li>Seat confirmed on approval</li></ul></div></div>
+            <div class="payform" data-form="inhouse"><div class="alt-pay"><b>In-House Financing, No Credit Check</b><p>Didn't qualify for Klarna or Afterpay? We'll set you up directly. Start with as little as $200 down and make payments leading up to your class date.</p><ul><li>No credit check</li><li>Payments scheduled before your start date</li><li>Course begins once the balance is paid in full</li></ul><p style="margin-top:13px">Prefer Zelle? Choose this and note it below; the office will send details and register you manually.</p></div>
+              <label class="field" style="margin-top:12px"><span>Anything we should know (optional)</span><input type="text" id="fNote" placeholder="Paying by Zelle, employer is covering it, etc." autocomplete="off"></label></div>
+            <button class="btn btn-primary btn-block" id="payBtn" type="button" style="margin-top:19px">Pay $200 Deposit</button>
+            <p class="pay-legal">By continuing you agree to Prime Lift Rigging Academy's <a href="/terms.html" style="color:var(--accent)">enrollment terms</a>. Deposits hold your seat and are applied to your course total.</p>
+          </div>
+        </section>
+      </div>
+      <aside class="bk-side" id="bkSide" aria-live="polite">
+        <div class="bk-side-shot"><img id="sideImg" src="/img/bg-classroom.jpg" alt="" width="640" height="360"><b id="sideName">Your Seat</b></div>
+        <dl class="summary" id="sideSummary"></dl>
+        <p class="bk-side-call">Rather book by phone? <a href="tel:__TEL__">__PHONE__</a><br>Mon – Fri · 7 AM – 5 PM</p>
+      </aside>
+    </div>
+    <div class="bk-done" id="bkDone" hidden>
+      <div class="co-success">
+        <div class="co-success-ico">__CHECK__</div>
+        <h2 id="doneH">You're On The List</h2>
+        <p id="doneMsg"></p>
+        <div class="co-success-box">
+          <b>Questions before class?</b>
+          <p>Call the office at <a href="tel:__TEL__" style="color:var(--accent);font-weight:700">__PHONE__</a> or email <a href="mailto:__EMAIL__" style="color:var(--accent);font-weight:700">__EMAIL__</a>.</p>
+        </div>
+        <a class="btn btn-ghost" href="/" style="margin-top:26px">Back To The Site</a>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Enrollment requests that don't go through Stripe (in-house financing, Zelle,
+     or a card booking made before payments are switched on). Static markup on
+     purpose: Netlify only registers fields it can see in the deployed HTML. -->
+<form name="enrollment-request" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thanks.html" hidden aria-hidden="true">
+  <input type="hidden" name="form-name" value="enrollment-request">
+  <input name="bot-field">
+  <input name="first_name"><input name="last_name"><input name="phone"><input name="email">
+  <input name="program"><input name="format"><input name="start_date">
+  <input name="payment_method"><input name="amount_due_today"><input name="note"><input name="page">
+  <input name="payer"><input name="notes"><input name="sms_consent_nonmarketing"><input name="sms_consent_marketing">
+</form>
+<script>
+/* Booking flow. Dates come from SCHEDULE_RULES + CLOSED/FULL in build.py (injected below),
+   the same rule the class-dates page and course strips use. Change the rule there, never a list. */
+(function(){
+  const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+  const SEATS=8, LEAD=__LEAD__, X=__SCHED__, PROGS=__PROGS__, CRAFTS=__CRAFTS__, PHONE="__PHONE__";
+  const MONS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const DOWS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], DOWFULL=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const pad2=n=>String(n).padStart(2,"0");
+  const iso=d=>d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate());
+  const dparts=s=>{ const p=s.split("-").map(Number); return new Date(p[0],p[1]-1,p[2]); };
+  const fmtLong=s=>{ const d=dparts(s); return DOWFULL[d.getDay()]+", "+MONS[d.getMonth()]+" "+d.getDate(); };
+  const money=n=>"$"+n.toLocaleString("en-US");
+  const isFull=(s,k)=>{ const f=X.full[s]||[]; return f.includes(k)||f.includes("*"); };
+  function first(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+LEAD); return d; }
+  function every(wd,n){ const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); while(o.length<n){ if(!X.closed[iso(d)]) o.push(iso(d)); d.setDate(d.getDate()+7); } return o; }
+  function weekdays(n){ const d=first(),o=[]; while(o.length<n){ if(d.getDay()>=1&&d.getDay()<=5&&!X.closed[iso(d)]) o.push(iso(d)); d.setDate(d.getDate()+1); } return o; }
+  PROGS.forEach(p=>p.formats.forEach(f=>{ f.dates=f.wd==="weekday"?weekdays(15):every(f.wd,8); }));
+
+  const S={prog:null,fmt:null,date:null,method:"card",step:1};
+  const ARROW='<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
+  const step=n=>$('.bk-step[data-step="'+n+'"]');
+  const key=()=>S.prog.id+":"+S.fmt.id;
+  const depositFor=(p,m)=>(m==="klarna"||m==="afterpay")?p.price:Math.min(p.deposit,p.price);
+  const setPick=(n,t)=>{ $(".bk-pick",step(n)).textContent=t||""; };
+  const val=id=>(($("#"+id)||{}).value||"").trim();
+
+  /* one step open, the finished ones collapsed to their pick, the rest waiting */
+  function show(n,scroll){
+    S.step=n;
+    for(let i=1;i<=5;i++){
+      const s=step(i);
+      s.classList.toggle("is-open",i===n);
+      s.classList.toggle("is-done",i<n);
+      s.classList.toggle("is-locked",i>n);
+      $(".bk-step-h",s).disabled=i>=n;
+    }
+    if(n===5) renderPay();
+    renderSide();
+    if(scroll) requestAnimationFrame(()=>{ const y=step(n).getBoundingClientRect().top+window.scrollY-84; window.scrollTo({top:y,behavior:"smooth"}); });
+  }
+  $$(".bk-step-h").forEach(h=>h.addEventListener("click",()=>{ const n=+h.parentElement.dataset.step; if(n<S.step) show(n,true); }));
+
+  /* 01 certification */
+  $("#bpGrid").innerHTML=PROGS.map(p=>'<button class="bp" type="button" data-prog="'+p.id+'">'
+    +'<span class="bp-shot"><img src="'+p.shot+'" alt="" loading="lazy" width="640" height="360"></span>'
+    +'<span class="bp-body"><b>'+p.name+'</b><span class="bp-blurb">'+p.blurb+'</span>'
+    +'<span class="bp-price">'+money(p.price)+(p.was?' <s class="was">'+money(p.was)+'</s>':'')+'<small>'+(p.id==="assessment"?"per craft":"per course")+'</small></span></span></button>').join("");
+  $("#bpGrid").addEventListener("click",e=>{ const b=e.target.closest("[data-prog]"); if(b) pickProgram(b.dataset.prog,true); });
+  function pickProgram(id,scroll){
+    const same=S.prog&&S.prog.id===id;
+    if(!same){ S.prog=PROGS.find(p=>p.id===id); S.fmt=null; S.date=null; }
+    $$("#bpGrid .bp").forEach(b=>b.classList.toggle("sel",b.dataset.prog===id));
+    setPick(1,S.prog.name+" · "+money(S.prog.price));
+    $("#craftField").hidden=S.prog.id!=="assessment";
+    if(!same){
+      $("#fmtList").innerHTML=S.prog.formats.map((f,i)=>'<button class="fmt" type="button" data-fmt="'+f.id+'"><span class="idx">'+pad2(i+1)+'</span><span><b>'+f.name+'</b><span>'+f.time+' &nbsp;<em>· '+f.note+'</em></span></span>'+ARROW+'</button>').join("");
+    }
+    if(same&&S.fmt){ show(S.date?4:3,scroll); return; }
+    if(S.prog.formats.length===1) pickFormat(S.prog.formats[0].id,scroll);
+    else show(2,scroll);
+  }
+
+  /* 02 schedule */
+  $("#fmtList").addEventListener("click",e=>{ const b=e.target.closest("[data-fmt]"); if(b) pickFormat(b.dataset.fmt,true); });
+  function pickFormat(id,scroll){
+    const same=S.fmt&&S.fmt.id===id;
+    if(!same){ S.fmt=S.prog.formats.find(f=>f.id===id); S.date=null; }
+    $$("#fmtList .fmt").forEach(b=>b.classList.toggle("sel",b.dataset.fmt===id));
+    setPick(2,S.fmt.name+" · "+S.fmt.time);
+    $("#dateSub").textContent=S.fmt.time;
+    if(!same){
+      const k=key();
+      $("#bdGrid").innerHTML=S.fmt.dates.map(s=>{ const d=dparts(s), full=isFull(s,k);
+        return '<button class="bd" type="button" data-date="'+s+'"'+(full?' disabled':'')+'><em>'+DOWS[d.getDay()]+'</em><b>'+d.getDate()+'</b><span>'+MONS[d.getMonth()]+'</span>'+(full?'<i>Full</i>':'')+'</button>'; }).join("");
+    }
+    if(same&&S.date){ show(4,scroll); return; }
+    show(3,scroll);
+  }
+
+  /* 03 start date */
+  $("#bdGrid").addEventListener("click",e=>{ const b=e.target.closest("[data-date]"); if(!b||b.disabled) return; pickDate(b.dataset.date,true); });
+  function pickDate(s,scroll){
+    S.date=s;
+    $$("#bdGrid .bd").forEach(b=>b.classList.toggle("sel",b.dataset.date===s));
+    setPick(3,fmtLong(s));
+    setTimeout(()=>show(4,scroll),scroll?140:0);
+  }
+
+  /* 04 details */
+  $("#fCraft").innerHTML='<option value="">Choose a craft</option>'+CRAFTS.map(c=>'<option>'+c+'</option>').join("")+'<option>Not sure / another craft</option>';
+  $("#toPay").addEventListener("click",()=>{
+    const err=$("#bkErr"), first=val("fFirst"), phone=val("fPhone"), email=val("fEmail");
+    let msg="";
+    if(!first) msg="Add your first name so the office knows who the seat is for.";
+    else if(!phone&&!email) msg="Add a mobile number or an email so we can confirm your seat.";
+    else if(S.prog.id==="assessment"&&!val("fCraft")) msg="Pick the craft you're testing in.";
+    err.textContent=msg; err.hidden=!msg;
+    if(msg){ err.scrollIntoView({block:"center",behavior:"smooth"}); return; }
+    setPick(4,(first+" "+val("fLast")).trim()+" · "+(phone||email));
+    show(5,true);
+  });
+
+  /* 05 hold your seat */
+  function summaryRows(m){
+    const p=S.prog, f=S.fmt, dep=depositFor(p,m), bal=p.price-dep;
+    let h=[["Certification",p.name],["Schedule",f.name],["Class times",f.time],["Start date",fmtLong(S.date)]].map(r=>'<div class="summary-row"><dt>'+r[0]+'</dt><dd>'+r[1]+'</dd></div>').join("");
+    h+='<div class="summary-row total"><dt>'+(p.id==="assessment"?"Assessment fee":"Course total")+'</dt><dd>'+money(p.price)+'</dd></div>';
+    h+='<div class="summary-row due"><dt>Due today</dt><dd>'+money(dep)+'</dd></div>';
+    if(bal>0) h+='<div class="summary-row"><dt>Balance before class</dt><dd>'+money(bal)+'</dd></div>';
+    return h;
+  }
+  function payLabel(m){
+    if(m==="inhouse") return "Request My Payment Plan";
+    const dep=depositFor(S.prog,m);
+    if(m==="klarna") return "Continue to Klarna · "+money(dep);
+    if(m==="afterpay") return "Continue to Afterpay · "+money(dep);
+    return dep===S.prog.price?"Pay "+money(dep):"Pay "+money(dep)+" Deposit";
+  }
+  function renderPay(){
+    $("#bkSummary").innerHTML=summaryRows(S.method);
+    $("#payBtn").textContent=payLabel(S.method);
+    $("#coLegal").textContent=(S.method==="klarna"||S.method==="afterpay")
+      ?"Klarna and Afterpay pay your course in full, then split it into installments for you. Your seat is confirmed as soon as they approve."
+      :"Balance must be paid in full before your class begins. Seats are released if the deposit isn't received.";
+    $$(".paytab").forEach(t=>t.classList.toggle("on",t.dataset.pay===S.method));
+    $$(".payform").forEach(f=>f.classList.toggle("on",f.dataset.form===S.method));
+  }
+  $$(".paytab").forEach(t=>t.addEventListener("click",()=>{ S.method=t.dataset.pay; renderPay(); renderSide(); }));
+
+  /* desktop side card: the running order */
+  function renderSide(){
+    if(!$("#bkSide")) return;
+    const p=S.prog, dash="—";
+    $("#sideName").textContent=p?p.name:"Your Seat";
+    const img=$("#sideImg"), src=p?p.shot:"/img/bg-classroom.jpg"; if(img.getAttribute("src")!==src) img.src=src;
+    let h=[["Schedule",S.fmt?S.fmt.name:dash],["Class times",S.fmt?S.fmt.time:dash],["Start date",S.date?fmtLong(S.date):dash]].map(r=>'<div class="summary-row"><dt>'+r[0]+'</dt><dd>'+r[1]+'</dd></div>').join("");
+    if(p){ const dep=depositFor(p,S.method), bal=p.price-dep;
+      h+='<div class="summary-row total"><dt>'+(p.id==="assessment"?"Assessment fee":"Course total")+'</dt><dd>'+money(p.price)+'</dd></div><div class="summary-row due"><dt>Due today</dt><dd>'+money(dep)+'</dd></div>'+(bal>0?'<div class="summary-row"><dt>Balance before class</dt><dd>'+money(bal)+'</dd></div>':''); }
+    else h+='<div class="summary-row due"><dt>Holds a seat</dt><dd>$200</dd></div>';
+    $("#sideSummary").innerHTML=h;
+  }
+
+  /* submit: card / Klarna / Afterpay -> Stripe Checkout via Netlify Function; in-house -> Netlify Form.
+     No STRIPE_SECRET_KEY on the site = 503, and the booking falls back to the form so nobody is dropped. */
+  function payload(){
+    const m=S.method, craft=val("fCraft"), notes=val("fNotes");
+    return { first_name:val("fFirst"), last_name:val("fLast"), phone:val("fPhone"), email:val("fEmail"),
+      program:S.prog.name, program_id:S.prog.id, format:S.fmt.name, format_id:S.fmt.id, class_times:S.fmt.time,
+      start_date:S.date, start_date_label:fmtLong(S.date), payment_method:m, amount_due_today:depositFor(S.prog,m), course_total:S.prog.price,
+      note:val("fNote"), payer:val("fPayer"), notes:(craft?"Craft: "+craft+(notes?". ":""):"")+notes,
+      sms_consent_nonmarketing:$("#cNon").checked?"yes":"no", sms_consent_marketing:$("#cMkt").checked?"yes":"no", page:location.href };
+  }
+  async function submitForm(p){
+    const body=new URLSearchParams({"form-name":"enrollment-request"});
+    /* start_date goes out human-readable: it lands verbatim in the office email, the opportunity name and the student's confirmation */
+    const q=Object.assign({},p,{start_date:p.start_date?fmtLong(p.start_date)+", "+p.start_date.slice(0,4):""});
+    ["first_name","last_name","phone","email","program","format","start_date","payment_method","amount_due_today","note","page","payer","notes","sms_consent_nonmarketing","sms_consent_marketing"].forEach(k=>body.append(k,String(q[k]==null?"":q[k])));
+    const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:body.toString()});
+    if(!r.ok) throw new Error("form "+r.status);
+  }
+  function showDone(msg){
+    $("#doneMsg").textContent=msg;
+    $("#bkGrid").hidden=true; $("#bkCanceled").hidden=true;
+    const d=$("#bkDone"); d.hidden=false;
+    requestAnimationFrame(()=>window.scrollTo({top:d.getBoundingClientRect().top+window.scrollY-110,behavior:"smooth"}));
+  }
+  function confirmLine(p){
+    const to=[]; if(p.email) to.push("your email"); if(p.phone&&p.sms_consent_nonmarketing==="yes") to.push("your phone");
+    return to.length?" A confirmation is on its way to "+to.join(" and ")+".":"";
+  }
+  $("#payBtn").addEventListener("click",async()=>{
+    const btn=$("#payBtn"), label=btn.textContent, p=payload(), who=p.first_name?p.first_name+", you're":"You're";
+    const dep=money(p.amount_due_today)+(p.amount_due_today<p.course_total?" deposit":" fee");
+    btn.innerHTML='<span class="spin"></span> Processing…'; btn.disabled=true;
+    const reset=()=>{ btn.disabled=false; btn.textContent=label; };
+    try{
+      if(p.payment_method==="inhouse"){
+        await submitForm(p); reset();
+        showDone(who+" on the list for "+p.program+" starting "+p.start_date_label+"."+confirmLine(p)+" The office will call you to set up your payment schedule and hold your seat.");
+        return;
+      }
+      const r=await fetch("/.netlify/functions/create-checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
+      if(r.status===503){
+        p.payment_method=p.payment_method+" (online payments pending, take by phone)";
+        await submitForm(p); reset();
+        showDone(who+" on the list for "+p.program+" starting "+p.start_date_label+"."+confirmLine(p)+" The office will call you to take the "+dep+" and confirm your seat.");
+        return;
+      }
+      const data=await r.json().catch(()=>({}));
+      if(!r.ok||!data.url) throw new Error(data.error||"checkout "+r.status);
+      location.href=data.url;
+    }catch(err){
+      console.error(err); reset();
+      alert("Something went wrong on our end. Call the office at "+PHONE+" and we'll hold your seat by phone.");
+    }
+  });
+
+  /* arrivals: /book/?book=advanced&fmt=night&date=2026-09-14 from course pages, the class-dates page
+     and the home band; ?booked=1 back from Stripe; ?canceled=1 if they bailed out of Stripe */
+  (function(){
+    const q=new URLSearchParams(location.search);
+    if(q.get("booked")==="1"){
+      $("#doneH").textContent="Seat Reserved";
+      showDone("Your deposit went through and your seat in "+(q.get("program")||"your course")+(q.get("date")?" starting "+q.get("date"):"")+" is reserved. A receipt is in your email, and the office will reach out with your study material.");
+      history.replaceState(null,"",location.pathname); return;
+    }
+    if(q.get("canceled")==="1") $("#bkCanceled").hidden=false;
+    const id=q.get("book");
+    if(id&&PROGS.some(p=>p.id===id)){
+      pickProgram(id,false);
+      const f=q.get("fmt"); if(f&&S.prog.formats.some(x=>x.id===f)) pickFormat(f,false);
+      const d=q.get("date"); if(S.fmt&&d&&S.fmt.dates.includes(d)&&!isFull(d,key())) pickDate(d,false);
+    }
+    if(location.search) history.replaceState(null,"",location.pathname);
+    renderSide();
+  })();
+})();
+</script>"""
+    body = (body.replace("__CRUMBS__", crumbs_html(crumbs)).replace("__CHECK__", I["check"]).replace("__ARROW__", I["arrow"])
+                .replace("__TEL__", BIZ["phone_raw"]).replace("__PHONE__", esc(BIZ["phone"])).replace("__EMAIL__", BIZ["email"])
+                .replace("__PROGS__", json.dumps(book_programs(), separators=(",", ":")))
+                .replace("__SCHED__", sched_json()).replace("__LEAD__", str(LEAD_DAYS))
+                .replace("__CRAFTS__", json.dumps([craft_short(n) for s, n, g, b, cov in CRAFTS], separators=(",", ":"))))
+    emit(url, page(url, "Book a Class · Advanced Rigger, Signal Person & NCCER Assessments in Portland, TX",
+                   "Book your NCCER Advanced Rigger or Signal Person class, or an NCCER assessment, in Portland, TX. Pick a schedule and a start date online; $200 holds your seat.",
+                   body, crumbs), "0.9")
 
 def build_404():
     body = """<section class="section" style="min-height:70svh;display:flex;align-items:center"><div class="wrap" style="text-align:center">
@@ -1413,6 +1788,98 @@ a.guide-card:hover{border-color:var(--accent)}
 .guide-card b{font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:21px; line-height:1.05; letter-spacing:.012em}
 .guide-card p{font-size:14.5px; color:var(--muted); margin:0; line-height:1.6}
 .guide-card .person-more{margin-top:auto; padding-top:8px}
+
+/* ---- /book/: the booking page. Steps stack; the finished ones collapse to a
+   one-line summary with a Change link, the current one is open, later ones wait. ---- */
+.bk-head{padding:124px 0 30px; background:var(--steel); border-bottom:1px solid var(--edge)}
+@media(min-width:900px){.bk-head{padding:160px 0 40px}}
+.bk-head .crumbs,.bk-head .eyebrow{justify-content:flex-start}
+.bk-head .eyebrow::before{display:none}
+.bk-head h1{font-size:clamp(42px,9vw,76px); line-height:.94; max-width:none}
+.bk-head h1 em{font-style:normal; color:var(--accent); display:block}
+.bk-head .lede{margin:18px 0 0; max-width:58ch}
+.bk-marks{display:flex; flex-wrap:wrap; gap:8px 22px; margin:22px 0 0; padding:0; list-style:none; font-family:var(--f-display); font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.bk-marks li{display:flex; align-items:center; gap:8px}
+.bk-marks svg{width:14px; height:14px; color:var(--accent); flex:none}
+.bk-main{padding:clamp(26px,4vw,52px) 0 var(--sec)}
+.bk-flash{margin:0 0 18px; padding:13px 16px; border-left:3px solid var(--accent); background:rgba(41,182,232,.08); font-size:14.5px; line-height:1.55; color:#D8D6D2}
+.bk-flash a{color:var(--accent); font-weight:600}
+.bk-grid{display:grid; gap:var(--gut); grid-template-columns:minmax(0,1fr); align-items:start}
+@media(min-width:1000px){.bk-grid{grid-template-columns:minmax(0,1fr) 336px}}
+.bk-steps{display:grid; gap:10px}
+.bk-step{border:1px solid var(--edge); background:var(--steel)}
+.bk-step-h{display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:14px; width:100%; padding:17px 20px; text-align:left; cursor:default}
+.bk-step.is-done .bk-step-h{cursor:pointer}
+.bk-step.is-done .bk-step-h:hover{background:rgba(255,255,255,.02)}
+.bk-step-h .idx{font-size:15px}
+.bk-step-h b{display:block; font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:clamp(19px,2.2vw,23px); letter-spacing:.012em; line-height:1.05}
+.bk-pick{display:none; font-size:13.5px; color:#fff; line-height:1.4; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.bk-change{display:none; font-family:var(--f-display); font-size:10.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); white-space:nowrap}
+.bk-step.is-done .bk-pick,.bk-step.is-done .bk-change{display:block}
+.bk-step.is-done .idx{color:var(--ok)}
+.bk-step.is-locked{opacity:.4}
+.bk-step.is-open{border-color:var(--edge-2)}
+.bk-step-b{display:none; padding:2px 20px 24px; border-top:1px solid var(--edge); animation:fade .3s ease}
+.bk-step.is-open .bk-step-b{display:block}
+.bk-q{margin:20px 0 16px; font-family:var(--f-display); font-weight:700; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted-2)}
+.bk-q span{color:var(--accent); margin-left:8px}
+.bk-step .field input,.bk-step .field select,.bk-step .field textarea,.bk-step .summary{background:var(--ink)}
+.bk-step .consent{margin-top:6px}
+.bk-step .paytabs{margin-bottom:14px}
+.bk-step #coLegal{margin:10px 0 0}
+@media(max-width:560px){.bk-step-h{padding:14px 14px; gap:12px} .bk-step-b{padding:2px 14px 20px}}
+/* certification cards: photo left on phones, photo on top from tablet up */
+.bp-grid{display:grid; gap:10px; grid-template-columns:1fr}
+@media(min-width:760px){.bp-grid{grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}}
+.bp{display:grid; grid-template-columns:110px minmax(0,1fr); text-align:left; border:1px solid var(--edge); background:var(--ink); overflow:hidden; transition:border-color .18s; padding:0}
+@media(min-width:760px){.bp{grid-template-columns:1fr; grid-template-rows:auto 1fr}}
+.bp:hover{border-color:rgba(41,182,232,.5)}
+.bp.sel{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.bp-shot{position:relative; overflow:hidden; background:var(--steel-3); min-height:112px}
+@media(min-width:760px){.bp-shot{aspect-ratio:16/9; min-height:0}}
+.bp-shot img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+.bp-shot::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 50%,rgba(10,10,12,.55))}
+.bp-body{display:flex; flex-direction:column; min-width:0; padding:13px 15px 14px}
+.bp b{font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:19px; letter-spacing:.01em; line-height:1.05}
+.bp-blurb{display:block; margin-top:5px; font-size:13px; line-height:1.45; color:var(--muted)}
+.bp-price{display:flex; flex-wrap:wrap; align-items:baseline; gap:3px 8px; margin-top:auto; padding-top:10px; font-family:var(--f-fig); font-stretch:125%; font-weight:700; font-size:18px; color:var(--accent); line-height:1}
+.bp-price .was{margin-left:0}
+.bp-price small{font-family:var(--f-display); font-stretch:100%; font-weight:600; font-size:10px; color:var(--muted-2); letter-spacing:.08em; text-transform:uppercase}
+@media(max-width:400px){.bp{grid-template-columns:92px minmax(0,1fr)} .bp-shot{min-height:100px} .bp-blurb{display:none} .bp-body{padding:12px 13px}}
+/* start dates: a calendar tile per date */
+.bd-grid{display:grid; gap:8px; grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(min-width:480px){.bd-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:700px){.bd-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(min-width:1000px){.bd-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:1180px){.bd-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.bd{display:flex; flex-direction:column; align-items:center; padding:12px 4px; border:1px solid var(--edge); background:var(--ink); text-align:center; transition:.16s}
+.bd:hover:not(:disabled){border-color:rgba(41,182,232,.5); transform:translateY(-2px)}
+.bd.sel{border-color:var(--accent); background:rgba(41,182,232,.09)}
+.bd:disabled{opacity:.32; cursor:not-allowed}
+.bd em{font-style:normal; font-family:var(--f-display); font-weight:700; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted)}
+.bd.sel em{color:var(--accent)}
+.bd b{font-family:var(--f-fig); font-stretch:125%; font-weight:700; font-variant-numeric:tabular-nums; font-size:26px; line-height:1; margin:6px 0 3px; color:#fff}
+.bd span{font-family:var(--f-display); font-size:11px; font-weight:600; color:var(--muted)}
+.bd i{font-style:normal; margin-top:6px; font-family:var(--f-display); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted-2); font-weight:700}
+.bk-note{margin:16px 0 0; font-size:13px; color:var(--muted-2); line-height:1.55}
+.bk-note a{color:var(--accent)}
+.bk-err{margin:0 0 12px; padding:11px 14px; border-left:3px solid #E86A5A; background:rgba(232,106,90,.09); font-size:14px; color:#F1D7D2}
+/* desktop: the running order sticks beside the steps */
+.bk-side{display:none}
+@media(min-width:1000px){
+  .bk-side{display:block; position:sticky; top:96px; border:1px solid var(--edge-2); border-top:2px solid var(--accent); background:var(--steel)}
+  .bk-side-shot{position:relative; aspect-ratio:16/9; background:var(--steel-3); overflow:hidden}
+  .bk-side-shot img{width:100%; height:100%; object-fit:cover}
+  .bk-side-shot::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 30%,rgba(10,10,12,.88))}
+  .bk-side-shot b{position:absolute; left:18px; right:18px; bottom:14px; z-index:1; font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:24px; letter-spacing:.012em; line-height:1.05}
+  .bk-side .summary{border:0; background:none; margin:0}
+  .bk-side .summary-row{padding:12px 18px}
+  .bk-side .summary-row.total{background:var(--steel-3)}
+  .bk-side-call{padding:14px 18px; border-top:1px solid var(--edge); font-size:13px; line-height:1.55; color:var(--muted); margin:0}
+  .bk-side-call a{color:#fff; font-weight:600; white-space:nowrap}
+}
+.bk-done{max-width:720px; margin-inline:auto; border:1px solid var(--edge-2); border-top:2px solid var(--ok); background:var(--steel)}
+.bk-done .co-success h2{font-size:30px; margin-bottom:12px}
 """
 
 SITE_JS = r"""
@@ -1483,7 +1950,7 @@ SITE_JS = r"""
     const dates=[]; while(dates.length<links.length){ if(bookable(d,key)) dates.push(new Date(d)); d.setDate(d.getDate()+7); }
     links.forEach((a,i)=>{
       const x=dates[i];
-      a.href="/?book="+row.dataset.book+"&fmt="+row.dataset.fmt+"&date="+iso(x)+"#schedule";
+      a.href="/book/?book="+row.dataset.book+"&fmt="+row.dataset.fmt+"&date="+iso(x);
       a.textContent=DOWS[x.getDay()]+", "+MONS[x.getMonth()]+" "+x.getDate();
     });
   });
@@ -1549,7 +2016,7 @@ def write_llms():
              "- Payment: card deposit, Klarna and Afterpay (pay in full at checkout), Zelle, in-house financing with no credit check. Deposit non-refundable; one reschedule with 48 hours' notice.",
              "- Class size: 8 seats. Individual enrollment only: no employer, crew or group training programs and no training at employer sites (an employer may pay for a student's seat). No Spanish-language instruction; a Spanish-language summary page exists at /es/.", "",
              "## Pages", ""]
-    names = {"/": "Home and online booking",
+    names = {"/": "Home", "/book/": "Book a class online (certification, schedule and start date; $200 deposit, assessments $150)",
              "/es/": "Resumen en español (Spanish-language summary of courses, assessments, financing, location)", "/guides/": "Guides (plain-English articles)"}
     names.update(("/guides/%s/" % g["slug"], "Guide: " + g["title"]) for g in GUIDES)
     for u, p in PAGES:
@@ -1561,6 +2028,7 @@ def write_llms():
 def main():
     write_assets()
     rewrite_index()
+    build_book()
     for c in COURSES: build_course(c)
     build_assessments()
     for c in CRAFTS: build_craft(c)

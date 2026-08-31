@@ -14,7 +14,8 @@
 
 ## Pages
 
-- [Home and online booking](https://primeliftrigging-academy.com/)
+- [Home](https://primeliftrigging-academy.com/)
+- [Book a class online (certification, schedule and start date; $200 deposit, assessments $150)](https://primeliftrigging-academy.com/book/)
 - [Advanced Rigger](https://primeliftrigging-academy.com/advanced-rigger/)
 - [Signal Person](https://primeliftrigging-academy.com/signal-person/)
 - [Nccer Assessments](https://primeliftrigging-academy.com/nccer-assessments/)

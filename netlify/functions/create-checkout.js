@@ -44,8 +44,8 @@ exports.handler = async (event) => {
   const label = amount === item.price ? item.name : `${item.name} deposit`;
 
   const site = (process.env.SITE_URL || process.env.URL || "").replace(/\/$/, "");
-  const success = `${site}/?booked=1&program=${encodeURIComponent(item.name)}&date=${encodeURIComponent(p.start_date_label || "")}`;
-  const cancel  = `${site}/?canceled=1#schedule`;
+  const success = `${site}/book/?booked=1&program=${encodeURIComponent(item.name)}&date=${encodeURIComponent(p.start_date_label || "")}`;
+  const cancel  = `${site}/book/?canceled=1`;
 
   const body = new URLSearchParams();
   body.append("mode", "payment");

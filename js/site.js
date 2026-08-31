@@ -65,7 +65,7 @@
     const dates=[]; while(dates.length<links.length){ if(bookable(d,key)) dates.push(new Date(d)); d.setDate(d.getDate()+7); }
     links.forEach((a,i)=>{
       const x=dates[i];
-      a.href="/?book="+row.dataset.book+"&fmt="+row.dataset.fmt+"&date="+iso(x)+"#schedule";
+      a.href="/book/?book="+row.dataset.book+"&fmt="+row.dataset.fmt+"&date="+iso(x);
       a.textContent=DOWS[x.getDay()]+", "+MONS[x.getMonth()]+" "+x.getDate();
     });
   });
