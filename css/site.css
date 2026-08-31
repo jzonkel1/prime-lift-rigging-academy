@@ -1618,6 +1618,17 @@ img.nccer{width:auto; display:inline-block; vertical-align:-1px}
 .ln-dates::-webkit-scrollbar{display:none}
 .ln-date{flex:none; padding:13px 16px; border:1px solid var(--edge-2); font-family:var(--f-fig); font-stretch:115%; font-weight:600; font-variant-numeric:tabular-nums; font-size:15px; white-space:nowrap; color:var(--text); transition:.16s}
 .ln-date:hover{border-color:var(--accent); color:#fff; background:rgba(41,182,232,.08)}
+/* desktop: the swipe strip clipped the 3rd/4th date at the column edge. Label sits
+   above a fixed grid of equal chips instead: 4 across in the wide Advanced Rigger
+   group, 3 across in the two narrow groups (their 4th date is dropped). */
+@media(min-width:1000px){
+  .ln-row{grid-template-columns:1fr; gap:12px; align-items:start}
+  .ln-dates{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; overflow:visible}
+  .ln-date{flex:auto; min-width:0; text-align:center; padding:12px 6px; font-size:14.5px}
+  .ln-group:not(:first-child) .ln-dates{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ln-group:not(:first-child) .ln-date:nth-child(n+4){display:none}
+}
+@media(min-width:1000px) and (max-width:1199px){.ln-date{font-size:13px; padding:12px 4px}}  /* "Wed, Sep 2" in a 91px chip */
 @media(max-width:640px){
   .ln-gh{padding:16px 16px}
   .ln-gh b{font-size:23px}
