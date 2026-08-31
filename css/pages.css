@@ -343,6 +343,11 @@ a.guide-card:hover{border-color:var(--accent)}
 .bd b{font-family:var(--f-fig); font-stretch:125%; font-weight:700; font-variant-numeric:tabular-nums; font-size:26px; line-height:1; margin:6px 0 3px; color:#fff}
 .bd span{font-family:var(--f-display); font-size:11px; font-weight:600; color:var(--muted)}
 .bd i{font-style:normal; margin-top:6px; font-family:var(--f-display); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted-2); font-weight:700}
+.bd i.left{color:var(--accent)}
+/* live seat counts on date chips (home band, course strips): "· 2 left" / "· full" */
+.ln-date .left,.nd-date .left{color:var(--accent); font-weight:600}
+.ln-date.is-full,.nd-date.is-full{opacity:.38; pointer-events:none; text-decoration:line-through}
+.ln-date.is-full .left,.nd-date.is-full .left{text-decoration:none; color:var(--muted-2)}
 .bk-note{margin:16px 0 0; font-size:13px; color:var(--muted-2); line-height:1.55}
 .bk-note a{color:var(--accent)}
 .bk-err{margin:0 0 12px; padding:11px 14px; border-left:3px solid #E86A5A; background:rgba(232,106,90,.09); font-size:14px; color:#F1D7D2}

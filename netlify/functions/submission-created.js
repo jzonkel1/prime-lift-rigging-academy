@@ -29,6 +29,9 @@ exports.handler = async (event) => {
     program: d.program || "",
     format: d.format || "",
     start_date: d.start_date || "",
+    start_iso: d.start_iso || "",        // YYYY-MM-DD
+    start_mdy: d.start_mdy || "",        // MM-DD-YYYY: the format GHL date fields parse (Class Start Date, Next Class Start)
+    class_times: d.class_times || "",
     payment_method: d.payment_method || "",
     amount_due_today: d.amount_due_today || "",
     payer: d.payer || "",

@@ -117,3 +117,48 @@
   ["scroll","pointerdown","touchstart","keydown"].forEach(function(e){ window.addEventListener(e, load, {passive:true, once:true}); });
   setTimeout(load, 6000);
 })();
+
+/* LIVE SEATS. /.netlify/functions/seats counts open cards in the office's own
+   Enrollment pipeline (one card = one seat, Lost frees it), so a class fills up
+   on the site the moment the 8th student is booked online OR by phone. The
+   static lists render first from CLOSED/FULL in build.py; this pass decorates
+   every date link on the page (home band, course strips, class-dates tiles)
+   and hands the data to /book/ through the pl:seats event. Fails silent. */
+(function(){
+  var CAP = 8, LOW = 3;
+  function keyOf(a){
+    var m = (a.getAttribute("href") || "").match(/[?&]book=([a-z]+)&(?:amp;)?fmt=([a-z]+)&(?:amp;)?date=(\d{4}-\d{2}-\d{2})/);
+    return m ? m[1] + ":" + m[2] + ":" + m[3] : null;
+  }
+  function paint(data){
+    var taken = data.taken || {}, cap = data.cap || CAP;
+    document.querySelectorAll("a.ln-date, a.nd-date, a.date").forEach(function(a){
+      var k = keyOf(a); if (!k) return;
+      var left = cap - (taken[k] || 0);
+      var tile = a.classList.contains("date"), seats = tile && a.querySelector(".seats");
+      if (left <= 0) {
+        a.classList.add("is-full"); a.setAttribute("aria-disabled", "true"); a.setAttribute("tabindex", "-1"); a.setAttribute("href", "#");
+        if (seats) { seats.querySelector("b").textContent = "—"; seats.querySelector("span").textContent = "full"; }
+        else if (!a.querySelector(".left")) a.insertAdjacentHTML("beforeend", '<span class="left"> · full</span>');
+        return;
+      }
+      if (seats) {
+        seats.querySelector("b").textContent = left; seats.querySelector("span").textContent = left === 1 ? "seat left" : "seats left";
+        seats.classList.toggle("low", left <= LOW);
+      } else if (left <= LOW && !a.querySelector(".left")) {
+        a.insertAdjacentHTML("beforeend", '<span class="left"> · ' + left + " left</span>");
+      }
+    });
+  }
+  function go(){
+    var url = "/.netlify/functions/seats";
+    if (location.protocol === "file:" || /^(127\.0\.0\.1|localhost)$/.test(location.hostname) && location.port !== "8888") return;
+    fetch(url, {cache: "no-cache"}).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+      if (!d || !d.taken) return;
+      window.__plSeats = d;
+      paint(d);
+      document.dispatchEvent(new CustomEvent("pl:seats", {detail: d}));
+    }).catch(function(){});
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
+})();

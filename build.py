@@ -1238,7 +1238,7 @@ def build_book():
   <input type="hidden" name="form-name" value="enrollment-request">
   <input name="bot-field">
   <input name="first_name"><input name="last_name"><input name="phone"><input name="email">
-  <input name="program"><input name="format"><input name="start_date">
+  <input name="program"><input name="format"><input name="start_date"><input name="start_iso"><input name="start_mdy"><input name="class_times">
   <input name="payment_method"><input name="amount_due_today"><input name="note"><input name="page">
   <input name="payer"><input name="notes"><input name="sms_consent_nonmarketing"><input name="sms_consent_marketing">
 </form>
@@ -1255,7 +1255,9 @@ def build_book():
   const dparts=s=>{ const p=s.split("-").map(Number); return new Date(p[0],p[1]-1,p[2]); };
   const fmtLong=s=>{ const d=dparts(s); return DOWFULL[d.getDay()]+", "+MONS[d.getMonth()]+" "+d.getDate(); };
   const money=n=>"$"+n.toLocaleString("en-US");
-  const isFull=(s,k)=>{ const f=X.full[s]||[]; return f.includes(k)||f.includes("*"); };
+  /* full = the office's static FULL list OR the live count from the Enrollment pipeline (site.js -> window.__plSeats) */
+  const seatsLeft=(s,k)=>{ const L=window.__plSeats; return L&&L.taken?(L.cap||SEATS)-(L.taken[k+":"+s]||0):SEATS; };
+  const isFull=(s,k)=>{ const f=X.full[s]||[]; return f.includes(k)||f.includes("*")||seatsLeft(s,k)<=0; };
   function first(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+LEAD); return d; }
   function every(wd,n){ const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); while(o.length<n){ if(!X.closed[iso(d)]) o.push(iso(d)); d.setDate(d.getDate()+7); } return o; }
   function weekdays(n){ const d=first(),o=[]; while(o.length<n){ if(d.getDay()>=1&&d.getDay()<=5&&!X.closed[iso(d)]) o.push(iso(d)); d.setDate(d.getDate()+1); } return o; }
@@ -1313,14 +1315,22 @@ def build_book():
     $$("#fmtList .fmt").forEach(b=>b.classList.toggle("sel",b.dataset.fmt===id));
     setPick(2,S.fmt.name+" · "+S.fmt.time);
     $("#dateSub").textContent=S.fmt.time;
-    if(!same){
-      const k=key();
-      $("#bdGrid").innerHTML=S.fmt.dates.map(s=>{ const d=dparts(s), full=isFull(s,k);
-        return '<button class="bd" type="button" data-date="'+s+'"'+(full?' disabled':'')+'><em>'+DOWS[d.getDay()]+'</em><b>'+d.getDate()+'</b><span>'+MONS[d.getMonth()]+'</span>'+(full?'<i>Full</i>':'')+'</button>'; }).join("");
-    }
+    if(!same) renderDates();
     if(same&&S.date){ show(4,scroll); return; }
     show(3,scroll);
   }
+  function renderDates(){
+    const k=key();
+    $("#bdGrid").innerHTML=S.fmt.dates.map(s=>{ const d=dparts(s), full=isFull(s,k), left=seatsLeft(s,k);
+      return '<button class="bd'+(S.date===s?' sel':'')+'" type="button" data-date="'+s+'"'+(full?' disabled':'')+'><em>'+DOWS[d.getDay()]+'</em><b>'+d.getDate()+'</b><span>'+MONS[d.getMonth()]+'</span>'
+        +(full?'<i>Full</i>':(left<=3?'<i class="left">'+left+(left===1?' seat':' seats')+' left</i>':''))+'</button>'; }).join("");
+  }
+  /* live counts arrive after first paint: redraw the tiles, and drop a pick that just filled up */
+  document.addEventListener("pl:seats",()=>{
+    if(!S.fmt) return;
+    if(S.date&&isFull(S.date,key())){ S.date=null; setPick(3,""); if(S.step>3) show(3,true); }
+    renderDates();
+  });
 
   /* 03 start date */
   $("#bdGrid").addEventListener("click",e=>{ const b=e.target.closest("[data-date]"); if(!b||b.disabled) return; pickDate(b.dataset.date,true); });
@@ -1397,9 +1407,11 @@ def build_book():
   }
   async function submitForm(p){
     const body=new URLSearchParams({"form-name":"enrollment-request"});
-    /* start_date goes out human-readable: it lands verbatim in the office email, the opportunity name and the student's confirmation */
-    const q=Object.assign({},p,{start_date:p.start_date?fmtLong(p.start_date)+", "+p.start_date.slice(0,4):""});
-    ["first_name","last_name","phone","email","program","format","start_date","payment_method","amount_due_today","note","page","payer","notes","sms_consent_nonmarketing","sms_consent_marketing"].forEach(k=>body.append(k,String(q[k]==null?"":q[k])));
+    /* start_date goes out human-readable: it lands verbatim in the office email, the opportunity name and the student's
+       confirmation. start_iso (YYYY-MM-DD) rides along for the opportunity's date field: seat counts and class reminders key on it. */
+    const s=p.start_date||"", mdy=s?s.slice(5,7)+"-"+s.slice(8,10)+"-"+s.slice(0,4):"";   /* GHL date fields want MM-DD-YYYY */
+    const q=Object.assign({},p,{start_date:s?fmtLong(s)+", "+s.slice(0,4):"", start_iso:s, start_mdy:mdy});
+    ["first_name","last_name","phone","email","program","format","start_date","start_iso","start_mdy","class_times","payment_method","amount_due_today","note","page","payer","notes","sms_consent_nonmarketing","sms_consent_marketing"].forEach(k=>body.append(k,String(q[k]==null?"":q[k])));
     const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:body.toString()});
     if(!r.ok) throw new Error("form "+r.status);
   }
@@ -1433,6 +1445,9 @@ def build_book():
       }
       const data=await r.json().catch(()=>({}));
       if(!r.ok||!data.url) throw new Error(data.error||"checkout "+r.status);
+      /* Record the booking BEFORE handing off to Stripe, so the office email, the pipeline card and the
+         seat count exist even if the student never finishes paying (the office confirms payment in Stripe). */
+      try{ await submitForm(Object.assign({},p,{payment_method:p.payment_method+" (Stripe checkout opened; confirm payment in Stripe)"})); }catch(e){ console.warn(e); }
       location.href=data.url;
     }catch(err){
       console.error(err); reset();
@@ -1861,6 +1876,11 @@ a.guide-card:hover{border-color:var(--accent)}
 .bd b{font-family:var(--f-fig); font-stretch:125%; font-weight:700; font-variant-numeric:tabular-nums; font-size:26px; line-height:1; margin:6px 0 3px; color:#fff}
 .bd span{font-family:var(--f-display); font-size:11px; font-weight:600; color:var(--muted)}
 .bd i{font-style:normal; margin-top:6px; font-family:var(--f-display); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted-2); font-weight:700}
+.bd i.left{color:var(--accent)}
+/* live seat counts on date chips (home band, course strips): "· 2 left" / "· full" */
+.ln-date .left,.nd-date .left{color:var(--accent); font-weight:600}
+.ln-date.is-full,.nd-date.is-full{opacity:.38; pointer-events:none; text-decoration:line-through}
+.ln-date.is-full .left,.nd-date.is-full .left{text-decoration:none; color:var(--muted-2)}
 .bk-note{margin:16px 0 0; font-size:13px; color:var(--muted-2); line-height:1.55}
 .bk-note a{color:var(--accent)}
 .bk-err{margin:0 0 12px; padding:11px 14px; border-left:3px solid #E86A5A; background:rgba(232,106,90,.09); font-size:14px; color:#F1D7D2}
@@ -2001,6 +2021,51 @@ SITE_JS = r"""
   }
   ["scroll","pointerdown","touchstart","keydown"].forEach(function(e){ window.addEventListener(e, load, {passive:true, once:true}); });
   setTimeout(load, 6000);
+})();
+
+/* LIVE SEATS. /.netlify/functions/seats counts open cards in the office's own
+   Enrollment pipeline (one card = one seat, Lost frees it), so a class fills up
+   on the site the moment the 8th student is booked online OR by phone. The
+   static lists render first from CLOSED/FULL in build.py; this pass decorates
+   every date link on the page (home band, course strips, class-dates tiles)
+   and hands the data to /book/ through the pl:seats event. Fails silent. */
+(function(){
+  var CAP = 8, LOW = 3;
+  function keyOf(a){
+    var m = (a.getAttribute("href") || "").match(/[?&]book=([a-z]+)&(?:amp;)?fmt=([a-z]+)&(?:amp;)?date=(\d{4}-\d{2}-\d{2})/);
+    return m ? m[1] + ":" + m[2] + ":" + m[3] : null;
+  }
+  function paint(data){
+    var taken = data.taken || {}, cap = data.cap || CAP;
+    document.querySelectorAll("a.ln-date, a.nd-date, a.date").forEach(function(a){
+      var k = keyOf(a); if (!k) return;
+      var left = cap - (taken[k] || 0);
+      var tile = a.classList.contains("date"), seats = tile && a.querySelector(".seats");
+      if (left <= 0) {
+        a.classList.add("is-full"); a.setAttribute("aria-disabled", "true"); a.setAttribute("tabindex", "-1"); a.setAttribute("href", "#");
+        if (seats) { seats.querySelector("b").textContent = "—"; seats.querySelector("span").textContent = "full"; }
+        else if (!a.querySelector(".left")) a.insertAdjacentHTML("beforeend", '<span class="left"> · full</span>');
+        return;
+      }
+      if (seats) {
+        seats.querySelector("b").textContent = left; seats.querySelector("span").textContent = left === 1 ? "seat left" : "seats left";
+        seats.classList.toggle("low", left <= LOW);
+      } else if (left <= LOW && !a.querySelector(".left")) {
+        a.insertAdjacentHTML("beforeend", '<span class="left"> · ' + left + " left</span>");
+      }
+    });
+  }
+  function go(){
+    var url = "/.netlify/functions/seats";
+    if (location.protocol === "file:" || /^(127\.0\.0\.1|localhost)$/.test(location.hostname) && location.port !== "8888") return;
+    fetch(url, {cache: "no-cache"}).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+      if (!d || !d.taken) return;
+      window.__plSeats = d;
+      paint(d);
+      document.dispatchEvent(new CustomEvent("pl:seats", {detail: d}));
+    }).catch(function(){});
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
 })();
 """
 
