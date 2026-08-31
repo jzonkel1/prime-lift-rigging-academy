@@ -1601,6 +1601,8 @@ img.nccer{width:auto; display:inline-block; vertical-align:-1px}
 /* photo, name and quote fade as one: the slide's own opacity carries all three;
    hidden slides also drop out of the tab order so their instructor links can't be focused */
 .hero-slide{position:absolute; inset:0 0 auto 0; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .45s ease, visibility 0s linear .45s}
+/* the first slide stays in flow so the panel has its height before JS measures it (was a 0.13 CLS on desktop) */
+.hero-slide:first-child{position:relative}
 .hero-slide.on{opacity:1; visibility:visible; pointer-events:auto; transition:opacity .45s ease, visibility 0s}
 .hero-slide .hero-photo{width:100%}
 @media(max-width:899px){
@@ -1672,14 +1674,23 @@ body.mnav-open .nav-burger span:nth-child(3){transform:translateY(-7px) rotate(-
    .nav-in (logo + burger). The row has to stack above the overlay or the close
    button is buried under it and the menu can't be dismissed. */
 .nav-in{position:relative; z-index:2}
+/* The open menu is a solid ink sheet that drops out from under a solid header bar.
+   It used to be a blurred translucent overlay fading in while the header cross-faded
+   to ink on its own timer: two surfaces, two timings, one seam at the logo, and a
+   full-screen backdrop-filter animating on a phone GPU (the stutter). Now: the
+   header snaps solid with a hairline the instant the menu opens, the sheet starts
+   exactly below the bar (whichever height the bar is in) and slides down 12px. */
 .mnav{
-  position:fixed; inset:0; top:0; z-index:1; display:none; overflow:auto;
-  background:rgba(10,10,12,.985); backdrop-filter:blur(14px);
-  padding-top:96px; -webkit-overflow-scrolling:touch;
+  position:fixed; inset:0; z-index:1; display:none; overflow:auto;
+  background:var(--ink);
+  padding-top:calc(110px + 6px); -webkit-overflow-scrolling:touch;
 }
-body.mnav-open .mnav{display:block; animation:fade .2s ease}
+.nav.stuck .mnav{padding-top:calc(88px + 6px)}
+@keyframes mnavIn{from{opacity:0; transform:translateY(-12px)}to{opacity:1; transform:none}}
+body.mnav-open .mnav{display:block; animation:mnavIn .28s cubic-bezier(.2,.7,.2,1) both}
+@media(prefers-reduced-motion:reduce){body.mnav-open .mnav{animation:none}}
 body.mnav-open{overflow:hidden}
-body.mnav-open .nav{background:var(--ink); z-index:80}
+body.mnav-open .nav{background:var(--ink); border-bottom-color:var(--edge); backdrop-filter:none; transition:none; z-index:80}
 .mnav-in{padding:0 var(--pad) 40px; max-width:560px; margin-inline:auto}
 /* rows: top-level links, the two accordion triggers (Courses / Academy) and the links inside them */
 .mnav-in>a,.macc-t,.macc-p a{display:grid; grid-template-columns:1fr auto; align-items:center; gap:2px 12px; padding:14px 4px; border-bottom:1px solid var(--edge); color:inherit}
