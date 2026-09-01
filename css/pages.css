@@ -10,10 +10,11 @@
 body.mnav-open .nav-burger span:nth-child(1){transform:translateY(7px) rotate(45deg)}
 body.mnav-open .nav-burger span:nth-child(2){opacity:0}
 body.mnav-open .nav-burger span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
-/* .mnav lives INSIDE header.nav, so its z-index only competes with its sibling
-   .nav-in (logo + burger). The row has to stack above the overlay or the close
-   button is buried under it and the menu can't be dismissed. */
-.nav-in{position:relative; z-index:2}
+/* .mnav lives INSIDE header.nav, so these three only stack against each other:
+   the sheet (1), the opaque lid that hides rows scrolling past the top (2), and
+   the logo + close button row (3), which has to stay on top or the menu can't
+   be dismissed. */
+.nav-in{position:relative; z-index:3}
 /* The open menu is a solid ink sheet that drops out from under a solid header bar.
    It used to be a blurred translucent overlay fading in while the header cross-faded
    to ink on its own timer: two surfaces, two timings, one seam at the logo, and a
@@ -22,12 +23,9 @@ body.mnav-open .nav-burger span:nth-child(3){transform:translateY(-7px) rotate(-
    exactly below the bar (whichever height the bar is in) and slides down 12px. */
 .mnav{
   position:fixed; inset:0; z-index:1; display:none; overflow:auto;
-  /* ink sheet + a 1px hairline exactly where the bar ends (the bar height is
-     scroll-driven via --navp, inherited from .nav); a background layer on the
-     scroll container stays put while the menu content scrolls */
-  background:
-    linear-gradient(var(--edge),var(--edge)) 0 calc(110px - 22px * var(--navp)) / 100% 1px no-repeat,
-    var(--ink);
+  /* plain ink sheet; the hairline at the bar's edge belongs to the lid below,
+     which is opaque and does not scroll with the menu */
+  background:var(--ink);
   padding-top:calc(110px - 22px * var(--navp) + 6px); -webkit-overflow-scrolling:touch;
 }
 @keyframes mnavIn{from{opacity:0; transform:translateY(-12px)}to{opacity:1; transform:none}}
@@ -35,6 +33,16 @@ body.mnav-open .mnav{display:block; animation:mnavIn .28s cubic-bezier(.2,.7,.2,
 @media(prefers-reduced-motion:reduce){body.mnav-open .mnav{animation:none}}
 body.mnav-open{overflow:hidden}
 body.mnav-open .nav{z-index:80}   /* the sheet (z-index:1) already covers the glass (z-index:0) */
+/* The bar is an opaque lid while the menu is open. Without it the sheet's
+   padding-top only sets the RESTING position of the first row: scroll the menu
+   and every row travels up through the bar, colliding with the logo and the
+   close button (rows appeared to float over the logo). The lid is painted
+   between the sheet and the logo row, so rows now disappear cleanly under it.
+   Height comes from .nav itself, so it tracks the scroll-driven bar height. */
+body.mnav-open .nav::after{
+  content:""; position:absolute; inset:0; z-index:2; pointer-events:none;
+  background:var(--ink); border-bottom:1px solid var(--edge);
+}
 .mnav-in{padding:0 var(--pad) 40px; max-width:560px; margin-inline:auto}
 /* rows: top-level links, the two accordion triggers (Courses / Academy) and the links inside them */
 .mnav-in>a,.macc-t,.macc-p a{display:grid; grid-template-columns:1fr auto; align-items:center; gap:2px 12px; padding:14px 4px; border-bottom:1px solid var(--edge); color:inherit}

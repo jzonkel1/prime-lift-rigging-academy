@@ -17,6 +17,11 @@
     $$(".macc-t").forEach(t=>t.addEventListener("click",()=>{ const acc=t.parentElement; setAcc(acc,!acc.classList.contains("open")); }));
     $$("#mnav a").forEach(a=>a.addEventListener("click",()=>{ document.body.classList.remove("mnav-open"); burger.setAttribute("aria-expanded","false"); }));
     document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&document.body.classList.contains("mnav-open")) burger.click(); });
+    /* rotate a small tablet past the desktop breakpoint with the menu open and the
+       sheet hides itself, leaving the scroll lock and the opaque bar behind */
+    window.matchMedia("(min-width:1000px)").addEventListener("change",e=>{
+      if(e.matches&&document.body.classList.contains("mnav-open")) burger.click();
+    });
   }
 
   if(!home){
