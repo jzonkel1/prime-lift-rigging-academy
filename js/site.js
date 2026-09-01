@@ -212,3 +212,53 @@
   };
   document.head.appendChild(s);
 })();
+
+/* THIS WEEK'S SPECIAL. The office edits row 2 of the "Prime Lift Weekly
+   Updates" Google Sheet (tab "This Week's Special", published to the web as
+   CSV): A2 = the banner sentence, B2 = last day to show it. Empty A2 = no
+   banner. Injected AFTER the 100svh hero so it costs nothing at first paint
+   and never shifts visible layout. Fails silent; renders home page only. */
+(function(){
+  var hero = document.querySelector(".hero");
+  if (!hero || !window.fetch) return;
+  var CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSwHQGTw88cR99Mj_Bg0OenyFiPZb3jVtatRpygtuOwA-KNqold2F6P98cgOLB9HEAM84YeSlQ8jCV2/pub?gid=1405683584&single=true&output=csv";
+  /* 5-minute cache bucket: fresh enough for a weekly banner, kind to Google's edge */
+  fetch(CSV + "&cb=" + Math.floor(Date.now() / 3e5), {cache: "no-store"})
+    .then(function(r){ return r.ok ? r.text() : ""; })
+    .then(function(t){
+      var line = (t.split(/\r?\n/)[1] || "");
+      /* first two CSV fields of the data row; handles quoted commas */
+      var f = [], cur = "", q = false, i, c;
+      for (i = 0; i < line.length && f.length < 2; i++) {
+        c = line[i];
+        if (q) { if (c === '"') { if (line[i+1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
+        else if (c === '"') q = true;
+        else if (c === ",") { f.push(cur); cur = ""; }
+        else cur += c;
+      }
+      f.push(cur);
+      var text = (f[0] || "").trim(), until = (f[1] || "").trim();
+      if (!text) return;
+      if (until) {
+        var end = null, m = until.match(/^(\d{1,2})[\/\-.](\d{1,2})(?:[\/\-.](\d{2,4}))?$/);
+        if (m) {
+          var y = m[3] ? (m[3].length === 2 ? 2000 + +m[3] : +m[3]) : new Date().getFullYear();
+          end = new Date(y, +m[1] - 1, +m[2], 23, 59, 59);
+          /* no year given and the date is months gone: they meant next year */
+          if (!m[3] && (new Date() - end) > 90 * 864e5) end.setFullYear(y + 1);
+        } else {
+          var d = new Date(until);
+          if (!isNaN(d)) { d.setHours(23, 59, 59, 0); end = d; }
+        }
+        if (end && new Date() > end) return;
+      }
+      var s = document.createElement("section"); s.className = "spx"; s.setAttribute("aria-label", "This week's special");
+      var w = document.createElement("div"); w.className = "wrap spx-in";
+      var k = document.createElement("span"); k.className = "spx-k"; k.textContent = "This Week";
+      var b = document.createElement("span"); b.className = "spx-t"; b.textContent = text;
+      var a = document.createElement("a"); a.className = "spx-cta"; a.href = "/book/"; a.textContent = "Book a Class ›";
+      w.appendChild(k); w.appendChild(b); w.appendChild(a); s.appendChild(w);
+      hero.parentNode.insertBefore(s, hero.nextSibling);
+    })
+    .catch(function(){});
+})();

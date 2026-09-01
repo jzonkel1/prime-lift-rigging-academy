@@ -1686,6 +1686,25 @@ a.iname:hover{color:var(--accent); text-decoration-color:currentColor}
 .rv-panel.ink a.iname{text-decoration-color:rgba(41,182,232,.45)}
 .rv-panel.ink a.iname:hover{color:#fff; text-decoration-color:#fff}
 
+/* ---- this week's special (fed by the Weekly Updates sheet; injected by site.js
+        right after the hero, so it's the first thing under the fold) ---- */
+/* the section that follows pulls itself up 57.6px with a diagonal clip (the
+   site's seam device), so the band carries that much extra ink below its
+   content and lets the diagonal slice through the empty part */
+.spx{background:linear-gradient(180deg,var(--steel),var(--ink)); border-top:1px solid rgba(41,182,232,.32); padding-bottom:58px; animation:spxin .5s ease both}
+.spx-in{display:flex; align-items:center; justify-content:center; gap:12px 22px; flex-wrap:wrap; padding-block:16px; text-align:center}
+.spx-k{font-family:var(--f-display); font-weight:700; text-transform:uppercase; font-size:11.5px; letter-spacing:.22em; color:var(--accent); white-space:nowrap; display:inline-flex; align-items:center; gap:10px}
+.spx-k::before{content:""; width:22px; height:1px; background:var(--accent); opacity:.7}
+.spx-t{font-size:16px; line-height:1.45; color:var(--text); max-width:62ch}
+.spx-cta{font-family:var(--f-display); font-weight:700; font-size:13.5px; letter-spacing:.04em; color:var(--accent); text-decoration:none; white-space:nowrap; border-bottom:2px solid rgba(41,182,232,.45); padding-bottom:1px; transition:color .18s ease, border-color .18s ease}
+.spx-cta:hover{color:var(--accent-2); border-color:currentColor}
+@keyframes spxin{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.spx{animation:none}}
+@media(max-width:640px){
+  .spx-in{padding-block:14px; gap:8px 16px}
+  .spx-t{font-size:15px}
+}
+
 /* ============================================================
    PAGES — components for the generated inner pages (build.py)
    and the mobile menu, which the home page shares.
