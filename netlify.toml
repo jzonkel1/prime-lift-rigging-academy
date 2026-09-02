@@ -42,3 +42,10 @@
   from = "/employers/*"
   to = "/"
   status = 301
+
+# Spanish summary pulled 9/2/26: their onboarding answered "Spanish: No", so the
+# page was collecting leads the office cannot serve in that language.
+[[redirects]]
+  from = "/es/*"
+  to = "/"
+  status = 301

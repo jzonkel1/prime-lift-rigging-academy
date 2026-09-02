@@ -286,7 +286,6 @@ def nav(home=False):
       <a href="/reviews/"><b>Student Reviews</b></a>
       <a href="/faq/"><b>FAQ</b></a>
       <a href="/contact/"><b>Contact</b></a>
-      <a href="/es/" lang="es" hreflang="es"><b>Español</b><span>Información en español</span></a>
       <div class="mnav-cta">
         <a class="btn btn-primary btn-block" href="/book/">Book a Class</a>
         <a class="btn btn-ghost btn-block" href="tel:%(tel)s">%(phone_i)s Call %(phone)s</a>
@@ -314,7 +313,6 @@ def footer(home=False):
           <a href="%(gm)s" target="_blank" rel="noopener" aria-label="Google">%(g_i)s</a>
           <a href="mailto:%(email)s" aria-label="Email">%(mail_i)s</a>
         </div>
-        <a class="foot-lang" href="/es/" lang="es" hreflang="es">Español</a>
       </div>
       <div>
         <p class="foot-h">Certifications</p>
@@ -425,10 +423,10 @@ def ld(graph):
 FONTS = '<link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans.woff2" crossorigin>'   # Anton rides inside bundle.css
 
 def hreflang_links(url):
-    """en/es alternates, only for the two pages that have a translation."""
-    if url not in ("/", "/es/"): return ""
-    return ('<link rel="alternate" hreflang="en" href="%s/">\n<link rel="alternate" hreflang="es" href="%s/es/">\n'
-            '<link rel="alternate" hreflang="x-default" href="%s/">\n') % (ORIGIN, ORIGIN, ORIGIN)
+    """No translated pages ship right now, so there are no alternates to declare.
+    The Spanish summary was pulled 9/2: the client's own onboarding answered
+    "Spanish: No", so it was generating leads the office cannot serve."""
+    return ""
 
 def page(url, title, desc, body, crumbs=(), schema=(), og_image="/img/og.jpg", hero_img=None, lang="en"):
     full = ORIGIN + url
@@ -483,8 +481,8 @@ def page(url, title, desc, body, crumbs=(), schema=(), og_image="/img/og.jpg", h
            suffix="" if len(title) > 40 else " | Prime Lift Rigging Academy",
            robots='<meta name="robots" content="noindex, nofollow">' if NOINDEX else '<meta name="robots" content="index, follow, max-image-preview:large">',
            ogimg=ORIGIN + og_image, fonts=FONTS, pre=pre, ld=ld(graph), cssv=CSS_VER,
-           nav=es_lang_links(nav()) if lang == "es" else nav(), body=body,
-           footer=es_lang_links(footer()) if lang == "es" else footer(), callbar=callbar())
+           nav=nav(), body=body,
+           footer=footer(), callbar=callbar())
     out = responsive_images(out)
     if hero_img:
         # preload exactly what the hero <img> will pick (same srcset + sizes), or the file itself
@@ -497,14 +495,6 @@ def page(url, title, desc, body, crumbs=(), schema=(), og_image="/img/og.jpg", h
             link = '<link rel="preload" as="image" href="%s" fetchpriority="high">' % hero_img
         out = out.replace("<!--PRE-->", link, 1)
     return out
-
-# On Spanish pages the language links flip to English so visitors can switch back.
-def es_lang_links(html):
-    return (html
-        .replace('<a href="/es/" lang="es" hreflang="es"><b>Español</b><span>Información en español</span></a>',
-                 '<a href="/" hreflang="en"><b>English</b><span>Volver al sitio en inglés</span></a>')
-        .replace('<a class="foot-lang" href="/es/" lang="es" hreflang="es">Español</a>',
-                 '<a class="foot-lang" href="/" hreflang="en">English</a>'))
 
 # ------------------------------------------------------------ components
 def crumbs_html(crumbs, home="Home"):
@@ -1033,101 +1023,6 @@ def next_dates_strip(cid):
         rows.append('<div class="nd-row" data-wd="%s" data-lead="%d" data-book="%s" data-fmt="%s"><b>%s</b><div class="nd-dates">%s</div></div>' % (
             r["wd"], LEAD_DAYS, r["id"], r["fmt"], esc(r["label"]), links))
     return '<div class="nextdates"><div class="wrap nextdates-in"><p class="nd-h">Next start dates</p>%s<a class="more nd-all" href="/class-dates/">See all dates %s</a></div></div>' % ("".join(rows), I["arrow"])
-
-def build_es():
-    url = "/es/"
-    s = ES
-    crumbs = [("Español", url)]
-    L = s["labels"]
-    body = phero(COURSES[0]["hero"], "Instructor demostrando un enganche de eslinga durante la clase de Advanced Rigger", s["kicker"], s["h1"], s["lede"], crumbs,
-                 ctas=['<a class="btn btn-primary" href="/book/?book=advanced">%s %s</a>' % (esc(s["enroll"]), I["arrow"]),
-                       '<a class="btn btn-ghost" href="tel:%s">%s %s %s</a>' % (BIZ["phone_raw"], I["phone"], esc(s["call"]), BIZ["phone"])], home="Inicio")
-    body += specbar(s["specs"])
-    def fmt_cards(fmts):
-        return '<div class="fmt-grid">%s</div>' % "".join('<div class="fmt-card rv"><span class="idx">%02d</span><b>%s</b><span class="fmt-when">%s · %s</span><p>%s</p></div>' % (
-            i+1, esc(n), esc(wh), esc(t), esc(note)) for i, (n, wh, t, note) in enumerate(fmts))
-    a, sg = s["advanced"], s["signal"]
-    body += """<section class="section"><div class="wrap split">
-  <div class="prose rv">
-    %s
-    <h3 class="h-sub">%s <span class="idx" style="font-size:.7em;margin-left:8px">%s <s class="was">%s</s></span></h3>
-    <p class="lede">%s</p>
-    <p><strong style="color:#DCDAD6">%s:</strong> %s</p>
-    <p>%s</p>
-    <h4 class="h-sub" style="font-size:19px;margin-top:22px">%s</h4>
-    %s
-    <h4 class="h-sub" style="font-size:19px">%s</h4>
-    %s
-    <h3 class="h-sub" style="margin-top:44px">%s <span class="idx" style="font-size:.7em;margin-left:8px">%s</span></h3>
-    <p class="lede">%s</p>
-    <p><strong style="color:#DCDAD6">%s:</strong> %s</p>
-    <p>%s</p>
-    <h4 class="h-sub" style="font-size:19px">%s</h4>
-    %s
-  </div>
-  <aside class="cta-box rv">
-    <span class="cta-price">$1,000 <s class="was">$1,700</s></span><b>Advanced Rigger</b>
-    <p>$200 aparta su lugar. El saldo se paga antes de la clase.</p>
-    <p>Klarna, Afterpay, Zelle o financiamiento interno sin revisión de crédito.</p>
-    <a class="btn btn-primary btn-block" href="/book/?book=advanced">%s</a>
-    <a class="btn btn-ghost btn-block" href="tel:%s">%s %s %s</a>
-    <a class="more" href="/class-dates/">%s %s</a>
-  </aside>
-</div></section>""" % (sec_head("01", s["courses_eyebrow"], s["courses_h2"]),
-                       esc(a["name"]), a["price"], a["was"], esc(a["summary"]), esc(L["cred"]), esc(a["cred"]), esc(a["deposit"]),
-                       esc(L["learn"]), checks(a["learn"]), esc(L["formats"]), fmt_cards(a["formats"]),
-                       esc(sg["name"]), sg["price"], esc(sg["summary"]), esc(L["cred"]), esc(sg["cred"]), esc(sg["deposit"]), esc(L["formats"]), fmt_cards(sg["formats"]),
-                       esc(s["enroll"]), BIZ["phone_raw"], I["phone"], esc(s["call"]), BIZ["phone"], esc(L["all_dates"]), I["arrow"])
-    groups = []
-    for gid, gname in s["groups"]:
-        cs = [c for c in CRAFTS if c[2] == gid]
-        if not cs: continue
-        groups.append('<div class="cgroup rv"><h3>%s</h3><ul class="craft-list">%s</ul></div>' % (esc(gname).replace("|", '<br class="mbr">'), "".join(
-            '<li><a href="/nccer-assessments/%s/" hreflang="en">%s%s</a></li>' % (sl, I["arrow"], esc(craft_short(n))) for sl, n, g, bl, cv in cs)))
-    body += """<section class="section alt" id="evaluaciones"><div class="wrap">
-  %s
-  <div class="cgroups">%s</div>
-  <p class="center-note rv"><a class="btn btn-primary" href="/book/?book=assessment">Solicitar fecha de evaluación</a></p>
-</div></section>""" % (sec_head("02", s["assess_eyebrow"], s["assess_h2"], s["assess_lede"], center=True), "".join(groups))
-    cards = "".join('<div class="fin-card rv"><span class="idx">%02d</span><b>%s</b><span>%s</span><em class="fin-tag">%s</em></div>' % (i+1, esc(t), esc(d), esc(tag)) for i, (t, d, tag) in enumerate(s["financing"]))
-    body += """<section class="section" id="pagos"><div class="wrap">
-  %s
-  <div class="fin-cards fin-cards-3">%s</div>
-  <div class="fin-note rv" style="max-width:760px;margin:30px auto 0">%s</div>
-</div></section>""" % (sec_head("03", s["fin_eyebrow"], s["fin_h2"], center=True), cards, esc(s["fin_note"]))
-    team = "".join("""
-      <a class="person rv" href="/instructors/%s/" hreflang="en">
-        <div class="person-img"><img src="/%s" alt="%s" loading="lazy"></div>
-        <div class="person-body"><span class="person-role">%s</span><h3>%s</h3><span class="person-more">Ver perfil (en inglés) %s</span></div>
-      </a>""" % (p["slug"], p.get("card", p["img"]), esc(p["alt"]), esc(s["roles"][p["slug"]]), esc(p["name"]), I["arrow"]) for p in PEOPLE)
-    body += """<section class="section alt" id="instructores"><div class="wrap">%s<div class="team-grid">%s</div></div></section>""" % (
-        sec_head("04", s["team_eyebrow"], s["team_h2"], center=True), team)
-    body += """<section class="section" id="ubicacion"><div class="wrap">
-  %s
-  <div class="contact-grid">
-  <div class="rv">
-    <ul class="loc-list">
-      <li>%s<div><b>%s</b><span>%s<br>%s, %s %s</span></div></li>
-      <li>%s<div><b>%s</b><span>%s<br><em>%s</em></span></div></li>
-      <li>%s<div><b>%s</b><a href="tel:%s">%s</a></div></li>
-      <li>%s<div><b>%s</b><a href="mailto:%s">%s</a></div></li>
-    </ul>
-    <div class="contact-links">
-      <a class="btn btn-ghost" href="%s" target="_blank" rel="noopener">%s %s</a>
-      <a class="btn btn-primary" href="/book/?book=advanced">%s</a>
-    </div>
-  </div>
-  <div class="map rv"><iframe title="Mapa a Prime Lift Rigging Academy, %s" src="%s" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>
-  </div>
-</div></section>""" % (sec_head("05", s["visit_eyebrow"], s["visit_h2"], s["visit_lede"], center=True),
-                       I["pin"], esc(L["center"]), esc(BIZ["street"]), BIZ["city"], BIZ["state"], BIZ["zip"],
-                       I["clock"], esc(L["hours"]), esc(s["hours"]), esc(s["hours_note"]),
-                       I["phone"], esc(L["phone"]), BIZ["phone_raw"], BIZ["phone"],
-                       I["mail"], esc(L["email"]), BIZ["email"], BIZ["email"],
-                       BIZ["gmaps"], I["pin"], esc(L["directions"]), esc(L["book"]), esc(FULL_ADDR), BIZ["map_embed"])
-    body += band(h2=s["band_h2"], p=s["band_p"], primary='<a class="btn btn-primary" href="/book/?book=advanced">%s</a>' % esc(s["enroll"]),
-                 eyebrow=s["band_eyebrow"], call=s["call"])
-    emit(url, page(url, s["title"], s["desc"], body, crumbs, hero_img="/" + COURSES[0]["hero"], lang="es"), "0.8")
 
 GUIDE_DATE = "2026-08-29"
 GUIDE_RELATED = {
@@ -2374,10 +2269,9 @@ def write_llms():
              "- Signal Person course: $1,000, $200 deposit. Two Fridays 8 AM-3 PM. NCCER Certified Signal Person.",
              "- NCCER assessments: $150 flat per assessment, 36 crafts, Mon-Fri 8 AM-5 PM by appointment. Written and hands-on, credential recorded on the NCCER Registry.",
              "- Payment: card deposit, Klarna and Afterpay (pay in full at checkout), Zelle, in-house financing with no credit check. Deposit non-refundable; one reschedule with 48 hours' notice.",
-             "- Class size: 8 seats. Individual enrollment only: no employer, crew or group training programs and no training at employer sites (an employer may pay for a student's seat). No Spanish-language instruction; a Spanish-language summary page exists at /es/.", "",
+             "- Class size: 8 seats. Individual enrollment only: no employer, crew or group training programs and no training at employer sites (an employer may pay for a student's seat).", "",
              "## Pages", ""]
-    names = {"/": "Home", "/book/": "Book a class online (certification, schedule and start date; $200 deposit, assessments $150)",
-             "/es/": "Resumen en español (Spanish-language summary of courses, assessments, financing, location)", "/guides/": "Guides (plain-English articles)"}
+    names = {"/": "Home", "/book/": "Book a class online (certification, schedule and start date; $200 deposit, assessments $150)", "/guides/": "Guides (plain-English articles)"}
     names.update(("/guides/%s/" % g["slug"], "Guide: " + g["title"]) for g in GUIDES)
     for u, p in PAGES:
         lines.append("- [%s](%s%s)" % (names.get(u, u.strip("/").replace("-", " ").replace("/", " / ").title()), BASE, u))
@@ -2445,7 +2339,6 @@ def main():
     build_about()
     build_reviews()
     build_faq()
-    build_es()
     build_guides()
     build_404()
     write_sitemap()
