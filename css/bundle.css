@@ -1481,6 +1481,7 @@ img.nccer{width:auto; display:inline-block; vertical-align:-1px}
 .rv-panel img{width:100%; height:auto; aspect-ratio:4/5; object-fit:cover; object-position:50% 12%; display:block}
 .rv-panel.blue img{clip-path:polygon(0 0,100% 0,100% 100%,0 91%)}
 .rv-panel.paper img{clip-path:polygon(0 0,100% 0,100% 91%,0 100%)}
+.rv-panel.ink img{clip-path:polygon(0 0,100% 0,100% 100%,0 91%); margin-top:-26px}
 .rv-panel .who{padding:24px 26px 0}
 .rv-panel .who b{display:block; font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:clamp(30px,2.8vw,40px); line-height:.95; letter-spacing:.01em}
 .rv-panel .who p{margin:14px 0 0; font-size:15.5px; line-height:1.5; font-weight:500}
