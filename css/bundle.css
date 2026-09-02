@@ -1417,7 +1417,14 @@ img.nccer{width:auto; display:inline-block; vertical-align:-1px}
 .gw-quote b{font-family:var(--f-head); font-weight:400; text-transform:uppercase; font-size:15px; letter-spacing:.03em}
 .gw-quote span{font-size:12px; color:var(--muted-2)}
 .gw-strip{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin-top:0}
-@media(min-width:760px){.gw-strip{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media(min-width:760px){
+  /* 12 columns so a 6-up row can be built from span-2 cells; that is what lets an
+     incomplete last row be nudged half a cell and sit centred instead of left-hung. */
+  .gw-strip{grid-template-columns:repeat(12,minmax(0,1fr))}
+  .gw-strip figure{grid-column:span 2}
+  /* 7th of exactly 9: centre the orphan row of three under the row of six. */
+  .gw-strip figure:nth-child(7):nth-last-child(3){grid-column:4/span 2}
+}
 .gw-strip figure{margin:0; position:relative; overflow:hidden; min-width:0; background:var(--steel-3); border:0; border-radius:0}
 .gw-strip img{width:100%; height:auto; aspect-ratio:3/4; object-fit:cover; object-position:50% 14%; transition:transform .6s ease}
 .gw-strip figure:hover img{transform:scale(1.05)}

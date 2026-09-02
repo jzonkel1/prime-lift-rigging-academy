@@ -991,6 +991,10 @@ def build_reviews():
                        '<a class="btn btn-ghost" href="/book/">Reserve Your Seat %s</a>' % I["arrow"]])
     body += """<section class="section"><div class="wrap">%s%s
   <div class="gal rv">
+    <figure><img src="/img/grad-aaron.jpg" alt="Aaron S. holding his NCCER Certified Advanced Rigger certificate" loading="lazy"><figcaption>Aaron S. &middot; Advanced Rigger</figcaption></figure>
+    <figure><img src="/img/grad-andrew.jpg" alt="Andrew M. holding his NCCER Certified Advanced Rigger certificate" loading="lazy"><figcaption>Andrew M. &middot; Advanced Rigger</figcaption></figure>
+    <figure><img src="/img/grad-justin.jpg" alt="Justin M. holding his NCCER Certified Advanced Rigger certificate" loading="lazy"><figcaption>Justin M. &middot; Advanced Rigger</figcaption></figure>
+    <figure><img src="/img/grad-dustin.jpg" alt="Dustin T. holding his NCCER Certified Advanced Rigger certificate" loading="lazy"><figcaption>Dustin T. &middot; Advanced Rigger</figcaption></figure>
     <figure><img src="/img/grad-johnny.jpg" alt="Prime Lift graduate holding an NCCER Certified Advanced Rigger certificate" loading="lazy"><figcaption>Certified Advanced Rigger</figcaption></figure>
     <figure><img src="/img/grad-leonel.jpg" alt="Prime Lift graduate holding an NCCER Certified Advanced Rigger certificate" loading="lazy"><figcaption>Certified Advanced Rigger</figcaption></figure>
     <figure><img src="/img/class-sling-demo.jpg" alt="Instructor demonstrating a sling hitch on a load during class" loading="lazy"><figcaption>Hands-on rigging class</figcaption></figure>
