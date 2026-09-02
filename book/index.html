@@ -483,7 +483,8 @@
       const data=await r.json().catch(()=>({}));
       if(!r.ok||!data.url) throw new Error(data.error||"checkout "+r.status);
       /* Record the booking BEFORE handing off to Stripe, so the office email, the pipeline card and the
-         seat count exist even if the student never finishes paying (the office confirms payment in Stripe). */
+         seat count exist even if the student never finishes paying. Stripe's webhook moves the card to
+         Deposit Paid and sends the confirmation once the money actually lands. */
       try{ await submitForm(Object.assign({},p,{payment_method:p.payment_method+" (Stripe checkout opened; confirm payment in Stripe)"})); }catch(e){ console.warn(e); }
       location.href=data.url;
     }catch(err){

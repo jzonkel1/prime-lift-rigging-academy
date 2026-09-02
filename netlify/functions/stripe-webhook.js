@@ -89,7 +89,11 @@ exports.handler = async (event) => {
     program: m.program || "",
     format: m.format || "",
     class_times: m.class_times || "",
-    start_date: m.start_date || "",                 // YYYY-MM-DD
+    /* start_date goes out human-readable ("Friday, September 25, 2026") so the
+       merge field reads the same here as it does in the Enrollment Router, which
+       gets it that way from the booking form. The machine forms ride alongside. */
+    start_date: m.start_label || m.start_date || "",
+    start_iso: m.start_date || "",                  // YYYY-MM-DD
     start_mdy: toMdy(m.start_date),                 // MM-DD-YYYY for GHL date fields
     payment_method: m.payment_method || "",
     amount_paid: String(paid),
