@@ -1233,7 +1233,7 @@ def build_book():
 </section>
 <section class="bk-main">
   <div class="wrap">
-    <p class="bk-flash" id="bkCanceled" hidden>No payment was taken and your seat isn't held yet. Pick your class again below, or call <a href="tel:__TEL__">__PHONE__</a> and we'll hold it by phone.</p>
+    <p class="bk-flash" id="bkCanceled" hidden>No payment was taken, so your seat isn't held yet. Your request did reach the office, so nothing is lost: call <a href="tel:__TEL__">__PHONE__</a> to finish it by phone, or pick your class below to run the payment again.</p>
     <div class="bk-grid" id="bkGrid">
       <div class="bk-steps">
         <section class="bk-step is-open" data-step="1">
