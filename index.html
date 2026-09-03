@@ -418,6 +418,24 @@
   </div>
 </section>
 
+<!-- ================= HOW WE TEACH ================= -->
+<section class="section" id="how-we-teach">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow">How We Teach It</p>
+      <h2 class="h-sec">Shown, Not<br>Just Told.</h2>
+      <p class="lede">Everyone learns differently, so we run plenty of visual scenarios and demonstrations: boom deflection, side loading, shock loading, block factors and the two most important knots in rigging, all to help you understand the information being taught.</p>
+    </div>
+    <div class="gal rv">
+      <figure><img src="img/demo-terminator-1200.webp" srcset="img/demo-terminator-320.webp 320w, img/demo-terminator-480.webp 480w, img/demo-terminator-800.webp 800w, img/demo-terminator-1200.webp 1200w, img/demo-terminator-1600.webp 1600w" sizes="(min-width:780px) 25vw, 50vw" data-o="img/demo-terminator.jpg" alt="Instructor Frank Torres showing a class how to assemble a terminator wedge socket on wire rope" loading="lazy"><figcaption>Assembling a terminator (becket)</figcaption></figure>
+      <figure><img src="img/demo-chain-hoist-1200.webp" srcset="img/demo-chain-hoist-320.webp 320w, img/demo-chain-hoist-480.webp 480w, img/demo-chain-hoist-800.webp 800w, img/demo-chain-hoist-1200.webp 1200w, img/demo-chain-hoist-1600.webp 1600w" sizes="(min-width:780px) 25vw, 50vw" data-o="img/demo-chain-hoist.jpg" alt="Two students communicating with each other to drift a load across a gantry with chain hoists" loading="lazy"><figcaption>Drifting a load with chain hoists</figcaption></figure>
+      <figure><img src="img/demo-knots-1200.webp" srcset="img/demo-knots-320.webp 320w, img/demo-knots-480.webp 480w, img/demo-knots-800.webp 800w, img/demo-knots-1200.webp 1200w, img/demo-knots-1600.webp 1600w" sizes="(min-width:780px) 25vw, 50vw" data-o="img/demo-knots.jpg" alt="Students tying the two most important knots in rigging on the training gantry" loading="lazy"><figcaption>The two most important knots</figcaption></figure>
+      <figure><img src="img/demo-block-loading-1080.webp" srcset="img/demo-block-loading-320.webp 320w, img/demo-block-loading-480.webp 480w, img/demo-block-loading-800.webp 800w, img/demo-block-loading-1080.webp 1080w" sizes="(min-width:780px) 25vw, 50vw" data-o="img/demo-block-loading.jpg" alt="Block loading demonstration board showing line pull angles and the loading factor each one produces" loading="lazy"><figcaption>Block loading: angles and factors</figcaption></figure>
+    </div>
+    <p class="center-note rv"><a class="more" href="/advanced-rigger/#how-we-teach">See what the course covers <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></p>
+  </div>
+</section>
+
 <!-- ================= TEAM ================= -->
 <section class="section team-sec" id="team">
   <div class="wrap">
@@ -934,28 +952,34 @@ window.addEventListener("resize",()=>{
 /* ============================================================
    GALLERY LIGHTBOX
    ============================================================ */
-const galFigs=$$(".gal figure"),
-      lb=$("#lightbox"), lbImg=$("#lbImg");
-let lbI=0, lbLast=null;
+/* Two galleries on this page now (the graduate wall and the demonstrations),
+   so each one is its own set: the 01/09 counter and the prev/next wrap must
+   stay inside the gallery you opened from. */
+const lb=$("#lightbox"), lbImg=$("#lbImg");
+let lbSet=[], lbI=0, lbLast=null;
 
-galFigs.forEach((f,i)=>{
-  f.insertAdjacentHTML("beforeend",
-    `<span class="gal-zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg></span>`);
-  f.setAttribute("tabindex","0");
-  f.setAttribute("role","button");
-  f.setAttribute("aria-label","View photo: "+f.querySelector("figcaption").textContent);
-  f.addEventListener("click",()=>openLb(i));
-  f.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openLb(i); } });
+$$(".gal").forEach(gal=>{
+  const figs=$$("figure",gal);
+  figs.forEach((f,i)=>{
+    f.insertAdjacentHTML("beforeend",
+      `<span class="gal-zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg></span>`);
+    f.setAttribute("tabindex","0");
+    f.setAttribute("role","button");
+    f.setAttribute("aria-label","View photo: "+f.querySelector("figcaption").textContent);
+    const open=()=>{ lbSet=figs; openLb(i); };
+    f.addEventListener("click",open);
+    f.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); open(); } });
+  });
 });
 
 function openLb(i){
   if(!lb.classList.contains("open")) lbLast=document.activeElement;
-  lbI=(i+galFigs.length)%galFigs.length;
-  const fig=galFigs[lbI], img=fig.querySelector("img");
+  lbI=(i+lbSet.length)%lbSet.length;
+  const fig=lbSet[lbI], img=fig.querySelector("img");
   /* thumbnails carry a WebP srcset (build.py); the lightbox wants the largest candidate, not the one the grid picked */
   const ss=img.getAttribute("srcset"); lbImg.src=ss?ss.trim().split(",").pop().trim().split(/\s+/)[0]:img.src; lbImg.alt=img.alt;
   $("#lbNum").textContent=pad2(lbI+1);
-  $("#lbTot").textContent="/ "+pad2(galFigs.length);
+  $("#lbTot").textContent="/ "+pad2(lbSet.length);
   $("#lbCap").textContent=fig.querySelector("figcaption").textContent;
   lb.classList.add("open");
   document.body.style.overflow="hidden";

@@ -67,6 +67,10 @@
      buttons to move; Esc or the backdrop to close. Body overflow is the same
      scroll lock the Lenis prevent hook already looks for. */
   (function(){
+    /* index.html ships its own lightbox (#lightbox) bound to the same .gal
+       figures, and its graduate wall is class="gal gw-strip". Never double-bind
+       on top of it. */
+    if(document.getElementById("lightbox")) return;
     const figs=$$(".gal figure"); if(!figs.length) return;
     const svg=d=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
     const ZOOM=svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/><path d="M11 8.4v5.2"/><path d="M8.4 11h5.2"/>');
