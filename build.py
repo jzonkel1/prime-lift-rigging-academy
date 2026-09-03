@@ -623,27 +623,87 @@ def emit(url, html_text, prio="0.7"):
     w(url.strip("/") + "/index.html" if url != "/" else "index.html", html_text)
     PAGES.append((url, prio))
 
-def demos_section(idx):
-    """Andres's demonstration photos. Rigging-specific, so the rigging course only."""
-    shots = [
-        ("demo-terminator", "Instructor Frank Torres showing a class how to assemble a terminator wedge socket on wire rope",
-         "Assembling a terminator (becket)"),
-        ("demo-chain-hoist", "Two students communicating with each other to drift a load across a gantry with chain hoists",
-         "Drifting a load with chain hoists"),
-        ("demo-knots", "Students tying the two most important knots in rigging on the training gantry",
-         "The two most important knots"),
-        ("demo-block-loading", "Block loading demonstration board showing line pull angles and the loading factor each one produces",
-         "Block loading: angles and factors"),
-    ]
-    figs = "".join(
-        '<figure><img src="/img/%s.jpg" alt="%s" loading="lazy"><figcaption>%s</figcaption></figure>' % (f, esc(a), esc(cap))
-        for f, a, cap in shots)
-    return """<section class="section" id="how-we-teach"><div class="wrap">
-  %s
-  <div class="gal rv">%s</div>
-</div></section>""" % (sec_head(idx, "How We Teach It", "Shown, Not<br>Just Told.",
-    "We understand everyone learns differently, which is why we run plenty of visual scenarios and demonstrations: boom deflection, side loading, shock loading, block factors, the two most important knots in rigging and much more, all to help you understand the information being taught.",
-    center=True), figs)
+TEACH_LEDE = ("We understand everyone learns differently, which is why we run plenty of visual "
+              "scenarios and demonstrations: boom deflection, side loading, shock loading, block "
+              "factors, the two most important knots in rigging and much more, all to help you "
+              "understand the information being taught.")
+
+# Andres described each of these photos individually, so each one gets a row of
+# its own with the explanation beside it rather than a caption under a thumbnail.
+# The technical detail comes off the client's own material: the wedge-socket
+# steps are the slide in the first photo, the loading factors are the chart on
+# the board in the last one. Do not add claims that aren't visible in the photo.
+TEACH_ROWS = [
+    ("demo-terminator",
+     "Instructor Frank Torres showing a class how to assemble a terminator wedge socket on wire rope",
+     "Assembling a terminator (becket)",
+     "A Termination Is Only As Good As The Assembly",
+     ["A terminator, the wedge socket that anchors the end of a wire rope, gets assembled in front "
+      "of the class. The parts come apart, get inspected for cracks and wear, and go back together "
+      "in order.",
+      "The details are the lesson. Never mix wedges, sockets and pins across different models or "
+      "sizes. Match the wedge and the socket to the rope you are actually using. Seize the dead end "
+      "instead of welding it, so the strands cannot untwist or flatten. Miss one of those and the "
+      "termination becomes the weakest point in the lift."]),
+    ("demo-chain-hoist",
+     "Two students communicating with each other to drift a load across a gantry with chain hoists",
+     "Drifting a load with chain hoists",
+     "Two Hoists, One Load, One Conversation",
+     ["Drifting a load means moving it sideways: one hoist pays out while the other takes up, and "
+      "the load walks across the span. Here two students run opposite hoists on the same load and "
+      "have to keep it under control between them.",
+      "The rigging is the easy half. The hard half is two people agreeing out loud on what happens "
+      "next, which is exactly what goes wrong on a real job when nobody is talking."]),
+    ("demo-knots",
+     "Students tying the two most important knots in rigging on the training gantry",
+     "The two most important knots",
+     "The Two Knots You Will Actually Use",
+     ["Every rigger ends up with a short list of knots that carry almost all of the work, and two of "
+      "them do most of it. Students tie them on the gantry with the same rope and hardware they will "
+      "see on a job, not on a desk with a length of string.",
+      "Once you have tied one correctly with your own hands a few times, you stop having to remember "
+      "how it goes."]),
+    ("demo-block-loading",
+     "Block loading demonstration board showing line pull angles and the loading factor each one produces",
+     "Block loading: angles and factors",
+     "The Angle Is The Whole Story",
+     ["One line on the board carries the whole idea: line pull times a factor equals the load on the "
+      "block and its anchorage. Change the angle between the two lines and the factor changes with "
+      "it.",
+      "The same rope is set at 60, 90 and 120 degrees so the difference stops being a formula on a "
+      "page. Two lines running side by side put twice the line pull on the block. Open them to "
+      "ninety degrees and it falls to about 1.41. Open them out into a straight line and the block "
+      "carries almost nothing at all."]),
+]
+TEACH_CLOSE = ("Boom deflection, side loading and shock loading get the same treatment. If a thing "
+               "can be shown instead of described, it gets shown.")
+
+def teach_section(idx=None, home=False):
+    """The "How We Teach It" editorial block. idx=None drops the section numeral
+    (the home page's section heads don't carry one). home=True emits relative
+    image paths, matching the rest of index.html."""
+    lead = "" if home else "/"
+    rows = "".join("""
+      <article class="teach-row rv">
+        <figure class="teach-shot"><img src="%simg/%s.jpg" alt="%s" loading="lazy"><figcaption>%s</figcaption></figure>
+        <div class="teach-copy">
+          <span class="idx">%02d</span>
+          <h3>%s</h3>
+          %s
+        </div>
+      </article>""" % (lead, slug, esc(alt), esc(cap), i + 1, esc(head),
+                       "".join("<p>%s</p>" % esc(p) for p in paras))
+        for i, (slug, alt, cap, head, paras) in enumerate(TEACH_ROWS))
+    head = '<div class="sec-head rv"><p class="eyebrow">%s%s</p><h2 class="h-sec">Shown, Not<br>Just Told.</h2><p class="lede">%s</p></div>' % (
+        ('<span class="idx">%s</span>' % idx) if idx else "", "How We Teach It", esc(TEACH_LEDE))
+    return """<section class="section teach" id="how-we-teach">
+  <div class="wrap">
+    %s
+    <div class="teach-rows" data-gallery="demonstrations">%s
+    </div>
+    <p class="teach-close rv">%s</p>
+  </div>
+</section>""" % (head, rows, esc(TEACH_CLOSE))
 
 def build_course(c):
     url = "/%s/" % c["slug"]
@@ -686,7 +746,7 @@ def build_course(c):
                        cta_box("%s · %s" % (c["name"], money(c["price"])),
                                ["$%d holds your seat. Balance due before class." % c["deposit"], "Klarna, Afterpay, Zelle or in-house financing with no credit check."],
                                price=price_line, href="/book/?book=%s" % c["id"]))
-    if c["id"] == "advanced": body += demos_section(sn())
+    if c["id"] == "advanced": body += teach_section(sn())
     body += """<section class="section alt" id="formats"><div class="wrap">
   %s
   <div class="fmt-grid">%s</div>
@@ -1574,6 +1634,10 @@ def rewrite_index():
         return s[:i] + new + s[j:]
     s = between(s, "<!-- ================= NAV ================= -->", "<!-- ================= HERO ================= -->", nav(home=True) + "\n")
     s = between(s, "<!-- ================= FOOTER ================= -->", "<!-- ================= STICKY CALL BAR ================= -->", footer(home=True) + "\n")
+    # "How We Teach It" is generated so the home page and the course page cannot drift
+    s = between(s, "<!-- TEACH:START", "<!-- TEACH:END -->",
+                "<!-- TEACH:START \u2014 generated by build.py, do not edit by hand -->\n"
+                + teach_section(home=True) + "\n")
     # booking form: closed / full dates from CLOSED + FULL above
     s = between(s, "/* SCHED:START */", "/* SCHED:END */", "/* SCHED:START */ const SCHED=%s; " % sched_json())
     # head: robots + canonical + og origin + schema
@@ -2090,7 +2154,7 @@ SITE_JS = r"""
        figures, and its graduate wall is class="gal gw-strip". Never double-bind
        on top of it. */
     if(document.getElementById("lightbox")) return;
-    const figs=$$(".gal figure"); if(!figs.length) return;
+    const figs=$$(".gal figure, [data-gallery] figure"); if(!figs.length) return;
     const svg=d=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
     const ZOOM=svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/><path d="M11 8.4v5.2"/><path d="M8.4 11h5.2"/>');
     figs.forEach(f=>{ const b=document.createElement("button"); b.type="button"; b.className="gal-zoom"; b.setAttribute("aria-label","View larger"); b.innerHTML=ZOOM; f.appendChild(b); });
