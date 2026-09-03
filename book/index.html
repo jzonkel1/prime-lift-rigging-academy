@@ -332,7 +332,12 @@
     if(!same){ S.prog=PROGS.find(p=>p.id===id); S.fmt=null; S.date=null; }
     $$("#bpGrid .bp").forEach(b=>b.classList.toggle("sel",b.dataset.prog===id));
     setPick(1,S.prog.name+" · "+money(S.prog.price));
-    $("#craftField").hidden=S.prog.id!=="assessment";
+    /* Hiding the craft field is not enough: the <select> keeps its value, so a
+       student who starts on an assessment and switches to a course sends
+       "Craft: Plumber" to the office on an Advanced Rigger booking. Clear it. */
+    const isAssess=S.prog.id==="assessment";
+    $("#craftField").hidden=!isAssess;
+    if(!isAssess) $("#fCraft").value="";
     /* NCCER number is only useful if they already have an account, so it stays hidden until they say so. */
     $("#fNccerHas").onchange=e=>{ const yes=/^Yes/.test(e.target.value); $("#nccerField").hidden=!yes; if(!yes) $("#fNccer").value=""; };
     if(!same){
@@ -447,7 +452,8 @@
   /* submit: card / Klarna / Afterpay -> Stripe Checkout via Netlify Function; in-house -> Netlify Form.
      No STRIPE_SECRET_KEY on the site = 503, and the booking falls back to the form so nobody is dropped. */
   function payload(){
-    const m=S.method, craft=val("fCraft"), notes=val("fNotes");
+    /* craft only belongs on an assessment, whatever is left in the hidden select */
+    const m=S.method, craft=S.prog.id==="assessment"?val("fCraft"):"", notes=val("fNotes");
     return { first_name:val("fFirst"), last_name:val("fLast"), phone:val("fPhone"), email:val("fEmail"),
       program:S.prog.name, program_id:S.prog.id, format:S.fmt.name, format_id:S.fmt.id, class_times:S.fmt.time,
       start_date:S.date, start_date_label:fmtLong(S.date), payment_method:m, amount_due_today:depositFor(S.prog,m), course_total:S.prog.price,
