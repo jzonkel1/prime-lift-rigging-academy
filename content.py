@@ -55,7 +55,7 @@ COURSES = [
         "formats": [
             {"name": "Weekday Day Class", "when": "Mon – Thu", "time": "8:00 AM – 2:00 PM", "note": "Four days. Starts every Monday."},
             {"name": "Weekday Night Class", "when": "Mon – Thu", "time": "6:00 PM – 11:00 PM", "note": "Four nights. Built for day-shift crews.", "link": "/night-classes/"},
-            {"name": "3-Day Weekend Express", "when": "Fri – Sun", "time": "8:00 AM – 5:00 PM", "note": "Done in one weekend. Starts every Friday.", "link": "/weekend-express/"},
+            {"name": "3-Day Weekend Express", "when": "Fri – Sun", "time": "8:00 AM – 5:00 PM", "note": "Done in one weekend. Starts every other Friday.", "link": "/weekend-express/"},
         ],
         "who": [
             ("New hires", "No experience required. The course starts from the ground up and you leave with a credential that gets you through the gate."),
@@ -94,7 +94,7 @@ COURSES = [
             "Written and practical test, certification on completion",
         ],
         "formats": [
-            {"name": "Two Fridays", "when": "Fridays", "time": "8:00 AM – 3:00 PM", "note": "Two days of training. Starts every Friday."},
+            {"name": "Two Fridays", "when": "Fridays", "time": "8:00 AM – 3:00 PM", "note": "Two days of training. Starts every other Friday."},
         ],
         "who": [
             ("Riggers adding a credential", "Most Advanced Rigger students add Signal Person so they can fill either role on a crew."),

@@ -156,8 +156,8 @@ MON, FRI = 1, 5                      # JS getDay() numbering (Sun=0)
 SCHEDULE_RULES = [
     {"id": "advanced", "fmt": "day", "name": "Advanced Rigger", "label": "Weekday Day Class", "time": "Mon – Thu · 8:00 AM – 2:00 PM", "note": "Four days, starts every Monday", "wd": MON, "n": 6},
     {"id": "advanced", "fmt": "night", "name": "Advanced Rigger", "label": "Weekday Night Class", "time": "Mon – Thu · 6:00 PM – 11:00 PM", "note": "Four nights, built for day-shift crews", "wd": MON, "n": 6},
-    {"id": "advanced", "fmt": "weekend", "name": "Advanced Rigger", "label": "3-Day Weekend Express", "time": "Fri – Sun · 8:00 AM – 5:00 PM", "note": "Done in one weekend, starts every Friday", "wd": FRI, "n": 6},
-    {"id": "signal", "fmt": "friday", "name": "Signal Person", "label": "Two Fridays", "time": "Fridays · 8:00 AM – 3:00 PM", "note": "Two Fridays of class and hands-on", "wd": FRI, "n": 6},
+    {"id": "advanced", "fmt": "weekend", "name": "Advanced Rigger", "label": "3-Day Weekend Express", "time": "Fri – Sun · 8:00 AM – 5:00 PM", "note": "Done in one weekend, every other Friday", "wd": FRI, "n": 6, "every": 14, "anchor": "2026-09-04"},
+    {"id": "signal", "fmt": "friday", "name": "Signal Person", "label": "Two Fridays", "time": "Fridays · 8:00 AM – 3:00 PM", "note": "Two Fridays of class and hands-on, every other Friday", "wd": FRI, "n": 6, "every": 14, "anchor": "2026-09-11"},
     {"id": "assessment", "fmt": "assess", "name": "NCCER Assessments", "label": "Any Weekday", "time": "Mon – Fri · 8:00 AM – 5:00 PM", "note": "By appointment, 36 crafts", "wd": "weekday", "n": 10},
 ]
 # Office exceptions. Edit here, run build.py, deploy (two minutes, see SOP in
@@ -175,9 +175,11 @@ def is_full(iso, key):
     f = FULL.get(iso, ())
     return key in f or "*" in f
 
-def next_dates(wd, n, key=None):
+def next_dates(wd, n, key=None, every=7, anchor=None):
     """Next n bookable start dates for a rule: wd = JS weekday number, or "weekday"
-    for Mon-Fri. Skips CLOSED dates and, when key is given, FULL classes."""
+    for Mon-Fri. Skips CLOSED dates and, when key is given, FULL classes.
+    A rule wider than weekly (every=14) has to be phased off its anchor date
+    rather than off today, or the run lands on the wrong Fridays."""
     d = datetime.date.today() + datetime.timedelta(days=LEAD_DAYS)
     out = []
     ok = lambda x: x.isoformat() not in CLOSED and not (key and is_full(x.isoformat(), key))
@@ -187,9 +189,12 @@ def next_dates(wd, n, key=None):
             d += datetime.timedelta(days=1)
         return out
     while (d.weekday() + 1) % 7 != wd: d += datetime.timedelta(days=1)
+    if anchor and every != 7:
+        off = (d - datetime.date(*map(int, anchor.split("-")))).days % every
+        if off: d += datetime.timedelta(days=every - off)
     while len(out) < n:
         if ok(d): out.append(d)
-        d += datetime.timedelta(days=7)
+        d += datetime.timedelta(days=every)
     return out
 def rules_json():
     return json.dumps(SCHEDULE_RULES, separators=(",", ":"))
@@ -618,8 +623,36 @@ def emit(url, html_text, prio="0.7"):
     w(url.strip("/") + "/index.html" if url != "/" else "index.html", html_text)
     PAGES.append((url, prio))
 
+def demos_section(idx):
+    """Andres's demonstration photos. Rigging-specific, so the rigging course only."""
+    shots = [
+        ("demo-terminator", "Instructor Frank Torres showing a class how to assemble a terminator wedge socket on wire rope",
+         "Assembling a terminator (becket)"),
+        ("demo-chain-hoist", "Two students communicating with each other to drift a load across a gantry with chain hoists",
+         "Drifting a load with chain hoists"),
+        ("demo-knots", "Students tying the two most important knots in rigging on the training gantry",
+         "The two most important knots"),
+        ("demo-block-loading", "Block loading demonstration board showing line pull angles and the loading factor each one produces",
+         "Block loading: angles and factors"),
+    ]
+    figs = "".join(
+        '<figure><img src="/img/%s.jpg" alt="%s" loading="lazy"><figcaption>%s</figcaption></figure>' % (f, esc(a), esc(cap))
+        for f, a, cap in shots)
+    return """<section class="section"><div class="wrap">
+  %s
+  <div class="gal rv">%s</div>
+</div></section>""" % (sec_head(idx, "How We Teach It", "Shown, Not<br>Just Told.",
+    "We understand everyone learns differently, which is why we run plenty of visual scenarios and demonstrations: boom deflection, side loading, shock loading, block factors, the two most important knots in rigging and much more, all to help you understand the information being taught.",
+    center=True), figs)
+
 def build_course(c):
     url = "/%s/" % c["slug"]
+    # Section numbers come off a counter: the demonstrations section only appears
+    # on the rigging course, and hard-coded indices would leave a gap on the other.
+    _sec = [0]
+    def sn():
+        _sec[0] += 1
+        return "%02d" % _sec[0]
     crumbs = [("Courses", "/#courses"), (c["name"], url)]
     price_line = "%s" % money(c["price"]) + (' <s class="was">%s</s>' % money(c["was"]) if c["was"] else "")
     fmts = "".join("""
@@ -649,29 +682,30 @@ def build_course(c):
     %s
   </div>
   %s
-</div></section>""" % (sec_head("01", "The Course", "What The<br>Course Covers"), esc(c["summary"]), checks(c["learn"]),
+</div></section>""" % (sec_head(sn(), "The Course", "What The<br>Course Covers"), esc(c["summary"]), checks(c["learn"]),
                        cta_box("%s · %s" % (c["name"], money(c["price"])),
                                ["$%d holds your seat. Balance due before class." % c["deposit"], "Klarna, Afterpay, Zelle or in-house financing with no credit check."],
                                price=price_line, href="/book/?book=%s" % c["id"]))
+    if c["id"] == "advanced": body += demos_section(sn())
     body += """<section class="section alt" id="formats"><div class="wrap">
   %s
   <div class="fmt-grid">%s</div>
   <p class="center-note rv"><a class="btn btn-ghost" href="/class-dates/">%s See Upcoming Dates</a></p>
-</div></section>""" % (sec_head("02", "Schedules", "Built Around<br>Your Shift.", "Every format ends the same way: a written and hands-on test-out in our accredited testing room, and a credential on the NCCER Registry.", center=True), fmts, I["cal"])
+</div></section>""" % (sec_head(sn(), "Schedules", "Built Around<br>Your Shift.", "Every format ends the same way: a written and hands-on test-out in our accredited testing room, and a credential on the NCCER Registry.", center=True), fmts, I["cal"])
     body += """<section class="section"><div class="wrap">
   %s
   <div class="who-grid">%s</div>
-</div></section>""" % (sec_head("03", "Who It's For", "Who Takes<br>This Course"), who)
+</div></section>""" % (sec_head(sn(), "Who It's For", "Who Takes<br>This Course"), who)
     body += """<section class="section how"><div class="how-bg" aria-hidden="true"><img src="/img/bg-classroom.jpg" alt="" loading="lazy"></div><div class="wrap">
   %s%s
-</div></section>""" % (sec_head("04", "The Process", "Three Steps To Certified"), steps())
+</div></section>""" % (sec_head(sn(), "The Process", "Three Steps To Certified"), steps())
     body += """<section class="section"><div class="wrap">
   %s%s
-</div></section>""" % (sec_head("05", "Who's Teaching You", "Your Instructors"), people_grid(teachers))
+</div></section>""" % (sec_head(sn(), "Who's Teaching You", "Your Instructors"), people_grid(teachers))
     body += """<section class="section alt"><div class="wrap">
   %s%s
   <p class="center-note rv"><a href="/faq/" class="more">All questions %s</a></p>
-</div></section>""" % (sec_head("06", "Common Questions", "%s FAQ" % esc(c["name"]), center=True), faq_html(c["faq"]), I["arrow"])
+</div></section>""" % (sec_head(sn(), "Common Questions", "%s FAQ" % esc(c["name"]), center=True), faq_html(c["faq"]), I["arrow"])
     body += band(primary='<a class="btn btn-primary" href="/book/?book=%s">Pick a Start Date</a>' % c["id"])
     emit(url, page(url, c["meta_title"], c["meta_desc"], body, crumbs,
                    [course_schema(c, url), faq_schema(c["faq"])], hero_img="/" + c["hero"]), "0.9")
@@ -766,20 +800,20 @@ def build_craft(c):
     emit(url, page(url, title, desc, body, crumbs,
                    [service_schema("NCCER %s Assessment" % name, desc, url), faq_schema(faq)], hero_img="/img/testing-room.jpg"), "0.6")
 
-def build_format_page(url, title, desc, hero, alt, kicker, h1, lede, idx_title, paras, checks_list, faq, book="advanced", specs=None, band_h2=None, crumb=None):
+def build_format_page(url, title, desc, hero, alt, kicker, h1, lede, idx_title, paras, checks_list, faq, book="advanced", specs=None, band_h2=None, crumb=None, cta=None, hero_cta=None, band_primary=None):
     crumbs = [("Advanced Rigger", "/advanced-rigger/"), (crumb or title.split(" (")[0].split(" in ")[0], url)]
     body = phero(hero, alt, kicker, h1, lede, crumbs,
-                 ctas=['<a class="btn btn-primary" href="/book/?book=%s">Pick a Start Date %s</a>' % (book, I["arrow"]),
+                 ctas=hero_cta or ['<a class="btn btn-primary" href="/book/?book=%s">Pick a Start Date %s</a>' % (book, I["arrow"]),
                        '<a class="btn btn-ghost" href="tel:%s">%s Call %s</a>' % (BIZ["phone_raw"], I["phone"], BIZ["phone"])])
     if specs: body += specbar(specs)
     body += """<section class="section"><div class="wrap split">
   <div class="prose rv">%s%s<h3 class="h-sub">What's included</h3>%s</div>
   %s
 </div></section>""" % (sec_head("01", "The Format", idx_title), "".join('<p class="lede">%s</p>' % esc(p) for p in paras), checks(checks_list),
-                       cta_box("Advanced Rigger · $1,000", ["$200 holds your seat. Balance due before class.", "Klarna, Afterpay, Zelle or in-house financing."], price='$1,000 <s class="was">$1,700</s>', href="/book/?book=%s" % book))
+                       cta or cta_box("Advanced Rigger · $1,000", ["$200 holds your seat. Balance due before class.", "Klarna, Afterpay, Zelle or in-house financing."], price='$1,000 <s class="was">$1,700</s>', href="/book/?book=%s" % book))
     body += """<section class="section alt"><div class="wrap">%s%s</div></section>""" % (sec_head("02", "Common Questions", "Before You Enroll", center=True), faq_html(faq))
     body += """<section class="section"><div class="wrap">%s%s</div></section>""" % (sec_head("03", "Who's Teaching You", "Your Instructors"), people_grid(["andres-herrera", "frank-torres"]))
-    body += band(h2=band_h2 or "Building Skills. Bettering Futures.", primary='<a class="btn btn-primary" href="/book/?book=%s">Pick a Start Date</a>' % book)
+    body += band(h2=band_h2 or "Building Skills. Bettering Futures.", primary=band_primary or '<a class="btn btn-primary" href="/book/?book=%s">Pick a Start Date</a>' % book)
     emit(url, page(url, title, desc, body, crumbs, [faq_schema(faq)], hero_img="/" + hero), "0.8")
 
 def build_dates():
@@ -787,7 +821,7 @@ def build_dates():
     crumbs = [("Class Dates", url)]
     body = phero("img/bg-classroom.jpg", "Students in the Prime Lift Rigging Academy classroom", "Upcoming Classes",
                  "Class Dates<em>&amp; Schedules</em>",
-                 "Advanced Rigger starts every Monday (days or nights) and every Friday (weekend express). Signal Person starts every Friday. Assessments run any weekday. Booking closes the day before a class starts.", crumbs)
+                 "Advanced Rigger starts every Monday (days or nights) and every other Friday (weekend express). Signal Person starts every other Friday. Assessments run any weekday. Booking closes the day before a class starts.", crumbs)
     body += specbar([("Advanced Rigger", "Mon – Thu · 8 AM – 2 PM"), ("Night class", "Mon – Thu · 6 – 11 PM"), ("Weekend express", "Fri – Sun · 8 AM – 5 PM"), ("Signal Person", "Fridays · 8 AM – 3 PM")])
     body += ("""<section class="section"><div class="wrap">
   %s
@@ -804,9 +838,11 @@ def build_dates():
   const closed=d=>!!X.closed[iso(d)];
   const full=(d,k)=>{ const f=X.full[iso(d)]||[]; return f.includes(k)||f.includes("*"); };
   function first(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+LEAD); return d; }
-  function every(wd,n){ const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); while(o.length<n){ if(!closed(d)) o.push(new Date(d)); d.setDate(d.getDate()+7);} return o; }
+  /* a cadence wider than weekly is phased off the rule anchor date, not off today. */
+  function phase(d,step,anchor){ if(!anchor||step===7) return; const p=anchor.split("-").map(Number), a=new Date(p[0],p[1]-1,p[2]); const off=((Math.round((d-a)/864e5)%%step)+step)%%step; if(off) d.setDate(d.getDate()+(step-off)); }
+  function every(wd,n,step,anchor){ step=step||7; const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); phase(d,step,anchor); while(o.length<n){ if(!closed(d)) o.push(new Date(d)); d.setDate(d.getDate()+step);} return o; }
   function weekdays(n){ const d=first(),o=[]; while(o.length<n){ if(d.getDay()>=MON&&d.getDay()<=FRI&&!closed(d)) o.push(new Date(d)); d.setDate(d.getDate()+1);} return o; }
-  const P=__RULES__.map(r=>Object.assign({},r,{dates:r.wd==="weekday"?weekdays(r.n):every(r.wd,r.n)}));
+  const P=__RULES__.map(r=>Object.assign({},r,{dates:r.wd==="weekday"?weekdays(r.n):every(r.wd,r.n,r.every,r.anchor)}));
   document.getElementById("schedList").innerHTML=P.map((p,i)=>`
     <div class="sched-block rv">
       <div class="sched-head"><span class="idx">${String(i+1).padStart(2,"0")}</span><div><b>${p.name}</b><span>${p.label} · ${p.time}</span></div></div>
@@ -819,7 +855,7 @@ def build_dates():
     </div>`).join("");
   document.querySelectorAll("#schedList .rv").forEach(el=>el.classList.add("in"));
 })();
-</script>""" % (sec_head("01", "Pick A Date", "Next Classes<br>In Portland, TX", "Dates roll forward every week. Tap one to hold it.", center=True), BIZ["phone_raw"], BIZ["phone"])).replace("__RULES__", rules_json()).replace("__SCHED__", sched_json())
+</script>""" % (sec_head("01", "Pick A Date", "Next Classes<br>In Portland, TX", "Weekday classes start every Monday. The weekend express and signal person classes run every other Friday. Tap a date to hold it.", center=True), BIZ["phone_raw"], BIZ["phone"])).replace("__RULES__", rules_json()).replace("__SCHED__", sched_json())
     body += band(primary='<a class="btn btn-primary" href="/book/">Book a Class</a>')
     emit(url, page(url, "Class Dates & Schedules · Rigging Classes in Portland, TX", "Upcoming Advanced Rigger and Signal Person class dates in Portland, TX: weekday day and night classes, 3-day weekend express, assessment dates. $200 holds a seat.", body, crumbs, hero_img="/img/bg-classroom.jpg"), "0.8")
 
@@ -1023,9 +1059,10 @@ def next_dates_strip(cid):
     for r in SCHEDULE_RULES:
         if r["id"] != cid: continue
         links = "".join('<a class="nd-date" href="/book/?book=%s&amp;fmt=%s&amp;date=%s">%s</a>' % (
-            r["id"], r["fmt"], d.isoformat(), d.strftime("%a, %b ") + str(d.day)) for d in next_dates(r["wd"], 3, r["id"] + ":" + r["fmt"]))
-        rows.append('<div class="nd-row" data-wd="%s" data-lead="%d" data-book="%s" data-fmt="%s"><b>%s</b><div class="nd-dates">%s</div></div>' % (
-            r["wd"], LEAD_DAYS, r["id"], r["fmt"], esc(r["label"]), links))
+            r["id"], r["fmt"], d.isoformat(), d.strftime("%a, %b ") + str(d.day))
+            for d in next_dates(r["wd"], 3, r["id"] + ":" + r["fmt"], r.get("every", 7), r.get("anchor")))
+        rows.append('<div class="nd-row" data-wd="%s" data-lead="%d" data-book="%s" data-fmt="%s" data-every="%d" data-anchor="%s"><b>%s</b><div class="nd-dates">%s</div></div>' % (
+            r["wd"], LEAD_DAYS, r["id"], r["fmt"], r.get("every", 7), r.get("anchor", ""), esc(r["label"]), links))
     return '<div class="nextdates"><div class="wrap nextdates-in"><p class="nd-h">Next start dates</p>%s<a class="more nd-all" href="/class-dates/">See all dates %s</a></div></div>' % ("".join(rows), I["arrow"])
 
 GUIDE_DATE = "2026-08-29"
@@ -1111,7 +1148,7 @@ BOOK_BLURBS = {
 def book_programs():
     fmts = {}
     for r in SCHEDULE_RULES:
-        fmts.setdefault(r["id"], []).append({"id": r["fmt"], "name": r["label"], "time": r["time"], "note": r["note"], "wd": r["wd"]})
+        fmts.setdefault(r["id"], []).append({"id": r["fmt"], "name": r["label"], "time": r["time"], "note": r["note"], "wd": r["wd"], "every": r.get("every", 7), "anchor": r.get("anchor")})
     out = [{"id": c["id"], "name": c["name"], "price": c["price"], "was": c["was"], "deposit": c["deposit"],
             "shot": variant_src("/" + c["img"], 800), "blurb": BOOK_BLURBS[c["id"]], "formats": fmts[c["id"]]} for c in COURSES]
     out.append({"id": "assessment", "name": "NCCER Assessment", "price": ASSESSMENT["price"], "was": None, "deposit": ASSESSMENT["price"],
@@ -1268,9 +1305,11 @@ def build_book():
   const seatsLeft=(s,k)=>{ const L=window.__plSeats; return L&&L.taken?(L.cap||SEATS)-(L.taken[k+":"+s]||0):SEATS; };
   const isFull=(s,k)=>{ const f=X.full[s]||[]; return f.includes(k)||f.includes("*")||seatsLeft(s,k)<=0; };
   function first(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+LEAD); return d; }
-  function every(wd,n){ const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); while(o.length<n){ if(!X.closed[iso(d)]) o.push(iso(d)); d.setDate(d.getDate()+7); } return o; }
+  /* a cadence wider than weekly is phased off the rule anchor date, not off today. */
+  function phase(d,step,anchor){ if(!anchor||step===7) return; const a=dparts(anchor); const off=((Math.round((d-a)/864e5)%step)+step)%step; if(off) d.setDate(d.getDate()+(step-off)); }
+  function every(wd,n,step,anchor){ step=step||7; const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); phase(d,step,anchor); while(o.length<n){ if(!X.closed[iso(d)]) o.push(iso(d)); d.setDate(d.getDate()+step); } return o; }
   function weekdays(n){ const d=first(),o=[]; while(o.length<n){ if(d.getDay()>=1&&d.getDay()<=5&&!X.closed[iso(d)]) o.push(iso(d)); d.setDate(d.getDate()+1); } return o; }
-  PROGS.forEach(p=>p.formats.forEach(f=>{ f.dates=f.wd==="weekday"?weekdays(15):every(f.wd,8); }));
+  PROGS.forEach(p=>p.formats.forEach(f=>{ f.dates=f.wd==="weekday"?weekdays(15):every(f.wd,8,f.every,f.anchor); }));
 
   const S={prog:null,fmt:null,date:null,method:"card",step:1};
   const ARROW='<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
@@ -2041,6 +2080,56 @@ SITE_JS = r"""
   });
   window.addEventListener("resize",()=>{ $$(".faq-item.open .faq-a").forEach(a=>{ a.style.maxHeight="none"; const h=a.scrollHeight; a.style.maxHeight=h+"px"; }); });
 
+  /* Photo gallery lightbox. The CSS for this (.gal-zoom, .lb) shipped a while
+     back with nothing driving it, so galleries showed a zoom cursor that did
+     nothing. Click a figure to open it full size; arrows or swipe-free nav
+     buttons to move; Esc or the backdrop to close. Body overflow is the same
+     scroll lock the Lenis prevent hook already looks for. */
+  (function(){
+    const figs=$$(".gal figure"); if(!figs.length) return;
+    const svg=d=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
+    const ZOOM=svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/><path d="M11 8.4v5.2"/><path d="M8.4 11h5.2"/>');
+    figs.forEach(f=>{ const b=document.createElement("button"); b.type="button"; b.className="gal-zoom"; b.setAttribute("aria-label","View larger"); b.innerHTML=ZOOM; f.appendChild(b); });
+    const lb=document.createElement("div");
+    lb.className="lb"; lb.setAttribute("role","dialog"); lb.setAttribute("aria-modal","true"); lb.setAttribute("aria-label","Photo");
+    lb.innerHTML='<button class="lb-x" type="button" aria-label="Close">'+svg('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>')+'</button>'
+      +'<button class="lb-nav lb-prev" type="button" aria-label="Previous photo">'+svg('<path d="m15 18-6-6 6-6"/>')+'</button>'
+      +'<button class="lb-nav lb-next" type="button" aria-label="Next photo">'+svg('<path d="m9 18 6-6-6-6"/>')+'</button>'
+      +'<figure class="lb-fig"><img alt=""><figcaption class="lb-cap"><span class="idx"></span><i></i><em></em></figcaption></figure>';
+    document.body.appendChild(lb);
+    const img=$("img",lb), idx=$(".idx",lb), cap=$("em",lb);
+    let at=0, last=null;
+    const pad=n=>String(n).padStart(2,"0");
+    /* currentSrc is whatever the 25vw thumbnail loaded (often the 480 rung), which
+       is useless full screen. Take the widest candidate in the srcset instead. */
+    function widest(im){
+      const ss=im.getAttribute("srcset");
+      if(!ss) return im.currentSrc||im.src;
+      return ss.split(",").map(x=>x.trim().split(/\s+/))
+               .reduce((a,b)=>(parseInt(b[1])||0)>(parseInt(a[1])||0)?b:a)[0];
+    }
+    function paint(){
+      const f=figs[at], src=$("img",f);
+      img.src=widest(src); img.alt=src.alt||"";
+      idx.textContent=pad(at+1)+" / "+pad(figs.length);
+      cap.textContent=(($("figcaption",f)||{}).textContent||"").trim();
+    }
+    function open(i){ at=i; last=document.activeElement; paint(); lb.classList.add("open"); document.body.style.overflow="hidden"; $(".lb-x",lb).focus(); }
+    function close(){ lb.classList.remove("open"); document.body.style.overflow=""; if(last&&last.focus) last.focus(); }
+    const go=d=>{ at=(at+d+figs.length)%figs.length; paint(); };
+    figs.forEach((f,i)=>f.addEventListener("click",()=>open(i)));
+    $(".lb-x",lb).addEventListener("click",close);
+    $(".lb-prev",lb).addEventListener("click",e=>{ e.stopPropagation(); go(-1); });
+    $(".lb-next",lb).addEventListener("click",e=>{ e.stopPropagation(); go(1); });
+    lb.addEventListener("click",e=>{ if(e.target===lb) close(); });
+    document.addEventListener("keydown",e=>{
+      if(!lb.classList.contains("open")) return;
+      if(e.key==="Escape") close();
+      else if(e.key==="ArrowLeft") go(-1);
+      else if(e.key==="ArrowRight") go(1);
+    });
+  })();
+
   /* course pages: the "next start dates" strip is rendered at build time from
      SCHEDULE_RULES in build.py; recompute from today's date so it never goes
      stale between builds. Same rule: next N occurrences of the weekday, from
@@ -2051,9 +2140,12 @@ SITE_JS = r"""
   $$(".nd-row").forEach(row=>{
     const wd=+row.dataset.wd; if(isNaN(wd)) return;
     const key=row.dataset.book+":"+row.dataset.fmt, links=$$(".nd-date",row);
+    const step=+row.dataset.every||7, anchor=row.dataset.anchor||"";
     const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+(+row.dataset.lead||1));
     while(d.getDay()!==wd) d.setDate(d.getDate()+1);
-    const dates=[]; while(dates.length<links.length){ if(bookable(d,key)) dates.push(new Date(d)); d.setDate(d.getDate()+7); }
+    /* biweekly rules are phased off their anchor date, not off today */
+    if(anchor&&step!==7){ const p=anchor.split("-").map(Number), a=new Date(p[0],p[1]-1,p[2]); const off=((Math.round((d-a)/864e5)%step)+step)%step; if(off) d.setDate(d.getDate()+(step-off)); }
+    const dates=[]; while(dates.length<links.length){ if(bookable(d,key)) dates.push(new Date(d)); d.setDate(d.getDate()+step); }
     links.forEach((a,i)=>{
       const x=dates[i];
       a.href="/book/?book="+row.dataset.book+"&fmt="+row.dataset.fmt+"&date="+iso(x);
@@ -2311,7 +2403,7 @@ def main():
         ["The 3-Day Weekend Express is the Advanced Rigger course compressed into one weekend. Nothing is cut: you cover the same lift planning, load math, sling and hardware selection, load control and hand signals, and you test out written and hands-on on Sunday.",
          "It exists for one reason: you can't take four weekdays off. Plenty of students drive in from Corpus Christi, Kingsville and the Valley on Friday morning and are certified by Sunday afternoon."],
         ["Full Advanced Rigger curriculum, Friday through Sunday", "Hands-on with real rigging hardware", "Written and practical test-out Sunday", "NCCER Certified Advanced Rigger, valid five years", "$200 holds your seat, $800 due before Friday"],
-        [("When does the weekend class run?", "Friday through Sunday, 8:00 AM to 5:00 PM, starting every Friday. Booking closes the day before."),
+        [("When does the weekend class run?", "Friday through Sunday, 8:00 AM to 5:00 PM, starting every other Friday. Booking closes the day before."),
          ("Is it the same certification as the 4-day class?", "Yes. Same NCCER Certified Advanced Rigger credential, same instructors, same written and practical test. Only the calendar is different."),
          ("Can I still pay over time?", "Yes. Klarna, Afterpay, Zelle and in-house financing with no credit check all apply. The balance has to be paid before Friday morning."),
          ("What should I bring?", "A government-issued photo ID for NCCER testing, something to write with, and work boots for the hands-on portion.")],
@@ -2333,19 +2425,25 @@ def main():
         specs=[("Course price", '$1,000 <s class="was">$1,700</s>'), ("Holds your seat", "$200"), ("Schedule", "Mon – Thu · 6 – 11 PM"), ("Credential", "NCCER Advanced Rigger")],
         band_h2="Keep The Paycheck.<br class=\"mbr\"> Get The Card.", crumb="Night Classes")
     build_format_page("/rigger-recertification/", "Advanced Rigger Recertification in Portland, TX",
-        "NCCER Advanced Rigger credentials are valid five years. Recertify in Portland, TX: call the office to schedule your retest or a refresher class.",
+        "NCCER Advanced Rigger credentials are valid five years. Recertify in Portland, TX: retest for $550, or take the refresher course. Scheduled by appointment.",
         "img/testing-room.jpg", "Candidates taking a proctored NCCER assessment in the on-site testing room", "Advanced Rigger · Recertification",
         "Credential<em>Coming Due?</em>",
         "NCCER rigger credentials are valid for five years. When yours is coming up, get it renewed here in Portland before it lapses and costs you a gate pass.",
         "Don't Let It<br>Lapse.",
         ["Your NCCER Advanced Rigger credential is good for five years from the date it was issued. Contractors check the NCCER Registry, and an expired credential reads the same as no credential.",
-         "Call the office with your NCCER card number and we'll tell you exactly what you need: a retest in our accredited assessment center, or a refresher class first if it's been a while. Either way you test out in the same building and the renewal is recorded on the Registry."],
-        ["Written and practical retest in our accredited testing room", "Refresher option: the full Advanced Rigger class in day, night or weekend format", "Renewal recorded on the NCCER Registry"],
+         "If you are already working as a rigger and you know the material, you do not have to sit through the course again. Come in, take the written assessment and the hands-on practical, and the renewal goes on the Registry. Retests are scheduled by appointment so we can work around your shift.",
+         "If it has been a while and you would rather go back through the material first, take the refresher. That is the full Advanced Rigger course in day, night or weekend format, ending in the same test-out."],
+        ["Written assessment $275, hands-on practical $275", "$550 in total to retest, with no class time to sit through", "Scheduled by appointment, around your shift", "Refresher option: the full Advanced Rigger course, $1,000", "Renewal recorded on the NCCER Registry"],
         [("How long is an NCCER Advanced Rigger credential valid?", "Five years from the date it was issued. Check your card or the NCCER Registry for the date."),
-         ("Do I have to retake the whole class?", "Not necessarily. Call the office with your card number and we'll tell you whether you can go straight to the retest or should take a refresher first."),
-         ("What does recertification cost?", "It depends on whether you retest or retake the course. Call (361) 213-9690 for a quote; the Advanced Rigger course is $1,000 if you choose the refresher.")],
+         ("Do I have to retake the whole class?", "Not if you are already working as a rigger and you know the material. You can come in and take the written assessment and the hands-on practical without sitting through the course. If you would rather go back through the material first, take the refresher, which is the full Advanced Rigger course."),
+         ("What does recertification cost?", "$275 for the written assessment and $275 for the hands-on practical, $550 in total. If you take the refresher instead, that is the Advanced Rigger course at $1,000."),
+         ("When can I retest?", "By appointment. Call (361) 213-9690 with your NCCER card number and we will put you on the schedule.")],
         book="advanced",
-        specs=[("Credential life", "5 years"), ("Retest", "Written + hands-on"), ("Refresher class", "$1,000"), ("Schedule", "Call the office")],
+        specs=[("Credential life", "5 years"), ("Retest", "$550"), ("Refresher class", "$1,000"), ("Schedule", "By appointment")],
+        cta=cta_box("Retest Your Advanced Rigger Card", ["$275 written assessment, $275 hands-on practical.", "By appointment. Have your NCCER card number handy."], price="$550", href="/contact/", label="Request a Retest Date"),
+        hero_cta=['<a class="btn btn-primary" href="/contact/">Request a Retest Date %s</a>' % I["arrow"],
+                  '<a class="btn btn-ghost" href="tel:%s">%s Call %s</a>' % (BIZ["phone_raw"], I["phone"], BIZ["phone"])],
+        band_primary='<a class="btn btn-primary" href="/contact/">Request a Retest Date</a>',
         band_h2="Renew It<br class=\"mbr\"> Before It Lapses.", crumb="Recertification")
     build_dates()
     build_financing()

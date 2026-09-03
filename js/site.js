@@ -61,6 +61,56 @@
   });
   window.addEventListener("resize",()=>{ $$(".faq-item.open .faq-a").forEach(a=>{ a.style.maxHeight="none"; const h=a.scrollHeight; a.style.maxHeight=h+"px"; }); });
 
+  /* Photo gallery lightbox. The CSS for this (.gal-zoom, .lb) shipped a while
+     back with nothing driving it, so galleries showed a zoom cursor that did
+     nothing. Click a figure to open it full size; arrows or swipe-free nav
+     buttons to move; Esc or the backdrop to close. Body overflow is the same
+     scroll lock the Lenis prevent hook already looks for. */
+  (function(){
+    const figs=$$(".gal figure"); if(!figs.length) return;
+    const svg=d=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
+    const ZOOM=svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/><path d="M11 8.4v5.2"/><path d="M8.4 11h5.2"/>');
+    figs.forEach(f=>{ const b=document.createElement("button"); b.type="button"; b.className="gal-zoom"; b.setAttribute("aria-label","View larger"); b.innerHTML=ZOOM; f.appendChild(b); });
+    const lb=document.createElement("div");
+    lb.className="lb"; lb.setAttribute("role","dialog"); lb.setAttribute("aria-modal","true"); lb.setAttribute("aria-label","Photo");
+    lb.innerHTML='<button class="lb-x" type="button" aria-label="Close">'+svg('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>')+'</button>'
+      +'<button class="lb-nav lb-prev" type="button" aria-label="Previous photo">'+svg('<path d="m15 18-6-6 6-6"/>')+'</button>'
+      +'<button class="lb-nav lb-next" type="button" aria-label="Next photo">'+svg('<path d="m9 18 6-6-6-6"/>')+'</button>'
+      +'<figure class="lb-fig"><img alt=""><figcaption class="lb-cap"><span class="idx"></span><i></i><em></em></figcaption></figure>';
+    document.body.appendChild(lb);
+    const img=$("img",lb), idx=$(".idx",lb), cap=$("em",lb);
+    let at=0, last=null;
+    const pad=n=>String(n).padStart(2,"0");
+    /* currentSrc is whatever the 25vw thumbnail loaded (often the 480 rung), which
+       is useless full screen. Take the widest candidate in the srcset instead. */
+    function widest(im){
+      const ss=im.getAttribute("srcset");
+      if(!ss) return im.currentSrc||im.src;
+      return ss.split(",").map(x=>x.trim().split(/\s+/))
+               .reduce((a,b)=>(parseInt(b[1])||0)>(parseInt(a[1])||0)?b:a)[0];
+    }
+    function paint(){
+      const f=figs[at], src=$("img",f);
+      img.src=widest(src); img.alt=src.alt||"";
+      idx.textContent=pad(at+1)+" / "+pad(figs.length);
+      cap.textContent=(($("figcaption",f)||{}).textContent||"").trim();
+    }
+    function open(i){ at=i; last=document.activeElement; paint(); lb.classList.add("open"); document.body.style.overflow="hidden"; $(".lb-x",lb).focus(); }
+    function close(){ lb.classList.remove("open"); document.body.style.overflow=""; if(last&&last.focus) last.focus(); }
+    const go=d=>{ at=(at+d+figs.length)%figs.length; paint(); };
+    figs.forEach((f,i)=>f.addEventListener("click",()=>open(i)));
+    $(".lb-x",lb).addEventListener("click",close);
+    $(".lb-prev",lb).addEventListener("click",e=>{ e.stopPropagation(); go(-1); });
+    $(".lb-next",lb).addEventListener("click",e=>{ e.stopPropagation(); go(1); });
+    lb.addEventListener("click",e=>{ if(e.target===lb) close(); });
+    document.addEventListener("keydown",e=>{
+      if(!lb.classList.contains("open")) return;
+      if(e.key==="Escape") close();
+      else if(e.key==="ArrowLeft") go(-1);
+      else if(e.key==="ArrowRight") go(1);
+    });
+  })();
+
   /* course pages: the "next start dates" strip is rendered at build time from
      SCHEDULE_RULES in build.py; recompute from today's date so it never goes
      stale between builds. Same rule: next N occurrences of the weekday, from
@@ -71,9 +121,12 @@
   $$(".nd-row").forEach(row=>{
     const wd=+row.dataset.wd; if(isNaN(wd)) return;
     const key=row.dataset.book+":"+row.dataset.fmt, links=$$(".nd-date",row);
+    const step=+row.dataset.every||7, anchor=row.dataset.anchor||"";
     const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+(+row.dataset.lead||1));
     while(d.getDay()!==wd) d.setDate(d.getDate()+1);
-    const dates=[]; while(dates.length<links.length){ if(bookable(d,key)) dates.push(new Date(d)); d.setDate(d.getDate()+7); }
+    /* biweekly rules are phased off their anchor date, not off today */
+    if(anchor&&step!==7){ const p=anchor.split("-").map(Number), a=new Date(p[0],p[1]-1,p[2]); const off=((Math.round((d-a)/864e5)%step)+step)%step; if(off) d.setDate(d.getDate()+(step-off)); }
+    const dates=[]; while(dates.length<links.length){ if(bookable(d,key)) dates.push(new Date(d)); d.setDate(d.getDate()+step); }
     links.forEach((a,i)=>{
       const x=dates[i];
       a.href="/book/?book="+row.dataset.book+"&fmt="+row.dataset.fmt+"&date="+iso(x);

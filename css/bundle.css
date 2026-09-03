@@ -149,6 +149,10 @@ img.nccer{width:auto; display:inline-block; vertical-align:-1px}
 .eyebrow .nccer-lock{display:inline-flex; align-items:center; gap:9px; white-space:nowrap}
 .eyebrow .nccer{height:12px}
 @media(max-width:560px){.eyebrow .nccer{height:11px} .eyebrow .nccer-lock{gap:8px}}
+/* "Accredited Training & Assessment Center" is too long to hold on one line on a
+   phone, so below 620px the lock stops being nowrap and the phrase wraps under
+   the mark instead of overflowing the hero. */
+@media(max-width:620px){.eyebrow .nccer-lock{white-space:normal; flex-wrap:wrap; justify-content:center; row-gap:5px; letter-spacing:.15em}}
 .brand-txt .nccer{height:12px; margin-right:4px}
 @media(min-width:900px){
   .eyebrow{justify-content:flex-start; text-align:left}
