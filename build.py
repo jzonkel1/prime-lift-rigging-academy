@@ -1179,6 +1179,13 @@ def build_book():
                 <option>I want to use financing</option>
               </select>
             </label>
+            <label class="field"><span>Do you already have an NCCER account?</span>
+              <select id="fNccerHas">
+                <option>No, this would be my first</option>
+                <option>Yes, I have one</option>
+              </select>
+            </label>
+            <label class="field" id="nccerField" hidden><span>Your NCCER card or account number</span><input type="text" id="fNccer" placeholder="Card or account number" autocomplete="off"></label>
             <label class="field"><span>Anything we should know? (optional)</span><textarea id="fNotes" rows="2" placeholder="Night shift, need the evening class…"></textarea></label>
             <div class="consent" id="smsConsent">
               <label class="chk"><input type="checkbox" id="cNon"><span><b>Text me about my enrollment.</b> I agree to receive enrollment confirmations, class reminders and schedule updates by SMS from Prime Lift Rigging Academy at the mobile number above. Msg frequency varies. Msg &amp; data rates may apply. Reply HELP for help, STOP to opt out.</span></label>
@@ -1242,6 +1249,7 @@ def build_book():
   <input name="program"><input name="format"><input name="start_date"><input name="start_iso"><input name="start_mdy"><input name="class_times">
   <input name="payment_method"><input name="amount_due_today"><input name="note"><input name="page">
   <input name="payer"><input name="notes"><input name="sms_consent_nonmarketing"><input name="sms_consent_marketing">
+  <input name="nccer_has"><input name="nccer_number">
 </form>
 <script>
 /* Booking flow. Dates come from SCHEDULE_RULES + CLOSED/FULL in build.py (injected below),
@@ -1300,6 +1308,8 @@ def build_book():
     $$("#bpGrid .bp").forEach(b=>b.classList.toggle("sel",b.dataset.prog===id));
     setPick(1,S.prog.name+" · "+money(S.prog.price));
     $("#craftField").hidden=S.prog.id!=="assessment";
+    /* NCCER number is only useful if they already have an account, so it stays hidden until they say so. */
+    $("#fNccerHas").onchange=e=>{ const yes=/^Yes/.test(e.target.value); $("#nccerField").hidden=!yes; if(!yes) $("#fNccer").value=""; };
     if(!same){
       $("#fmtList").innerHTML=S.prog.formats.map((f,i)=>'<button class="fmt" type="button" data-fmt="'+f.id+'"><span class="idx">'+pad2(i+1)+'</span><span><b>'+f.name+'</b><span>'+f.time+' &nbsp;<em>· '+f.note+'</em></span></span>'+ARROW+'</button>').join("");
     }
@@ -1417,6 +1427,7 @@ def build_book():
       program:S.prog.name, program_id:S.prog.id, format:S.fmt.name, format_id:S.fmt.id, class_times:S.fmt.time,
       start_date:S.date, start_date_label:fmtLong(S.date), payment_method:m, amount_due_today:depositFor(S.prog,m), course_total:S.prog.price,
       note:val("fNote"), payer:val("fPayer"), notes:(craft?"Craft: "+craft+(notes?". ":""):"")+notes,
+      nccer_has:/^Yes/.test(val("fNccerHas"))?"yes":"no", nccer_number:/^Yes/.test(val("fNccerHas"))?val("fNccer"):"",
       sms_consent_nonmarketing:$("#cNon").checked?"yes":"no", sms_consent_marketing:$("#cMkt").checked?"yes":"no", page:location.href };
   }
   async function submitForm(p){
@@ -1425,7 +1436,7 @@ def build_book():
        confirmation. start_iso (YYYY-MM-DD) rides along for the opportunity's date field: seat counts and class reminders key on it. */
     const s=p.start_date||"", mdy=s?s.slice(5,7)+"-"+s.slice(8,10)+"-"+s.slice(0,4):"";   /* GHL date fields want MM-DD-YYYY */
     const q=Object.assign({},p,{start_date:s?fmtLong(s)+", "+s.slice(0,4):"", start_iso:s, start_mdy:mdy});
-    ["first_name","last_name","phone","email","program","format","start_date","start_iso","start_mdy","class_times","payment_method","amount_due_today","note","page","payer","notes","sms_consent_nonmarketing","sms_consent_marketing"].forEach(k=>body.append(k,String(q[k]==null?"":q[k])));
+    ["first_name","last_name","phone","email","program","format","start_date","start_iso","start_mdy","class_times","payment_method","amount_due_today","note","page","payer","notes","sms_consent_nonmarketing","sms_consent_marketing","nccer_has","nccer_number"].forEach(k=>body.append(k,String(q[k]==null?"":q[k])));
     const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:body.toString()});
     if(!r.ok) throw new Error("form "+r.status);
   }

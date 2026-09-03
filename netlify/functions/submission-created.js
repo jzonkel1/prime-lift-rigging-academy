@@ -35,6 +35,9 @@ exports.handler = async (event) => {
     payment_method: d.payment_method || "",
     amount_due_today: d.amount_due_today || "",
     payer: d.payer || "",
+    /* the office opens an NCCER account before day one when the student does not have one */
+    nccer_has: d.nccer_has || "",
+    nccer_number: d.nccer_number || "",
     notes: [d.notes, d.note].filter(Boolean).join(" | "),
     sms_consent_nonmarketing: d.sms_consent_nonmarketing || "no",
     sms_consent_marketing: d.sms_consent_marketing || "no",

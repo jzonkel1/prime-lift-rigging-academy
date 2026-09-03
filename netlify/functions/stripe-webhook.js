@@ -102,7 +102,10 @@ exports.handler = async (event) => {
     sms_consent_nonmarketing: m.sms_consent_nonmarketing || "no",
     sms_consent_marketing: m.sms_consent_marketing || "no",
     payer: m.payer || "",
-    notes: m.notes || ""
+    notes: m.notes || "",
+    /* the office needs to know whether to open an NCCER account before day one */
+    nccer_has: m.nccer_has || "",
+    nccer_number: m.nccer_number || ""
   };
 
   const r = await fetch(url, {

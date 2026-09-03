@@ -72,6 +72,7 @@ exports.handler = async (event) => {
     program: item.name, format: p.format, class_times: p.class_times,
     start_date: p.start_date, start_label: p.start_date_label, payment_method: method,
     payer: p.payer, notes: p.notes,
+    nccer_has: p.nccer_has, nccer_number: p.nccer_number,
     sms_consent_nonmarketing: p.sms_consent_nonmarketing, sms_consent_marketing: p.sms_consent_marketing,
     course_total: String(item.price), paid_today: String(amount), balance_due: String(item.price - amount)
   };
