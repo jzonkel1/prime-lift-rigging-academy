@@ -1,5 +1,6 @@
 .netlify
 __pycache__/
+*.csv
 img/_orig/
 img/_up/
 img/_backup/
