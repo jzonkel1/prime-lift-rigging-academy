@@ -23,7 +23,7 @@ from content import (BIZ, COURSES, ASSESSMENT, CRAFT_GROUPS, CRAFTS, PEOPLE,
 ROOT = os.path.dirname(os.path.abspath(__file__))
 BASE = "https://primeliftriggingtx.com"   # launch domain per Jeffrey 8/31/26 (NOT primeliftrigging-academy.com; 301 that one here at launch)
 PREVIEW = "https://prime-lift-rigging-academy.netlify.app"
-NOINDEX = True                       # <- flip to False at launch
+NOINDEX = False                      # LIVE on primeliftriggingtx.com 9/4/26
 ORIGIN = PREVIEW if NOINDEX else BASE
 YEAR = datetime.date.today().year
 TODAY = datetime.date.today().isoformat()
