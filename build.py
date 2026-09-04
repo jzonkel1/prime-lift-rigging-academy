@@ -91,7 +91,7 @@ _STRIP = {"gw-strip"}                                                  # graduat
 _GAL = {"gal"}                                                         # photo gallery: 4-up desktop, 2-up phones
 SIZES = {"full": "(max-width:900px) 200vw, 100vw",   # a tall phone box covered by a landscape photo needs > 100vw (200vw x 2 DPR = the 1600 rung)
          "grid": "(min-width:1040px) 34vw, (min-width:640px) 50vw, 100vw",
-         "strip": "(min-width:760px) 16vw, 33vw",
+         "strip": "(min-width:760px) 16vw, 44vw",   # phones: marquee tiles are 44vw wide
          "gal": "(min-width:780px) 25vw, 50vw",
          "logo": "120px", "page": "100vw"}
 
