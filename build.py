@@ -2241,6 +2241,30 @@ SITE_JS = r"""
   document.addEventListener("pl:seats",renderStrips);
 })();
 
+/* GOOGLE ANALYTICS (GA4, property "Prime Lift Rigging Academy", stream
+   primeliftriggingtx.com). Loaded the same lazy way as the chat widget below so
+   it never costs Lighthouse points: first scroll / touch / key, or 6s idle,
+   whichever comes first. gtag sends the page_view on config whenever it loads,
+   so pageviews still record for visitors who bounce without interacting. */
+(function(){
+  if (window.__plGa) return; window.__plGa = 1;
+  var done = false;
+  function ga(){
+    if (done) return; done = true;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function(){ dataLayer.push(arguments); };
+    gtag("js", new Date());
+    gtag("config", "G-Z01JPFJB5X");
+    var s = document.createElement("script");
+    s.async = true;
+    s.src = "https://www.googletagmanager.com/gtag/js?id=G-Z01JPFJB5X";
+    document.head.appendChild(s);
+    ["scroll","pointerdown","touchstart","keydown"].forEach(function(e){ window.removeEventListener(e, ga); });
+  }
+  ["scroll","pointerdown","touchstart","keydown"].forEach(function(e){ window.addEventListener(e, ga, {passive:true}); });
+  setTimeout(ga, 6000);
+})();
+
 /* GHL live chat widget (Conversation AI). Loaded lazily so it never competes with
    first paint: first scroll / touch / pointer, or 6s idle, whichever comes first. */
 (function(){
