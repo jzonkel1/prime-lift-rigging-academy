@@ -166,24 +166,31 @@
   const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
   const SHORT={day:"Day class",night:"Night class",weekend:"Weekend Express",friday:"Two Fridays",assess:"Assessment"};
   const closed=d=>!!X.closed[iso(d)];
-  const full=(d,k)=>{ const f=X.full[iso(d)]||[]; return f.includes(k)||f.includes("*"); };
+  /* full = the office's static FULL list OR the live seat count (site.js -> window.__plSeats).
+     A full date is never rendered: the office wants booked dates gone, not counted down. */
+  const full=(d,k)=>{ const f=X.full[iso(d)]||[]; if(f.includes(k)||f.includes("*")) return true;
+    const L=window.__plSeats; return !!(L&&L.taken&&((L.cap||SEATS)-(L.taken[k+":"+iso(d)]||0)<=0)); };
   function first(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+LEAD); return d; }
   /* a cadence wider than weekly is phased off the rule anchor date, not off today. */
   function phase(d,step,anchor){ if(!anchor||step===7) return; const p=anchor.split("-").map(Number), a=new Date(p[0],p[1]-1,p[2]); const off=((Math.round((d-a)/864e5)%step)+step)%step; if(off) d.setDate(d.getDate()+(step-off)); }
-  function every(wd,n,step,anchor){ step=step||7; const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); phase(d,step,anchor); while(o.length<n){ if(!closed(d)) o.push(new Date(d)); d.setDate(d.getDate()+step);} return o; }
-  function weekdays(n){ const d=first(),o=[]; while(o.length<n){ if(d.getDay()>=MON&&d.getDay()<=FRI&&!closed(d)) o.push(new Date(d)); d.setDate(d.getDate()+1);} return o; }
-  const P=[{"id":"advanced","fmt":"day","name":"Advanced Rigger","label":"Weekday Day Class","time":"Mon \u2013 Thu \u00b7 8:00 AM \u2013 2:00 PM","note":"Four days, starts every Monday","wd":1,"n":6},{"id":"advanced","fmt":"night","name":"Advanced Rigger","label":"Weekday Night Class","time":"Mon \u2013 Thu \u00b7 6:00 PM \u2013 11:00 PM","note":"Four nights, built for day-shift crews","wd":1,"n":6},{"id":"advanced","fmt":"weekend","name":"Advanced Rigger","label":"3-Day Weekend Express","time":"Fri \u2013 Sun \u00b7 8:00 AM \u2013 5:00 PM","note":"Done in one weekend, every other Friday","wd":5,"n":6,"every":14,"anchor":"2026-09-04"},{"id":"signal","fmt":"friday","name":"Signal Person","label":"Two Fridays","time":"Fridays \u00b7 8:00 AM \u2013 3:00 PM","note":"Two Fridays of class and hands-on, every other Friday","wd":5,"n":6,"every":14,"anchor":"2026-09-11"},{"id":"assessment","fmt":"assess","name":"NCCER Assessments","label":"Any Weekday","time":"Mon \u2013 Fri \u00b7 8:00 AM \u2013 5:00 PM","note":"By appointment, 36 crafts","wd":"weekday","n":10}].map(r=>Object.assign({},r,{dates:r.wd==="weekday"?weekdays(r.n):every(r.wd,r.n,r.every,r.anchor)}));
-  document.getElementById("schedList").innerHTML=P.map((p,i)=>`
-    <div class="sched-block rv">
+  function every(wd,n,step,anchor,k){ step=step||7; const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); phase(d,step,anchor); while(o.length<n){ if(!closed(d)&&!full(d,k)) o.push(new Date(d)); d.setDate(d.getDate()+step);} return o; }
+  function weekdays(n,k){ const d=first(),o=[]; while(o.length<n){ if(d.getDay()>=MON&&d.getDay()<=FRI&&!closed(d)&&!full(d,k)) o.push(new Date(d)); d.setDate(d.getDate()+1);} return o; }
+  /* rendered as a function: live counts land after first paint (pl:seats), and a date
+     that just filled drops out with the next one backfilling behind it */
+  function render(){
+    const P=[{"id":"advanced","fmt":"day","name":"Advanced Rigger","label":"Weekday Day Class","time":"Mon \u2013 Thu \u00b7 8:00 AM \u2013 2:00 PM","note":"Four days, starts every Monday","wd":1,"n":6},{"id":"advanced","fmt":"night","name":"Advanced Rigger","label":"Weekday Night Class","time":"Mon \u2013 Thu \u00b7 6:00 PM \u2013 11:00 PM","note":"Four nights, built for day-shift crews","wd":1,"n":6},{"id":"advanced","fmt":"weekend","name":"Advanced Rigger","label":"3-Day Weekend Express","time":"Fri \u2013 Sun \u00b7 8:00 AM \u2013 5:00 PM","note":"Done in one weekend, every other Friday","wd":5,"n":6,"every":14,"anchor":"2026-09-04"},{"id":"signal","fmt":"friday","name":"Signal Person","label":"Two Fridays","time":"Fridays \u00b7 8:00 AM \u2013 3:00 PM","note":"Two Fridays of class and hands-on, every other Friday","wd":5,"n":6,"every":14,"anchor":"2026-09-11"},{"id":"assessment","fmt":"assess","name":"NCCER Assessments","label":"Any Weekday","time":"Mon \u2013 Fri \u00b7 8:00 AM \u2013 5:00 PM","note":"By appointment, 36 crafts","wd":"weekday","n":10}].map(r=>Object.assign({},r,{dates:r.wd==="weekday"?weekdays(r.n,r.id+":"+r.fmt):every(r.wd,r.n,r.every,r.anchor,r.id+":"+r.fmt)}));
+    document.getElementById("schedList").innerHTML=P.map((p,i)=>`
+    <div class="sched-block rv in">
       <div class="sched-head"><span class="idx">${String(i+1).padStart(2,"0")}</span><div><b>${p.name}</b><span>${p.label} · ${p.time}</span></div></div>
-      <div class="date-grid">${p.dates.map(d=>{ const isFull=full(d,p.id+":"+p.fmt); return `
-        <a class="date${isFull?" is-full":""}" href="${isFull?"#":`/book/?book=${p.id}&fmt=${p.fmt}&date=${iso(d)}`}"${isFull?' aria-disabled="true" tabindex="-1"':""}>
+      <div class="date-grid">${p.dates.map(d=>`
+        <a class="date" href="/book/?book=${p.id}&fmt=${p.fmt}&date=${iso(d)}">
           <span class="date-cal"><em>${MONS[d.getMonth()]}</em><b>${d.getDate()}</b></span>
           <span class="date-info"><b>${DOW[d.getDay()]}</b><span>${p.name} · ${SHORT[p.fmt]||p.label}</span></span>
-          <span class="seats"><b>${isFull?"—":SEATS}</b><span>${isFull?"full":"seats/class"}</span></span>
-        </a>`; }).join("")}</div>
+        </a>`).join("")}</div>
     </div>`).join("");
-  document.querySelectorAll("#schedList .rv").forEach(el=>el.classList.add("in"));
+  }
+  render();
+  document.addEventListener("pl:seats",render);
 })();
 </script><section class="band">
   <div class="band-bg" aria-hidden="true"><img src="/img/bg-crane-golden-1200.webp" srcset="/img/bg-crane-golden-320.webp 320w, /img/bg-crane-golden-480.webp 480w, /img/bg-crane-golden-800.webp 800w, /img/bg-crane-golden-1200.webp 1200w, /img/bg-crane-golden-1600.webp 1600w" sizes="(max-width:900px) 200vw, 100vw" data-o="/img/bg-crane-golden.jpg" alt="" loading="lazy"></div>

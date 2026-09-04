@@ -366,10 +366,11 @@
     show(3,scroll);
   }
   function renderDates(){
-    const k=key();
-    $("#bdGrid").innerHTML=S.fmt.dates.map(s=>{ const d=dparts(s), full=isFull(s,k), left=seatsLeft(s,k);
-      return '<button class="bd'+(S.date===s?' sel':'')+'" type="button" data-date="'+s+'"'+(full?' disabled':'')+'><em>'+DOWS[d.getDay()]+'</em><b>'+d.getDate()+'</b><span>'+MONS[d.getMonth()]+'</span>'
-        +(full?'<i>Full</i>':(left<=3?'<i class="left">'+left+(left===1?' seat':' seats')+' left</i>':''))+'</button>'; }).join("");
+    /* a booked-up date is simply not offered: no seats-left counts, no Full tiles */
+    const k=key(), open=S.fmt.dates.filter(s=>!isFull(s,k));
+    $("#bdGrid").innerHTML=open.length?open.map(s=>{ const d=dparts(s);
+      return '<button class="bd'+(S.date===s?' sel':'')+'" type="button" data-date="'+s+'"><em>'+DOWS[d.getDay()]+'</em><b>'+d.getDate()+'</b><span>'+MONS[d.getMonth()]+'</span></button>'; }).join("")
+      :'<p class="bk-note">Upcoming dates for this schedule are booked up. Call the office at '+PHONE+' and we will find you a seat.</p>';
   }
   /* live counts arrive after first paint: redraw the tiles, and drop a pick that just filled up */
   document.addEventListener("pl:seats",()=>{

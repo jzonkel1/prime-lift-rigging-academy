@@ -896,24 +896,31 @@ def build_dates():
   const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
   const SHORT={day:"Day class",night:"Night class",weekend:"Weekend Express",friday:"Two Fridays",assess:"Assessment"};
   const closed=d=>!!X.closed[iso(d)];
-  const full=(d,k)=>{ const f=X.full[iso(d)]||[]; return f.includes(k)||f.includes("*"); };
+  /* full = the office's static FULL list OR the live seat count (site.js -> window.__plSeats).
+     A full date is never rendered: the office wants booked dates gone, not counted down. */
+  const full=(d,k)=>{ const f=X.full[iso(d)]||[]; if(f.includes(k)||f.includes("*")) return true;
+    const L=window.__plSeats; return !!(L&&L.taken&&((L.cap||SEATS)-(L.taken[k+":"+iso(d)]||0)<=0)); };
   function first(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+LEAD); return d; }
   /* a cadence wider than weekly is phased off the rule anchor date, not off today. */
   function phase(d,step,anchor){ if(!anchor||step===7) return; const p=anchor.split("-").map(Number), a=new Date(p[0],p[1]-1,p[2]); const off=((Math.round((d-a)/864e5)%%step)+step)%%step; if(off) d.setDate(d.getDate()+(step-off)); }
-  function every(wd,n,step,anchor){ step=step||7; const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); phase(d,step,anchor); while(o.length<n){ if(!closed(d)) o.push(new Date(d)); d.setDate(d.getDate()+step);} return o; }
-  function weekdays(n){ const d=first(),o=[]; while(o.length<n){ if(d.getDay()>=MON&&d.getDay()<=FRI&&!closed(d)) o.push(new Date(d)); d.setDate(d.getDate()+1);} return o; }
-  const P=__RULES__.map(r=>Object.assign({},r,{dates:r.wd==="weekday"?weekdays(r.n):every(r.wd,r.n,r.every,r.anchor)}));
-  document.getElementById("schedList").innerHTML=P.map((p,i)=>`
-    <div class="sched-block rv">
+  function every(wd,n,step,anchor,k){ step=step||7; const d=first(),o=[]; while(d.getDay()!==wd) d.setDate(d.getDate()+1); phase(d,step,anchor); while(o.length<n){ if(!closed(d)&&!full(d,k)) o.push(new Date(d)); d.setDate(d.getDate()+step);} return o; }
+  function weekdays(n,k){ const d=first(),o=[]; while(o.length<n){ if(d.getDay()>=MON&&d.getDay()<=FRI&&!closed(d)&&!full(d,k)) o.push(new Date(d)); d.setDate(d.getDate()+1);} return o; }
+  /* rendered as a function: live counts land after first paint (pl:seats), and a date
+     that just filled drops out with the next one backfilling behind it */
+  function render(){
+    const P=__RULES__.map(r=>Object.assign({},r,{dates:r.wd==="weekday"?weekdays(r.n,r.id+":"+r.fmt):every(r.wd,r.n,r.every,r.anchor,r.id+":"+r.fmt)}));
+    document.getElementById("schedList").innerHTML=P.map((p,i)=>`
+    <div class="sched-block rv in">
       <div class="sched-head"><span class="idx">${String(i+1).padStart(2,"0")}</span><div><b>${p.name}</b><span>${p.label} · ${p.time}</span></div></div>
-      <div class="date-grid">${p.dates.map(d=>{ const isFull=full(d,p.id+":"+p.fmt); return `
-        <a class="date${isFull?" is-full":""}" href="${isFull?"#":`/book/?book=${p.id}&fmt=${p.fmt}&date=${iso(d)}`}"${isFull?' aria-disabled="true" tabindex="-1"':""}>
+      <div class="date-grid">${p.dates.map(d=>`
+        <a class="date" href="/book/?book=${p.id}&fmt=${p.fmt}&date=${iso(d)}">
           <span class="date-cal"><em>${MONS[d.getMonth()]}</em><b>${d.getDate()}</b></span>
           <span class="date-info"><b>${DOW[d.getDay()]}</b><span>${p.name} · ${SHORT[p.fmt]||p.label}</span></span>
-          <span class="seats"><b>${isFull?"—":SEATS}</b><span>${isFull?"full":"seats/class"}</span></span>
-        </a>`; }).join("")}</div>
+        </a>`).join("")}</div>
     </div>`).join("");
-  document.querySelectorAll("#schedList .rv").forEach(el=>el.classList.add("in"));
+  }
+  render();
+  document.addEventListener("pl:seats",render);
 })();
 </script>""" % (sec_head("01", "Pick A Date", "Next Classes<br>In Portland, TX", "Weekday classes start every Monday. The weekend express and signal person classes run every other Friday. Tap a date to hold it.", center=True), BIZ["phone_raw"], BIZ["phone"])).replace("__RULES__", rules_json()).replace("__SCHED__", sched_json())
     body += band(primary='<a class="btn btn-primary" href="/book/">Book a Class</a>')
@@ -1440,10 +1447,11 @@ def build_book():
     show(3,scroll);
   }
   function renderDates(){
-    const k=key();
-    $("#bdGrid").innerHTML=S.fmt.dates.map(s=>{ const d=dparts(s), full=isFull(s,k), left=seatsLeft(s,k);
-      return '<button class="bd'+(S.date===s?' sel':'')+'" type="button" data-date="'+s+'"'+(full?' disabled':'')+'><em>'+DOWS[d.getDay()]+'</em><b>'+d.getDate()+'</b><span>'+MONS[d.getMonth()]+'</span>'
-        +(full?'<i>Full</i>':(left<=3?'<i class="left">'+left+(left===1?' seat':' seats')+' left</i>':''))+'</button>'; }).join("");
+    /* a booked-up date is simply not offered: no seats-left counts, no Full tiles */
+    const k=key(), open=S.fmt.dates.filter(s=>!isFull(s,k));
+    $("#bdGrid").innerHTML=open.length?open.map(s=>{ const d=dparts(s);
+      return '<button class="bd'+(S.date===s?' sel':'')+'" type="button" data-date="'+s+'"><em>'+DOWS[d.getDay()]+'</em><b>'+d.getDate()+'</b><span>'+MONS[d.getMonth()]+'</span></button>'; }).join("")
+      :'<p class="bk-note">Upcoming dates for this schedule are booked up. Call the office at '+PHONE+' and we will find you a seat.</p>';
   }
   /* live counts arrive after first paint: redraw the tiles, and drop a pick that just filled up */
   document.addEventListener("pl:seats",()=>{
@@ -2210,7 +2218,9 @@ SITE_JS = r"""
      tomorrow (booking closes the day before). */
   const MONS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], DOWS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], SCHED=__SCHED__;
   const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-  const bookable=(x,k)=>!SCHED.closed[iso(x)] && !((SCHED.full[iso(x)]||[]).some(f=>f===k||f==="*"));
+  const bookable=(x,k)=>{ if(SCHED.closed[iso(x)]||(SCHED.full[iso(x)]||[]).some(f=>f===k||f==="*")) return false;
+    const L=window.__plSeats; return !(L&&L.taken&&((L.cap||8)-(L.taken[k+":"+iso(x)]||0)<=0)); };
+  function renderStrips(){
   $$(".nd-row").forEach(row=>{
     const wd=+row.dataset.wd; if(isNaN(wd)) return;
     const key=row.dataset.book+":"+row.dataset.fmt, links=$$(".nd-date",row);
@@ -2226,6 +2236,9 @@ SITE_JS = r"""
       a.textContent=DOWS[x.getDay()]+", "+MONS[x.getMonth()]+" "+x.getDate();
     });
   });
+  }
+  renderStrips();
+  document.addEventListener("pl:seats",renderStrips);
 })();
 
 /* GHL live chat widget (Conversation AI). Loaded lazily so it never competes with
@@ -2277,43 +2290,19 @@ SITE_JS = r"""
 
 /* LIVE SEATS. /.netlify/functions/seats counts open cards in the office's own
    Enrollment pipeline (one card = one seat, Lost frees it), so a class fills up
-   on the site the moment the 8th student is booked online OR by phone. The
-   static lists render first from CLOSED/FULL in build.py; this pass decorates
-   every date link on the page (home band, course strips, class-dates tiles)
-   and hands the data to /book/ through the pl:seats event. Fails silent. */
+   on the site the moment the 8th student is booked online OR by phone. Nothing
+   is decorated any more: the office wants booked dates GONE, never labeled or
+   counted down. Each date surface listens for pl:seats and re-renders itself
+   without the full dates (home band + next-class strip in index.html, course
+   strips and the class-dates page here, the /book/ grid in its own script).
+   Fails silent. */
 (function(){
-  var CAP = 8, LOW = 3;
-  function keyOf(a){
-    var m = (a.getAttribute("href") || "").match(/[?&]book=([a-z]+)&(?:amp;)?fmt=([a-z]+)&(?:amp;)?date=(\d{4}-\d{2}-\d{2})/);
-    return m ? m[1] + ":" + m[2] + ":" + m[3] : null;
-  }
-  function paint(data){
-    var taken = data.taken || {}, cap = data.cap || CAP;
-    document.querySelectorAll("a.ln-date, a.nd-date, a.date").forEach(function(a){
-      var k = keyOf(a); if (!k) return;
-      var left = cap - (taken[k] || 0);
-      var tile = a.classList.contains("date"), seats = tile && a.querySelector(".seats");
-      if (left <= 0) {
-        a.classList.add("is-full"); a.setAttribute("aria-disabled", "true"); a.setAttribute("tabindex", "-1"); a.setAttribute("href", "#");
-        if (seats) { seats.querySelector("b").textContent = "—"; seats.querySelector("span").textContent = "full"; }
-        else if (!a.querySelector(".left")) a.insertAdjacentHTML("beforeend", '<span class="left"> · full</span>');
-        return;
-      }
-      if (seats) {
-        seats.querySelector("b").textContent = left; seats.querySelector("span").textContent = left === 1 ? "seat left" : "seats left";
-        seats.classList.toggle("low", left <= LOW);
-      } else if (left <= LOW && !a.querySelector(".left")) {
-        a.insertAdjacentHTML("beforeend", '<span class="left"> · ' + left + " left</span>");
-      }
-    });
-  }
   function go(){
     var url = "/.netlify/functions/seats";
     if (location.protocol === "file:" || /^(127\.0\.0\.1|localhost)$/.test(location.hostname) && location.port !== "8888") return;
     fetch(url, {cache: "no-cache"}).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
       if (!d || !d.taken) return;
       window.__plSeats = d;
-      paint(d);
       document.dispatchEvent(new CustomEvent("pl:seats", {detail: d}));
     }).catch(function(){});
   }

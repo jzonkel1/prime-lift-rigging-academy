@@ -65,7 +65,9 @@ exports.handler = async (event) => {
   if (p.email) body.append("customer_email", p.email);
   body.append("phone_number_collection[enabled]", "true");
   body.append("payment_intent_data[description]", `${label} for ${p.first_name || ""} ${p.last_name || ""}`.trim());
-  body.append("payment_intent_data[receipt_email]", p.email || "");
+  /* an empty receipt_email is rejected by Stripe ("Invalid email address"),
+     and the form lets a student book with only a phone number */
+  if (p.email) body.append("payment_intent_data[receipt_email]", p.email);
 
   const meta = {
     first_name: p.first_name, last_name: p.last_name, phone: p.phone, email: p.email,

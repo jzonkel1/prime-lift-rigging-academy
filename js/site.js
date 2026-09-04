@@ -121,7 +121,9 @@
      tomorrow (booking closes the day before). */
   const MONS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], DOWS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], SCHED={"closed":{"2026-09-07":"Labor Day"},"full":{}};
   const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-  const bookable=(x,k)=>!SCHED.closed[iso(x)] && !((SCHED.full[iso(x)]||[]).some(f=>f===k||f==="*"));
+  const bookable=(x,k)=>{ if(SCHED.closed[iso(x)]||(SCHED.full[iso(x)]||[]).some(f=>f===k||f==="*")) return false;
+    const L=window.__plSeats; return !(L&&L.taken&&((L.cap||8)-(L.taken[k+":"+iso(x)]||0)<=0)); };
+  function renderStrips(){
   $$(".nd-row").forEach(row=>{
     const wd=+row.dataset.wd; if(isNaN(wd)) return;
     const key=row.dataset.book+":"+row.dataset.fmt, links=$$(".nd-date",row);
@@ -137,6 +139,9 @@
       a.textContent=DOWS[x.getDay()]+", "+MONS[x.getMonth()]+" "+x.getDate();
     });
   });
+  }
+  renderStrips();
+  document.addEventListener("pl:seats",renderStrips);
 })();
 
 /* GHL live chat widget (Conversation AI). Loaded lazily so it never competes with
@@ -188,43 +193,19 @@
 
 /* LIVE SEATS. /.netlify/functions/seats counts open cards in the office's own
    Enrollment pipeline (one card = one seat, Lost frees it), so a class fills up
-   on the site the moment the 8th student is booked online OR by phone. The
-   static lists render first from CLOSED/FULL in build.py; this pass decorates
-   every date link on the page (home band, course strips, class-dates tiles)
-   and hands the data to /book/ through the pl:seats event. Fails silent. */
+   on the site the moment the 8th student is booked online OR by phone. Nothing
+   is decorated any more: the office wants booked dates GONE, never labeled or
+   counted down. Each date surface listens for pl:seats and re-renders itself
+   without the full dates (home band + next-class strip in index.html, course
+   strips and the class-dates page here, the /book/ grid in its own script).
+   Fails silent. */
 (function(){
-  var CAP = 8, LOW = 3;
-  function keyOf(a){
-    var m = (a.getAttribute("href") || "").match(/[?&]book=([a-z]+)&(?:amp;)?fmt=([a-z]+)&(?:amp;)?date=(\d{4}-\d{2}-\d{2})/);
-    return m ? m[1] + ":" + m[2] + ":" + m[3] : null;
-  }
-  function paint(data){
-    var taken = data.taken || {}, cap = data.cap || CAP;
-    document.querySelectorAll("a.ln-date, a.nd-date, a.date").forEach(function(a){
-      var k = keyOf(a); if (!k) return;
-      var left = cap - (taken[k] || 0);
-      var tile = a.classList.contains("date"), seats = tile && a.querySelector(".seats");
-      if (left <= 0) {
-        a.classList.add("is-full"); a.setAttribute("aria-disabled", "true"); a.setAttribute("tabindex", "-1"); a.setAttribute("href", "#");
-        if (seats) { seats.querySelector("b").textContent = "—"; seats.querySelector("span").textContent = "full"; }
-        else if (!a.querySelector(".left")) a.insertAdjacentHTML("beforeend", '<span class="left"> · full</span>');
-        return;
-      }
-      if (seats) {
-        seats.querySelector("b").textContent = left; seats.querySelector("span").textContent = left === 1 ? "seat left" : "seats left";
-        seats.classList.toggle("low", left <= LOW);
-      } else if (left <= LOW && !a.querySelector(".left")) {
-        a.insertAdjacentHTML("beforeend", '<span class="left"> · ' + left + " left</span>");
-      }
-    });
-  }
   function go(){
     var url = "/.netlify/functions/seats";
     if (location.protocol === "file:" || /^(127\.0\.0\.1|localhost)$/.test(location.hostname) && location.port !== "8888") return;
     fetch(url, {cache: "no-cache"}).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
       if (!d || !d.taken) return;
       window.__plSeats = d;
-      paint(d);
       document.dispatchEvent(new CustomEvent("pl:seats", {detail: d}));
     }).catch(function(){});
   }
